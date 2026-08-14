@@ -342,7 +342,7 @@
 .hint {
   position: absolute;
   left: 0;
-  top: 1600px;
+  top: 1545px;
   width: 100%;
   text-align: center;
   font-size: 12px;
@@ -353,62 +353,3 @@
   transition: opacity 0.4s ease;
 }
 
-.scrubber {
-  position: absolute;
-  left: 60px;
-  bottom: 20px;
-  width: 1480px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  z-index: 10;
-}
-
-.sceneLabel {
-  width: 250px;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  white-space: nowrap;
-  color: #79e59b;
-}
-
-.track {
-  position: relative;
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(228, 225, 205, 0.12);
-  cursor: pointer;
-  touch-action: none;
-}
-
-.scrubFill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 0;
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #79e59b, #f64c6f);
-}
-
-.scrubHandle {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #e4e1cd;
-  box-shadow: 0 0 12px rgba(121, 229, 155, 0.6);
-  transform: translate(-50%, -50%);
-  cursor: grab;
-}
-
-.sceneNum {
-  width: 52px;
-  font-size: 12px;
-  text-align: right;
-  color: #7a8394;
-}

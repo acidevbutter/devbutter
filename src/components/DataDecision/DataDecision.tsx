@@ -15,6 +15,14 @@ import type { StageHandle } from "./storyboard";
 const STAGE_W = 1600;
 const STAGE_H = 1780;
 
+// The stage's layout box runs to 1780, but the storyboard's content stops just under the
+// result cards. Fitting to the full box scaled ~275px of empty stage in as letterbox and
+// left the whole thing small, so the fit and the centring both use the content box.
+const CONTENT_TOP = 96;
+const CONTENT_BOTTOM = 1576;
+const CONTENT_H = CONTENT_BOTTOM - CONTENT_TOP;
+const CONTENT_MID = (CONTENT_TOP + CONTENT_BOTTOM) / 2;
+
 export default function DataDecision() {
   const section = useRef<HTMLElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
@@ -34,8 +42,13 @@ export default function DataDecision() {
     // Scale the fixed 1600×1780 stage down to whatever the pinned viewport gives us.
     const fit = () => {
       const r = vp.getBoundingClientRect();
-      const s = Math.min((r.width * 0.98) / STAGE_W, (r.height * 0.96) / STAGE_H);
+      // The sticky header overlays the top of the pinned viewport, so it is not ours.
+      const navH = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+      const avail = Math.max(1, r.height - navH);
+      const s = Math.min((r.width * 0.99) / STAGE_W, (avail * 0.99) / CONTENT_H);
       vp.style.setProperty("--stage-scale", String(s || 1));
+      // Centre the content box rather than the layout box, in the space below the header.
+      vp.style.setProperty("--stage-shift", `${navH / 2 + (STAGE_H / 2 - CONTENT_MID) * s}px`);
     };
     fit();
     const ro = new ResizeObserver(fit);
@@ -98,21 +111,11 @@ export default function DataDecision() {
     };
   }, []);
 
-  /** The scrubber seeks by moving the page, since scroll is what drives progress. */
-  const seek = (fraction: number) => {
-    const sec = section.current;
-    if (!sec) return;
-    const r = sec.getBoundingClientRect();
-    const total = r.height - window.innerHeight;
-    if (total <= 0) return;
-    window.scrollTo({ top: window.scrollY + r.top + fraction * total });
-  };
-
   return (
     <section ref={section} className={styles.section}>
       <div ref={viewport} className={styles.viewport}>
         <div className={styles.stageWrap}>
-          <StoryboardStage ref={stage} onSeek={seek} />
+          <StoryboardStage ref={stage} />
         </div>
         <div className={styles.compactWrap}>
           <StoryboardCompact ref={compact} />

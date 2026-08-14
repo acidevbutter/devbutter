@@ -11,12 +11,10 @@ import {
   BLOCKS,
   OPTIONS,
   RESULT_CARDS,
-  SCENES,
   SENTENCE,
   SENTENCE_ACCENT_FROM,
   fitCanvas,
   lerp,
-  makeSeeds,
   setOp,
   smooth,
   drawNetwork,
@@ -26,10 +24,10 @@ import {
 /** Progress window each scene owns. The desktop stage overlaps them; here they queue. */
 const WINDOWS: [number, number][] = [
   [0.0, 0.47],
-  [0.47, 0.66],
-  [0.66, 0.86],
-  [0.86, 0.95],
-  [0.95, 1.01],
+  [0.47, 0.69],
+  [0.69, 0.885],
+  [0.885, 0.93],
+  [0.93, 1.01],
 ];
 const FADE = 0.025;
 
@@ -38,7 +36,6 @@ export default forwardRef<StageHandle, object>(function StoryboardCompact(_props
   const cv = useRef<HTMLCanvasElement>(null);
   const ctx = useRef<CanvasRenderingContext2D | null>(null);
   const box = useRef({ w: 0, h: 0 });
-  const seeds = useRef<number[]>([]);
 
   const scenes = useRef<(HTMLDivElement | null)[]>([]);
   const blocks = useRef<(HTMLDivElement | null)[]>([]);
@@ -51,9 +48,6 @@ export default forwardRef<StageHandle, object>(function StoryboardCompact(_props
   const words = useRef<(HTMLSpanElement | null)[]>([]);
   const cards = useRef<(HTMLDivElement | null)[]>([]);
   const output = useRef<HTMLDivElement>(null);
-  const sceneLabel = useRef<HTMLSpanElement>(null);
-  const sceneNum = useRef<HTMLSpanElement>(null);
-  const barFill = useRef<HTMLDivElement>(null);
 
   const put =
     <T,>(store: React.RefObject<(T | null)[]>, i: number) =>
@@ -74,17 +68,15 @@ export default forwardRef<StageHandle, object>(function StoryboardCompact(_props
     const g = ctx.current;
     if (!g) return;
     g.clearRect(0, 0, w, h);
+    g.lineCap = "round";
+    // The network is authored for the desktop stage's 900×340 panel, so the dolly
+    // carries an extra factor that fits it to whatever box this variant gives it.
     const camT = smooth(0.52, 0.64, p);
+    const fit = Math.min(w / 900, h / 340);
     drawNetwork(
       g,
       { x: 0, y: 0, w, h },
-      {
-        alpha: 1,
-        scale: lerp(2.2, 0.82, camT * camT * (3 - 2 * camT)),
-        t,
-        p,
-        seeds: seeds.current,
-      }
+      { alpha: 1, scale: lerp(2.2, 1, camT * camT * (3 - 2 * camT)) * fit, t }
     );
   }
 
@@ -92,10 +84,8 @@ export default forwardRef<StageHandle, object>(function StoryboardCompact(_props
     update(p, t) {
       const R = root.current;
       if (!R || R.offsetWidth === 0) return;
-      if (!seeds.current.length) seeds.current = makeSeeds();
 
       // scene cross-fade
-      let current = WINDOWS.length - 1;
       const last = WINDOWS.length - 1;
       WINDOWS.forEach(([a, b], i) => {
         // the closing scene has nothing to hand over to, so it never fades back out
@@ -106,7 +96,6 @@ export default forwardRef<StageHandle, object>(function StoryboardCompact(_props
           setOp(el, on);
           el.style.transform = `scale(${lerp(0.96, 1, on)})`;
         }
-        if (p >= a && p < b) current = i;
       });
 
       // 1 — blocks arrive left to right
@@ -122,11 +111,11 @@ export default forwardRef<StageHandle, object>(function StoryboardCompact(_props
       paintNetwork(p, t);
 
       // 3 — paths score up, the winner turns green
-      const fill = smooth(0.76, 0.83, p);
-      const wh = smooth(0.83, 0.86, p);
+      const fill = smooth(0.78, 0.84, p);
+      const wh = smooth(0.845, 0.875, p);
       rows.current.forEach((row, i) => {
         if (!row) return;
-        const ri = smooth(0.68 + i * 0.02, 0.73 + i * 0.02, p);
+        const ri = smooth(0.71 + i * 0.02, 0.76 + i * 0.02, p);
         setOp(row, ri);
         row.style.transform = `translateX(${(1 - ri) * -14}px)`;
       });
@@ -147,7 +136,7 @@ export default forwardRef<StageHandle, object>(function StoryboardCompact(_props
       if (labels.current[0]) labels.current[0]!.style.fontWeight = wh > 0.3 ? "600" : "400";
 
       // 4 — the selected path lands
-      const out = smooth(0.87, 0.91, p);
+      const out = smooth(0.89, 0.918, p);
       if (output.current) {
         setOp(output.current, out);
         output.current.style.transform = `translateY(${(1 - out) * 14}px)`;
@@ -157,23 +146,18 @@ export default forwardRef<StageHandle, object>(function StoryboardCompact(_props
       const n = words.current.length;
       words.current.forEach((w, i) => {
         if (!w) return;
-        const wr = smooth(0.95 + (n - 1 - i) * 0.004, 0.968 + (n - 1 - i) * 0.004, p);
+        const from = 0.932 + (n - 1 - i) * 0.004;
+        const wr = smooth(from, from + 0.018, p);
         setOp(w, wr);
         w.style.filter = `blur(${(1 - wr) * 4}px)`;
       });
       cards.current.forEach((c, i) => {
         if (!c) return;
-        const from = 0.955 + (3 - i) * 0.008;
+        const from = 0.94 + (3 - i) * 0.008;
         const on = smooth(from, from + 0.021, p);
         setOp(c, Math.max(0.14, on));
         c.style.borderColor = `rgba(121,229,155,${lerp(0.2, 0.65, on)})`;
       });
-
-      // chrome
-      if (barFill.current) barFill.current.style.width = `${p * 100}%`;
-      const sc = SCENES[current];
-      if (sceneLabel.current) sceneLabel.current.textContent = `CENA ${sc[1]} · ${sc[2]}`;
-      if (sceneNum.current) sceneNum.current.textContent = `0${sc[1]}/05`;
     },
   }));
 
@@ -268,17 +252,6 @@ export default forwardRef<StageHandle, object>(function StoryboardCompact(_props
         </div>
       </div>
 
-      <div className={styles.footer} aria-hidden="true">
-        <span ref={sceneLabel} className={`mono ${styles.sceneLabel}`}>
-          CENA 1 · BLOCOS APARECEM
-        </span>
-        <div className={styles.track}>
-          <div ref={barFill} className={styles.trackFill} />
-        </div>
-        <span ref={sceneNum} className={`mono ${styles.sceneNum}`}>
-          01/05
-        </span>
-      </div>
     </div>
   );
 });

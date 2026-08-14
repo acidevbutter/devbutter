@@ -16,13 +16,14 @@
   justify-content: center;
 }
 
-// The full storyboard keeps its native 1600×1780 layout box and is scaled to fit;
-// flex centering places the box, the transform shrinks it around that same center.
+// The full storyboard keeps its native 1600×1780 layout box and is scaled to fit; flex
+// centering places the box, the transform shrinks it around that same center and then
+// nudges it down so the content — not the taller layout box — ends up centered.
 .stageWrap {
   display: none;
   align-items: center;
   justify-content: center;
-  transform: scale(var(--stage-scale, 1));
+  transform: translateY(var(--stage-shift, 0)) scale(var(--stage-scale, 1));
   transform-origin: center;
 }
 

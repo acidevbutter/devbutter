@@ -20,11 +20,10 @@ import {
   frac,
   kf,
   lerp,
-  makeSeeds,
   quad,
-  sceneAt,
   setOp,
   smooth,
+  drawBlockFeed,
   drawNetwork,
   type StageHandle,
 } from "./storyboard";
@@ -35,14 +34,11 @@ const H = 1780;
 /** Where the neural network settles once the camera finishes pulling back. */
 const PANEL = { x: 350, y: 470, w: 900, h: 340 };
 
-type Props = { onSeek?: (fraction: number) => void };
-
-export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek }, ref) {
+export default forwardRef<StageHandle, object>(function StoryboardStage(_props, ref) {
   const root = useRef<HTMLDivElement>(null);
   const cv = useRef<HTMLCanvasElement>(null);
   const ctx = useRef<CanvasRenderingContext2D | null>(null);
   const ratio = useRef(0);
-  const seeds = useRef<number[]>([]);
 
   const eyebrow = useRef<HTMLDivElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
@@ -75,11 +71,6 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
   const rcards = useRef<(HTMLDivElement | null)[]>([]);
 
   const hint = useRef<HTMLDivElement>(null);
-  const track = useRef<HTMLDivElement>(null);
-  const scrubfill = useRef<HTMLDivElement>(null);
-  const scrubhandle = useRef<HTMLDivElement>(null);
-  const scenelabel = useRef<HTMLSpanElement>(null);
-  const scenenum = useRef<HTMLSpanElement>(null);
 
   const put =
     <T,>(store: React.RefObject<(T | null)[]>, i: number) =>
@@ -112,6 +103,14 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
       g.stroke();
     }
 
+    // once the whole chain is up, current runs the connectors and feeds the network
+    const feed = kf(p, [
+      [0.82, 0],
+      [0.89, 1],
+      [1, 1],
+    ]);
+    if (feed > 0.001) drawBlockFeed(g, feed, t);
+
     const netAlpha = kf(p, [
       [0.49, 0],
       [0.56, 1],
@@ -121,8 +120,8 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
 
     // camera dolly: the network starts past the viewer and retreats into the panel
     const camT = smooth(0.52, 0.64, p);
-    const scale = lerp(2.6, 1, camT * camT * (3 - 2 * camT));
-    drawNetwork(g, PANEL, { alpha: netAlpha, scale, t, p, seeds: seeds.current });
+    const scale = lerp(2.2, 1, camT * camT * (3 - 2 * camT));
+    drawNetwork(g, PANEL, { alpha: netAlpha, scale, t });
 
     // dashed path carrying the decision down to the options table
     const pathA = kf(p, [
@@ -269,13 +268,13 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
     ]);
     setOp(s3.current, s3in);
     // the table's chrome dissolves as the winning row travels to the output card
-    const chromeExit = smooth(0.945, 0.965, p);
+    const chromeExit = smooth(0.885, 0.905, p);
     s3.current.style.borderColor = `rgba(246,76,111,${0.22 * (1 - chromeExit)})`;
     s3.current.style.background = `rgba(16,22,34,${0.55 * (1 - chromeExit)})`;
     setOp(s3head.current, 1 - chromeExit);
 
     const fill = smooth(0.77, 0.81, p);
-    const loseExit = smooth(0.945, 0.965, p);
+    const loseExit = smooth(0.885, 0.905, p);
     rows.current.forEach((row, i) => {
       if (!row) return;
       const ri = smooth(0.71 + i * 0.015, 0.76 + i * 0.015, p);
@@ -305,10 +304,8 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
     if (!win || !winLabel || !winRank || !winIcon || !winBar || !winScore) return;
 
     const wh = smooth(0.815, 0.845, p) * (s3in > 0.5 ? 1 : 0);
-    // the highlight leaves with the rest of the table chrome, not after it
-    const held = wh * (1 - chromeExit);
-    win.style.background = `rgba(121,229,155,${0.09 * held})`;
-    win.style.boxShadow = held > 0.3 ? `0 0 20px rgba(121,229,155,${0.18 * held})` : "none";
+    win.style.background = `rgba(121,229,155,${0.09 * wh})`;
+    win.style.boxShadow = wh > 0.3 ? "0 0 20px rgba(121,229,155,0.18)" : "none";
     const wcol = wh > 0.5 ? "#79E59B" : "#F64C6F";
     winRank.style.color = wcol;
     winIcon.style.color = wcol;
@@ -317,9 +314,9 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
     winLabel.style.fontWeight = wh > 0.3 ? "600" : "400";
 
     // ---- the winning label flies out of the table into the output card ----
-    const handoff = smooth(0.945, 0.985, p);
+    const handoff = smooth(0.885, 0.925, p);
     if (handoff > 0.0001 && outword.current) {
-      const rowExit = smooth(0.945, 0.968, p);
+      const rowExit = smooth(0.885, 0.908, p);
       setOp(winRank, 1 - rowExit);
       setOp(winIcon, 1 - rowExit);
       setOp(winBar, 1 - rowExit);
@@ -328,7 +325,7 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
       win.style.zIndex = "7";
 
       // cream → green as the word lifts off the table
-      const cg = smooth(0.945, 0.965, p);
+      const cg = smooth(0.885, 0.905, p);
       winLabel.style.color = `rgb(${Math.round(lerp(228, 121, cg))},${Math.round(
         lerp(225, 229, cg)
       )},${Math.round(lerp(205, 155, cg))})`;
@@ -343,7 +340,7 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
       winLabel.style.transform = `translate(${dx}px,${dy}px) scale(${lerp(1, 13 / 16, handoff)})`;
 
       // hand the word off to the card's own copy
-      const cross = smooth(0.975, 0.992, p);
+      const cross = smooth(0.915, 0.93, p);
       setOp(winLabel, 1 - cross);
     } else {
       win.style.position = "";
@@ -361,60 +358,52 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
     setOp(
       output.current,
       kf(p, [
-        [0.95, 0],
-        [0.98, 1],
+        [0.885, 0],
+        [0.915, 1],
         [1, 1],
       ])
     );
     setOp(
       outsub.current,
       kf(p, [
-        [0.95, 0],
-        [0.99, 1],
+        [0.885, 0],
+        [0.925, 1],
         [1, 1],
       ])
     );
-    setOp(outword.current, smooth(0.975, 0.992, p));
+    setOp(outword.current, smooth(0.915, 0.93, p));
 
     // ---- closing sentence + result cards, both built right to left ----
     setOp(
       s5box.current,
       kf(p, [
-        [0.945, 0],
-        [0.975, 1],
+        [0.9, 0],
+        [0.935, 1],
         [1, 1],
       ])
     );
-    // Both staggers are timed so the last item lands exactly at p = 1 — the storyboard's
-    // end frame calls for the whole sentence and all four cards to be up.
     const n = words.current.length;
     words.current.forEach((w, i) => {
       if (!w) return;
-      const from = 0.945 + (n - 1 - i) * 0.0045;
-      const wr = smooth(from, from + 0.0235, p);
+      const from = 0.9 + (n - 1 - i) * 0.005;
+      const wr = smooth(from, from + 0.03, p);
       setOp(w, wr);
       w.style.filter = `blur(${(1 - wr) * 4}px)`;
     });
     rcards.current.forEach((c, i) => {
       if (!c) return;
-      const from = 0.95 + (3 - i) * 0.0115;
-      const on = smooth(from, from + 0.0155, p);
+      const from = 0.9 + (3 - i) * 0.013;
+      const on = smooth(from, from + 0.04, p);
       const base = kf(p, [
         [0.7, 0],
         [0.74, 0.14],
-        [0.945, 0.14],
+        [0.9, 0.14],
       ]);
       setOp(c, Math.max(base, on));
       c.style.borderColor = `rgba(121,229,155,${lerp(0.2, 0.65, on)})`;
       c.style.boxShadow = on > 0.4 ? `0 0 22px rgba(121,229,155,${0.22 * on})` : "none";
     });
 
-    // ---- scrubber ----
-    if (scrubfill.current) scrubfill.current.style.width = `${p * 100}%`;
-    if (scrubhandle.current) scrubhandle.current.style.left = `${p * 100}%`;
-    const sc = sceneAt(p);
-    if (scenelabel.current) scenelabel.current.textContent = `CENA ${sc[1]} · ${sc[2]}`;
-    if (scenenum.current) scenenum.current.textContent = `0${sc[1]}/05`;
     setOp(hint.current, p > 0.02 ? 0 : 1);
   }
 
@@ -423,7 +412,6 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
       const R = root.current;
       // offsetWidth is 0 while the compact variant owns the viewport.
       if (!R || R.offsetWidth === 0) return;
-      if (!seeds.current.length) seeds.current = makeSeeds();
 
       // Read the display scale once, before any style writes this frame.
       const zoom = R.getBoundingClientRect().width / W || 1;
@@ -437,21 +425,6 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
       paint(p, zoom);
     },
   }));
-
-  // Dragging the scrubber seeks the page scroll, which is what actually drives `p`.
-  const seek = (clientX: number) => {
-    const t = track.current;
-    if (!t || !onSeek) return;
-    const r = t.getBoundingClientRect();
-    onSeek(Math.max(0, Math.min(1, (clientX - r.left) / r.width)));
-  };
-  const onPointerDown = (e: React.PointerEvent) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    seek(e.clientX);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) seek(e.clientX);
-  };
 
   return (
     <div ref={root} className={styles.root}>
@@ -612,24 +585,6 @@ export default forwardRef<StageHandle, Props>(function StoryboardStage({ onSeek 
 
       <div ref={hint} className={`mono ${styles.hint}`}>
         Role para avançar
-      </div>
-
-      <div className={styles.scrubber}>
-        <span ref={scenelabel} className={`mono ${styles.sceneLabel}`}>
-          CENA 1 · BLOCOS APARECEM
-        </span>
-        <div
-          ref={track}
-          className={styles.track}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-        >
-          <div ref={scrubfill} className={styles.scrubFill} />
-          <div ref={scrubhandle} className={styles.scrubHandle} />
-        </div>
-        <span ref={scenenum} className={`mono ${styles.sceneNum}`}>
-          01/05
-        </span>
       </div>
     </div>
   );
