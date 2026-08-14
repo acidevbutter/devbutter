@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Logomark from "@/components/icons/Logomark";
 import styles from "./ChatSimulation.module.scss";
 
@@ -64,26 +64,51 @@ const MESSAGES: Message[] = [
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
+const REDUCE_QUERY = "(prefers-reduced-motion: reduce)";
+
+const subscribeReduceMotion = (onChange: () => void) => {
+  const mq = window.matchMedia(REDUCE_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+};
+
+/**
+ * Reads the media query without desyncing from the server. The server has no query to
+ * read, so its snapshot is "motion is fine" — which is what the HTML is rendered for —
+ * and React swaps in the real value right after hydration.
+ */
+function usePrefersReducedMotion() {
+  return useSyncExternalStore(
+    subscribeReduceMotion,
+    () => window.matchMedia(REDUCE_QUERY).matches,
+    () => false
+  );
+}
+
 export default function ChatSimulation() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const startedRef = useRef(false);
   const cancelledRef = useRef(false);
 
-  const [revealed, setRevealed] = useState<boolean[]>(() =>
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ? MESSAGES.map(() => true)
-      : MESSAGES.map(() => false)
-  );
+  // Starts hidden to match the server's HTML; reduced motion shows everything at once
+  // and is folded in at render time rather than by seeding this state.
+  const [revealed, setRevealed] = useState<boolean[]>(() => MESSAGES.map(() => false));
+  const reduceMotion = usePrefersReducedMotion();
   const [typingIndex, setTypingIndex] = useState<number | null>(null);
   const [typingShown, setTypingShown] = useState(false);
 
   useEffect(() => {
+    // Both refs outlive the effect, so a re-run — StrictMode's double mount, Fast
+    // Refresh, a remount — has to clear the previous run's flags. Without this the
+    // cleanup's `cancelled` latches on and `run` bails out before revealing anything.
+    cancelledRef.current = false;
+    startedRef.current = false;
+
     const el = containerRef.current;
     if (!el) return;
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
+    // Reduced motion shows the whole conversation at render time — nothing to play.
+    if (reduceMotion) return;
 
     const reveal = (index: number) =>
       setRevealed((prev) => {
@@ -133,7 +158,7 @@ export default function ChatSimulation() {
       cancelledRef.current = true;
       io.disconnect();
     };
-  }, []);
+  }, [reduceMotion]);
 
   return (
     <section className={styles.section}>
@@ -177,7 +202,7 @@ export default function ChatSimulation() {
                 className={[
                   styles.bubble,
                   m.role === "user" ? styles.bubbleUser : m.role === "ai" ? styles.bubbleAi : styles.bubbleResult,
-                  revealed[i] ? styles.bubbleVisible : "",
+                  revealed[i] || reduceMotion ? styles.bubbleVisible : "",
                 ].join(" ")}
               >
                 {m.content}

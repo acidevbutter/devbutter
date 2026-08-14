@@ -28,6 +28,7 @@ export default function DataDecision() {
   const viewport = useRef<HTMLDivElement>(null);
   const stage = useRef<StageHandle>(null);
   const compact = useRef<StageHandle>(null);
+  const releasedRef = useRef(false);
 
   useEffect(() => {
     const sec = section.current;
@@ -54,8 +55,29 @@ export default function DataDecision() {
     const ro = new ResizeObserver(fit);
     ro.observe(vp);
 
+    // The sequence plays once. When it reaches the end the section stops pinning: the
+    // scroll runway collapses to a single viewport and the page is pulled back by the
+    // same amount, so nothing moves on screen but from here on scrolling just carries
+    // the section up and away, holding its last frame on the way out.
+    //
+    // The flag is a ref, not a local, and the collapsed height is never restored: both
+    // have to outlive this effect, or a re-run (Fast Refresh, StrictMode's double
+    // mount) would hand the section its runway back and let the sequence replay.
+    const release = () => {
+      if (releasedRef.current) return;
+      releasedRef.current = true;
+      const r = sec.getBoundingClientRect();
+      const cut = r.height - window.innerHeight;
+      const y = window.scrollY;
+      sec.style.height = "100vh";
+      // compensate only for the runway that had actually been scrolled past
+      if (cut > 0) window.scrollTo(0, Math.max(0, y - Math.min(cut, Math.max(0, -r.top))));
+    };
+
     // Design note on this section: under reduced motion, hold the sequence at p = 1.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // No sequence to play, so there is no runway to scroll through either.
+      release();
       push(1, 0);
       // The stages skip work while their variant is hidden, so re-run on resize in
       // case the breakpoint flips and the other variant needs its first paint.
@@ -78,14 +100,28 @@ export default function DataDecision() {
     const frame = (ts: number) => {
       const r = sec.getBoundingClientRect();
       const vh = window.innerHeight;
+
+      // A flick, a scrollbar drag or End can carry the section clean past the viewport
+      // between two frames. The sequence is over either way, so latch it here too —
+      // otherwise the runway survives and scrolling back up falls into it and replays.
+      if (r.bottom <= 0) release();
+
       if (r.top >= vh || r.bottom <= 0) {
         raf = 0;
         return;
       }
       raf = requestAnimationFrame(frame);
 
-      const total = r.height - vh;
-      target = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 0;
+      if (releasedRef.current) {
+        target = 1; // latched on the last frame
+      } else {
+        const total = r.height - vh;
+        target = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 0;
+        if (target > 0.995) {
+          target = 1;
+          release();
+        }
+      }
       if (!started) {
         // don't play the whole sequence back when the section is entered mid-way
         started = true;
