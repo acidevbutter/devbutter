@@ -1,0 +1,52 @@
+@use "../../styles/tokens" as *;
+
+.section {
+  position: relative;
+  padding: 84px $db-section-pad-x;
+  text-align: center;
+  border-bottom: 1px solid $db-border;
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 120%, rgba(0, 210, 106, 0.12), transparent 55%);
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+}
+
+.h2 {
+  font-size: clamp(26px, 3.2vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.subtext {
+  color: $db-text-secondary;
+  font-size: 16px;
+  margin: 14px auto 0;
+  max-width: 440px;
+}
+
+.cta {
+  margin-top: 30px;
+  padding: 15px 30px;
+  border-radius: 12px;
+  font: 600 15px var(--font-geist-sans);
+  cursor: pointer;
+  background: $db-green;
+  color: $db-bg;
+  border: none;
+  box-shadow: 0 0 34px rgba(0, 210, 106, 0.42);
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 42px rgba(0, 210, 106, 0.55);
+  }
+}

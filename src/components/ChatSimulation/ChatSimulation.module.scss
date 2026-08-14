@@ -1,0 +1,202 @@
+@use "../../styles/tokens" as *;
+
+.section {
+  position: relative;
+  padding: 86px $db-section-pad-x;
+  border-bottom: 1px solid $db-border;
+  max-width: $db-content-max;
+  margin: 0 auto;
+}
+
+.head {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.h2 {
+  font-size: clamp(28px, 3.4vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 12px 0 0;
+}
+
+.subtext {
+  color: $db-text-secondary;
+  font-size: 16px;
+  margin: 12px 0 0;
+}
+
+.window {
+  max-width: 600px;
+  margin: 36px auto 0;
+  background: $db-surface;
+  border: 1px solid $db-border-interactive;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.windowHeader {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 14px 18px;
+  border-bottom: 1px solid $db-border;
+  background: $db-surface-inset;
+}
+
+.windowTitle {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.windowStatus {
+  font-size: 11px;
+  color: $db-green;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $db-green-glow;
+  box-shadow: 0 0 8px $db-green-glow;
+}
+
+.messages {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 380px;
+}
+
+.bubble {
+  max-width: 80%;
+  padding: 12px 15px;
+  font-size: 14px;
+  color: $db-chat-text-strong;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.bubbleVisible {
+  opacity: 1;
+  transform: none;
+}
+
+.bubbleUser {
+  align-self: flex-end;
+  background: $db-surface-inset;
+  border: 1px solid $db-border-interactive;
+  border-radius: 15px 15px 4px 15px;
+}
+
+.bubbleAi {
+  align-self: flex-start;
+  max-width: 82%;
+  background: rgba(121, 229, 155, 0.06);
+  border: 1px solid rgba(121, 229, 155, 0.28);
+  border-radius: 15px 15px 15px 4px;
+  line-height: 1.5;
+}
+
+.bubbleResult {
+  align-self: flex-start;
+  max-width: 82%;
+  background: rgba(246, 76, 111, 0.06);
+  border: 1px solid rgba(246, 76, 111, 0.3);
+  border-radius: 15px 15px 15px 4px;
+  line-height: 1.5;
+}
+
+.flowList {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.flowItem {
+  display: flex;
+  gap: 8px;
+}
+
+.arrow {
+  font-size: 12px;
+}
+
+.typing {
+  display: none;
+  align-self: flex-start;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 16px;
+  border-radius: 15px;
+  background: rgba(121, 229, 155, 0.06);
+  border: 1px solid rgba(121, 229, 155, 0.25);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.typingVisible {
+  display: flex;
+}
+
+.typingShown {
+  opacity: 1;
+}
+
+.typingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $db-green;
+  animation: db-typed 1.2s infinite;
+}
+
+.chips {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding: 0 22px 22px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  border-radius: 20px;
+  padding: 8px 15px;
+  color: $db-text-primary;
+  cursor: pointer;
+  background: transparent;
+  font-family: inherit;
+  transition: transform 0.15s;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.chipGreen {
+  border: 1.5px solid $db-green;
+  box-shadow: 0 0 16px rgba(0, 210, 106, 0.12);
+}
+
+.chipPink {
+  border: 1.5px solid $db-pink;
+  box-shadow: 0 0 16px rgba(255, 79, 163, 0.12);
+}

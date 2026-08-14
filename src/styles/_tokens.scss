@@ -1,0 +1,54 @@
+// DevButter design tokens — colors, type, spacing, shadows
+// Source: design_handoff_homepage/README.md
+
+:root {
+  // Backgrounds / surfaces
+  --db-bg: #05070d;
+  --db-surface: #0b0f18;
+  --db-surface-inset: #0d1322;
+  --db-surface-deep: #080b12;
+
+  // Text
+  --db-text-primary: #f5f7fb;
+  --db-text-secondary: #9ca6b5;
+  --db-text-muted: #5a6272;
+  --db-chat-text: #c9cfd8;
+  --db-chat-text-strong: #e6e9ef;
+
+  // Accents
+  --db-green: #79e59b;
+  --db-green-glow: #00d26a;
+  --db-pink: #f64c6f;
+  --db-pink-glow: #ff4fa3;
+
+  // Borders
+  --db-border: rgba(255, 255, 255, 0.08);
+  --db-border-interactive: rgba(255, 255, 255, 0.14);
+  --db-selection: rgba(255, 79, 163, 0.32);
+
+  // Layout
+  --db-content-max: 1280px;
+  --db-section-pad-x: 4vw;
+}
+
+$db-bg: #05070d;
+$db-surface: #0b0f18;
+$db-surface-inset: #0d1322;
+$db-surface-deep: #080b12;
+
+$db-text-primary: #f5f7fb;
+$db-text-secondary: #9ca6b5;
+$db-text-muted: #5a6272;
+$db-chat-text: #c9cfd8;
+$db-chat-text-strong: #e6e9ef;
+
+$db-green: #79e59b;
+$db-green-glow: #00d26a;
+$db-pink: #f64c6f;
+$db-pink-glow: #ff4fa3;
+
+$db-border: rgba(255, 255, 255, 0.08);
+$db-border-interactive: rgba(255, 255, 255, 0.14);
+
+$db-content-max: 1280px;
+$db-section-pad-x: 4vw;

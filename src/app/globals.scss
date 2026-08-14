@@ -1,0 +1,57 @@
+@use "../styles/tokens" as *;
+@use "../styles/animations";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: $db-bg;
+  color: $db-text-primary;
+  font-family: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: $db-green;
+  text-decoration: none;
+}
+
+a:hover {
+  color: $db-green-glow;
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: rgba(255, 79, 163, 0.32);
+}
+
+.mono {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.gn {
+  color: $db-green;
+}
+
+.pk {
+  color: $db-pink;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

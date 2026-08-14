@@ -1,0 +1,268 @@
+@use "../../styles/tokens" as *;
+
+.hero {
+  position: relative;
+  padding: 74px $db-section-pad-x 0;
+  border-bottom: 1px solid $db-border;
+  overflow: hidden;
+}
+
+.ambientDots {
+  position: absolute;
+  top: 120px;
+  right: 2vw;
+  opacity: 0.5;
+  display: none;
+
+  @media (min-width: 1100px) {
+    display: block;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.02fr 1fr;
+  gap: 36px;
+  align-items: center;
+  min-height: 70vh;
+  position: relative;
+  z-index: 2;
+  max-width: $db-content-max;
+  margin: 0 auto;
+
+  @media (max-width: 940px) {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+}
+
+.eyebrow {
+  animation-delay: 0.05s;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: $db-green;
+  margin-bottom: 20px;
+}
+
+.h1 {
+  animation-delay: 0.12s;
+  margin: 0;
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+
+.h1Line1 {
+  display: block;
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 600;
+  color: $db-text-primary;
+}
+
+.h1Line2 {
+  display: block;
+  font-size: clamp(52px, 7vw, 92px);
+  color: $db-green;
+}
+
+.paragraph {
+  animation-delay: 0.22s;
+  max-width: 460px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: $db-text-secondary;
+  margin: 24px 0 0;
+}
+
+.ctas {
+  animation-delay: 0.32s;
+  display: flex;
+  gap: 13px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.ctaPrimary {
+  padding: 14px 26px;
+  border-radius: 12px;
+  font: 600 15px var(--font-geist-sans);
+  cursor: pointer;
+  background: $db-green;
+  color: $db-bg;
+  border: none;
+  box-shadow: 0 0 32px rgba(0, 210, 106, 0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 40px rgba(0, 210, 106, 0.5);
+  }
+}
+
+.ctaSecondary {
+  padding: 14px 26px;
+  border-radius: 12px;
+  font: 600 15px var(--font-geist-sans);
+  cursor: pointer;
+  background: transparent;
+  color: $db-text-primary;
+  border: 1.5px solid rgba(255, 79, 163, 0.5);
+  box-shadow: 0 0 22px rgba(255, 79, 163, 0.12);
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    border-color: rgba(255, 79, 163, 0.8);
+    box-shadow: 0 0 28px rgba(255, 79, 163, 0.2);
+  }
+}
+
+// ---- illustration stage ----
+
+.stage {
+  position: relative;
+  height: 500px;
+
+  @media (max-width: 940px) {
+    height: 360px;
+  }
+
+  @media (max-width: 560px) {
+    display: none;
+  }
+}
+
+.stageGlow {
+  position: absolute;
+  inset: -8%;
+  background: radial-gradient(circle at 56% 42%, rgba(246, 76, 111, 0.16), transparent 46%),
+    radial-gradient(circle at 42% 60%, rgba(121, 229, 155, 0.16), transparent 48%);
+  animation: db-glowb 5s ease-in-out infinite;
+}
+
+.circuitSvg,
+.ringSvg,
+.flaskSvg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.circuitSvg {
+  overflow: visible;
+}
+
+.ringOuter {
+  transform-origin: 50% 50%;
+  animation: db-ringspin 34s linear infinite;
+}
+
+.ringInner {
+  transform-origin: 50% 50%;
+  animation: db-ringspin-r 26s linear infinite;
+}
+
+.flaskSvg {
+  width: 150px;
+  height: 180px;
+  left: calc(50% - 75px);
+  top: calc(50% - 96px);
+  z-index: 2;
+}
+
+.flaskLiquidTop {
+  animation: db-wave 6s ease-in-out infinite;
+}
+
+.flaskLiquidBottom {
+  animation: db-wave 6s ease-in-out infinite 0.5s;
+}
+
+.bubble {
+  animation: db-bubrise 2.4s ease-in infinite;
+}
+
+.keywordNode {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 10px var(--font-geist-mono), monospace;
+  color: $db-text-secondary;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.keywordDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.chip {
+  position: absolute;
+  z-index: 3;
+  animation: db-floaty 6s ease-in-out infinite;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  border: 1.5px solid $db-green;
+  background: rgba(121, 229, 155, 0.05);
+  box-shadow: 0 0 20px rgba(0, 210, 106, 0.14);
+  font-weight: 600;
+  font-size: 13.5px;
+  color: $db-text-primary;
+
+  @media (max-width: 1180px) {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+.chipPink {
+  border-color: $db-pink;
+  background: rgba(246, 76, 111, 0.05);
+  box-shadow: 0 0 20px rgba(255, 79, 163, 0.14);
+}
+
+// ---- wireframe data-terrain strip ----
+
+.terrainSection {
+  position: relative;
+  height: 230px;
+  margin-top: 10px;
+  overflow: hidden;
+
+  @media (max-width: 640px) {
+    height: 140px;
+  }
+}
+
+.terrainGrid {
+  position: absolute;
+  bottom: -30px;
+  left: -15%;
+  right: -15%;
+  height: 260px;
+  background-image: linear-gradient(rgba(121, 229, 155, 0.32) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 79, 163, 0.22) 1px, transparent 1px);
+  background-size: 46px 46px;
+  transform: perspective(300px) rotateX(66deg);
+  transform-origin: bottom;
+  -webkit-mask-image: linear-gradient(to top, #000 12%, transparent 88%);
+  mask-image: linear-gradient(to top, #000 12%, transparent 88%);
+  animation: db-gridmove 7s linear infinite;
+}
+
+.terrainParticles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}

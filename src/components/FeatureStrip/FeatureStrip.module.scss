@@ -1,0 +1,78 @@
+@use "../../styles/tokens" as *;
+
+.section {
+  position: relative;
+  padding: 64px $db-section-pad-x;
+  border-bottom: 1px solid $db-border;
+  max-width: $db-content-max;
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: $db-surface;
+  border: 1px solid $db-border;
+  border-radius: 18px;
+  padding: 26px;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.cardGreen:hover {
+  border-color: rgba(121, 229, 155, 0.5);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), 0 0 26px rgba(0, 210, 106, 0.12);
+}
+
+.cardPink:hover {
+  border-color: rgba(255, 79, 163, 0.5);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), 0 0 26px rgba(255, 79, 163, 0.12);
+}
+
+.iconTile {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: $db-surface-inset;
+  display: grid;
+  place-items: center;
+}
+
+.iconTileGreen {
+  border: 1px solid rgba(121, 229, 155, 0.3);
+  box-shadow: 0 0 20px rgba(0, 210, 106, 0.1);
+}
+
+.iconTilePink {
+  border: 1px solid rgba(255, 79, 163, 0.3);
+  box-shadow: 0 0 20px rgba(255, 79, 163, 0.1);
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 18px;
+  letter-spacing: -0.01em;
+}
+
+.desc {
+  font-size: 13px;
+  color: $db-text-secondary;
+  margin: 8px 0 0;
+  line-height: 1.5;
+}

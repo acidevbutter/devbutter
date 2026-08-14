@@ -1,0 +1,152 @@
+// Shared keyframes, ported 1:1 from the design handoff
+
+@keyframes db-wave {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(1.5px);
+  }
+}
+
+@keyframes db-ringspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes db-ringspin-r {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes db-pulse-travel {
+  0% {
+    opacity: 0;
+    offset-distance: 0%;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    offset-distance: 100%;
+  }
+}
+
+@keyframes db-floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes db-glowb {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes db-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes db-surge {
+  0%,
+  100% {
+    opacity: 0.06;
+  }
+  45%,
+  55% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes db-dashflow {
+  to {
+    stroke-dashoffset: -30;
+  }
+}
+
+@keyframes db-padblink {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes db-gridmove {
+  to {
+    background-position: 0 46px;
+  }
+}
+
+@keyframes db-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes db-typed {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes db-bubrise {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-22px);
+    opacity: 0;
+  }
+}
+
+.fu {
+  opacity: 0;
+  animation: db-fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+  .fu {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
