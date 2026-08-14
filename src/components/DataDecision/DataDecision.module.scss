@@ -6,7 +6,7 @@
   border-bottom: 1px solid $db-border;
 }
 
-.sticky {
+.viewport {
   position: sticky;
   top: 0;
   height: 100vh;
@@ -16,149 +16,28 @@
   justify-content: center;
 }
 
-.inner {
-  width: 100%;
-  max-width: $db-content-max;
-  padding: 0 $db-section-pad-x;
-  display: flex;
-  flex-direction: column;
+// The full storyboard keeps its native 1600×1780 layout box and is scaled to fit;
+// flex centering places the box, the transform shrinks it around that same center.
+.stageWrap {
+  display: none;
   align-items: center;
-  gap: 40px;
+  justify-content: center;
+  transform: scale(var(--stage-scale, 1));
+  transform-origin: center;
 }
 
-.head {
-  text-align: center;
-  max-width: 560px;
-}
-
-.eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.h2 {
-  font-size: clamp(28px, 3.4vw, 42px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin: 12px 0 0;
-}
-
-.stage {
-  position: relative;
-  width: 100%;
-  max-width: 760px;
-  height: 300px;
-  border: 1px solid $db-border;
-  border-radius: 20px;
-  background: $db-surface;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-
-  @media (max-width: 640px) {
-    height: 240px;
-  }
-}
-
-.stageGlow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(121, 229, 155, 0.1), transparent 60%);
-  transition: opacity 0.4s ease;
-}
-
-.scenes {
-  position: relative;
-  width: 100%;
+.compactWrap {
+  flex: 1 1 auto;
+  display: flex;
   height: 100%;
-  display: grid;
-  place-items: center;
 }
 
-.scene {
-  grid-area: 1 / 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  opacity: 0;
-  transform: scale(0.94);
-  transition: opacity 0.35s ease, transform 0.35s ease;
-  pointer-events: none;
-}
+@media (min-width: 900px) and (min-height: 620px) {
+  .stageWrap {
+    display: flex;
+  }
 
-.sceneActive {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.sceneLabel {
-  font-size: 13px;
-  color: $db-text-secondary;
-  text-align: center;
-  max-width: 340px;
-  line-height: 1.5;
-}
-
-.dotField {
-  display: grid;
-  grid-template-columns: repeat(9, 8px);
-  gap: 8px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: $db-text-muted;
-  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.dotGreen {
-  background: $db-green;
-  box-shadow: 0 0 8px $db-green-glow;
-  transform: scale(1.15);
-}
-
-.dotPink {
-  background: $db-pink;
-  box-shadow: 0 0 8px $db-pink-glow;
-  transform: scale(1.15);
-}
-
-.core {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  border: 1.5px solid $db-green;
-  background: rgba(121, 229, 155, 0.08);
-  box-shadow: 0 0 40px rgba(0, 210, 106, 0.35);
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-}
-
-.steps {
-  display: flex;
-  gap: 10px;
-}
-
-.step {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: $db-border-interactive;
-  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
-}
-
-.stepActive {
-  background: $db-green;
-  box-shadow: 0 0 10px $db-green-glow;
-  transform: scale(1.3);
-}
-
-.progressLabel {
-  font-size: 11px;
-  color: $db-text-muted;
+  .compactWrap {
+    display: none;
+  }
 }

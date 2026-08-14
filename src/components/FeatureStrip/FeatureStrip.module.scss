@@ -27,10 +27,31 @@
   border: 1px solid $db-border;
   border-radius: 18px;
   padding: 26px;
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  // The reveal rides on `translate` so the hover lift keeps `transform` to itself.
+  opacity: 0;
+  translate: 0 22px;
+  transition:
+    opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    translate 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
 
   &:hover {
     transform: translateY(-4px);
+  }
+}
+
+.cardIn {
+  opacity: 1;
+  translate: 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    opacity: 1;
+    translate: 0 0;
+    transition: none;
   }
 }
 

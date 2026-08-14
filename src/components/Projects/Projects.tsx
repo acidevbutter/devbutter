@@ -1,3 +1,6 @@
+"use client";
+
+import useRevealOnce from "@/hooks/useRevealOnce";
 import styles from "./Projects.module.scss";
 
 const PROJECTS = [
@@ -69,6 +72,8 @@ const PROJECTS = [
 ];
 
 export default function Projects() {
+  const [rowRef, shown] = useRevealOnce<HTMLDivElement>();
+
   return (
     <section className={styles.section}>
       <div className={`mono gn ${styles.eyebrow}`}>Selected work</div>
@@ -82,12 +87,15 @@ export default function Projects() {
         Uma amostra do que construímos — do produto interno ao experimento de pesquisa.
       </p>
 
-      <div className={styles.scroller}>
-        {PROJECTS.map((p) => (
+      <div ref={rowRef} className={styles.scroller}>
+        {PROJECTS.map((p, i) => (
           <a
             key={p.title}
             href="#"
-            className={`${styles.card} ${p.accent === "green" ? styles.cardGreen : styles.cardPink}`}
+            className={`${styles.card} ${shown ? styles.cardIn : ""} ${
+              p.accent === "green" ? styles.cardGreen : styles.cardPink
+            }`}
+            style={{ transitionDelay: `${i * 80}ms` }}
           >
             <div className={`${styles.iconTile} ${p.accent === "green" ? styles.iconTileGreen : styles.iconTilePink}`}>
               {p.icon}

@@ -1,137 +1,121 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+// Section 6 — "Da informação à decisão".
+// The storyboard's own scrubbing (wheel capture + body drag) is replaced by page
+// scroll: the section is 420vh tall with a pinned viewport, and scroll position maps
+// to the sequence's 0→1 progress. Progress is eased toward its target the same way
+// the source did, so the motion keeps its trailing feel.
+
+import { useEffect, useRef } from "react";
+import StoryboardCompact from "./StoryboardCompact";
+import StoryboardStage from "./StoryboardStage";
 import styles from "./DataDecision.module.scss";
+import type { StageHandle } from "./storyboard";
 
-const STAGES = [
-  {
-    key: "raw",
-    step: "01",
-    title: "Dados brutos",
-    desc: "Métricas, mensagens, planilhas e sistemas espalhados — sem conexão entre si.",
-  },
-  {
-    key: "patterns",
-    step: "02",
-    title: "Padrões",
-    desc: "A IA cruza sinais e encontra estrutura onde antes só havia ruído.",
-  },
-  {
-    key: "context",
-    step: "03",
-    title: "Contexto",
-    desc: "RAG e embeddings ligam os dados ao conhecimento do seu negócio.",
-  },
-  {
-    key: "decision",
-    step: "04",
-    title: "Decisão",
-    desc: "Uma recomendação clara, pronta para virar ação.",
-  },
-] as const;
-
-const DOT_COUNT = 36;
+const STAGE_W = 1600;
+const STAGE_H = 1780;
 
 export default function DataDecision() {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const [progress, setProgress] = useState(() =>
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ? 1
-      : 0
-  );
+  const section = useRef<HTMLElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
+  const stage = useRef<StageHandle>(null);
+  const compact = useRef<StageHandle>(null);
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
+    const sec = section.current;
+    const vp = viewport.current;
+    if (!sec || !vp) return;
 
-    // Progress only needs to change in response to scroll/resize — driving it off a
-    // free-running rAF loop instead forces a layout read every frame for no benefit.
-    let queued = false;
-    const update = () => {
-      queued = false;
-      const el = sectionRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight || 800;
-      const total = rect.height - vh;
-      const p = total > 0 ? -rect.top / total : 0;
-      setProgress(Math.max(0, Math.min(1, p)));
+    const push = (p: number, t: number) => {
+      stage.current?.update(p, t);
+      compact.current?.update(p, t);
     };
 
-    const queueUpdate = () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(update);
+    // Scale the fixed 1600×1780 stage down to whatever the pinned viewport gives us.
+    const fit = () => {
+      const r = vp.getBoundingClientRect();
+      const s = Math.min((r.width * 0.98) / STAGE_W, (r.height * 0.96) / STAGE_H);
+      vp.style.setProperty("--stage-scale", String(s || 1));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(vp);
+
+    // Design note on this section: under reduced motion, hold the sequence at p = 1.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      push(1, 0);
+      // The stages skip work while their variant is hidden, so re-run on resize in
+      // case the breakpoint flips and the other variant needs its first paint.
+      const settle = () => push(1, 0);
+      window.addEventListener("resize", settle);
+      return () => {
+        ro.disconnect();
+        window.removeEventListener("resize", settle);
+      };
+    }
+
+    let p = 0;
+    let target = 0;
+    let raf = 0;
+    let started = false;
+    const t0 = performance.now();
+
+    // The canvas animates continuously, so the loop parks itself once the section
+    // leaves the viewport and any scroll wakes it back up.
+    const frame = (ts: number) => {
+      const r = sec.getBoundingClientRect();
+      const vh = window.innerHeight;
+      if (r.top >= vh || r.bottom <= 0) {
+        raf = 0;
+        return;
+      }
+      raf = requestAnimationFrame(frame);
+
+      const total = r.height - vh;
+      target = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 0;
+      if (!started) {
+        // don't play the whole sequence back when the section is entered mid-way
+        started = true;
+        p = target;
+      }
+      p += (target - p) * 0.14;
+      if (Math.abs(target - p) < 0.0004) p = target;
+      push(p, (ts - t0) / 1000);
     };
 
-    queueUpdate();
-    window.addEventListener("scroll", queueUpdate, { passive: true });
-    window.addEventListener("resize", queueUpdate);
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+    kick();
+    window.addEventListener("scroll", kick, { passive: true });
+    window.addEventListener("resize", kick);
 
     return () => {
-      window.removeEventListener("scroll", queueUpdate);
-      window.removeEventListener("resize", queueUpdate);
+      window.removeEventListener("scroll", kick);
+      window.removeEventListener("resize", kick);
+      ro.disconnect();
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 
-  const stageIndex = Math.min(STAGES.length - 1, Math.floor(progress * STAGES.length));
-  const litDots = Math.round(progress * DOT_COUNT);
+  /** The scrubber seeks by moving the page, since scroll is what drives progress. */
+  const seek = (fraction: number) => {
+    const sec = section.current;
+    if (!sec) return;
+    const r = sec.getBoundingClientRect();
+    const total = r.height - window.innerHeight;
+    if (total <= 0) return;
+    window.scrollTo({ top: window.scrollY + r.top + fraction * total });
+  };
 
   return (
-    <section ref={sectionRef} className={styles.section}>
-      <div className={styles.sticky}>
-        <div className={styles.inner}>
-          <div className={styles.head}>
-            <div className={`mono gn ${styles.eyebrow}`}>Da informação à decisão</div>
-            <h2 className={styles.h2}>
-              Como transformamos <span className="gn">dados</span> em <span className="pk">decisão</span>.
-            </h2>
-          </div>
-
-          <div className={styles.stage}>
-            <div className={styles.stageGlow} />
-            <div className={styles.scenes}>
-              {STAGES.map((s, i) => (
-                <div
-                  key={s.key}
-                  className={`${styles.scene} ${i === stageIndex ? styles.sceneActive : ""}`}
-                >
-                  {s.key !== "decision" ? (
-                    <div className={styles.dotField} aria-hidden="true">
-                      {Array.from({ length: DOT_COUNT }).map((_, di) => {
-                        const lit = di < litDots;
-                        const green = di % 2 === 0;
-                        return (
-                          <span
-                            key={di}
-                            className={`${styles.dot} ${lit ? (green ? styles.dotGreen : styles.dotPink) : ""}`}
-                          />
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className={styles.core} aria-hidden="true">
-                      →
-                    </div>
-                  )}
-                  <div className={styles.sceneLabel}>{s.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.steps} aria-hidden="true">
-            {STAGES.map((s, i) => (
-              <span
-                key={s.key}
-                className={`${styles.step} ${i === stageIndex ? styles.stepActive : ""}`}
-              />
-            ))}
-          </div>
-          <div className={`mono ${styles.progressLabel}`}>
-            {STAGES[stageIndex].step} · {STAGES[stageIndex].title}
-          </div>
+    <section ref={section} className={styles.section}>
+      <div ref={viewport} className={styles.viewport}>
+        <div className={styles.stageWrap}>
+          <StoryboardStage ref={stage} onSeek={seek} />
+        </div>
+        <div className={styles.compactWrap}>
+          <StoryboardCompact ref={compact} />
         </div>
       </div>
     </section>

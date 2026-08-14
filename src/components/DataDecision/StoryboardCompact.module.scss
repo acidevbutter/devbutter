@@ -1,0 +1,305 @@
+@use "../../styles/tokens" as *;
+
+$cream: #e4e1cd;
+
+.root {
+  width: 100%;
+  height: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  // the viewport pins at the top of the page, so clear the sticky nav
+  padding: 88px $db-section-pad-x 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: $cream;
+}
+
+.head {
+  text-align: center;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: $db-pink;
+}
+
+.title {
+  margin: 8px 0 0;
+  font-size: clamp(26px, 8vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: $cream;
+}
+
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+
+.scene {
+  grid-area: 1 / 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+// ---- 1 ----
+
+.blocks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 54px;
+  padding: 0 12px;
+  border: 1px solid rgba(121, 229, 155, 0.2);
+  border-radius: 12px;
+  background: rgba(11, 15, 24, 0.6);
+  opacity: 0;
+}
+
+.blockIcon {
+  display: flex;
+  color: $db-green;
+}
+
+.blockNum {
+  font-size: 12px;
+  color: $db-green;
+}
+
+.blockLabel {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+// ---- 2 ----
+
+.panel {
+  width: 100%;
+  aspect-ratio: 16 / 11;
+  border: 1px solid rgba(121, 229, 155, 0.25);
+  border-radius: 18px;
+  background: rgba(11, 15, 24, 0.4);
+  overflow: hidden;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.nucleo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: $db-green;
+}
+
+// ---- 3 ----
+
+.table {
+  width: 100%;
+  border: 1px solid rgba(246, 76, 111, 0.22);
+  border-radius: 16px;
+  background: rgba(16, 22, 34, 0.55);
+  padding: 16px 14px;
+}
+
+.tableHead {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: $db-pink;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 8px;
+  opacity: 0;
+}
+
+.rank {
+  width: 18px;
+  font-size: 11px;
+  color: $db-pink;
+}
+
+.rowIcon {
+  display: flex;
+  color: $db-pink;
+}
+
+.rowLabel {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar {
+  position: relative;
+  flex: 0 0 54px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(228, 225, 205, 0.1);
+  overflow: hidden;
+}
+
+.barFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 100%;
+  border-radius: 3px;
+  background: $db-pink;
+}
+
+.score {
+  width: 38px;
+  font-size: 12px;
+  text-align: right;
+  color: $db-pink;
+}
+
+// ---- 4 ----
+
+.output {
+  width: 100%;
+  max-width: 340px;
+  border: 1.5px solid rgba(246, 76, 111, 0.6);
+  border-radius: 14px;
+  background: rgba(16, 22, 34, 0.65);
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+}
+
+.outputSub {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: $db-green;
+}
+
+.outputTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: $db-pink;
+}
+
+// ---- 5 ----
+
+.sentence {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(16px, 4.8vw, 20px);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  height: 84px;
+  padding: 12px 14px;
+  border: 1px solid rgba(121, 229, 155, 0.2);
+  border-radius: 14px;
+  background: rgba(16, 22, 34, 0.55);
+  opacity: 0;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardDash {
+  font-size: 18px;
+  color: #5b6472;
+}
+
+.cardLabel {
+  font-size: 13px;
+}
+
+// ---- chrome ----
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sceneLabel {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  color: $db-green;
+}
+
+.track {
+  position: relative;
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(228, 225, 205, 0.12);
+  overflow: hidden;
+}
+
+.trackFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, $db-green, $db-pink);
+}
+
+.sceneNum {
+  font-size: 10px;
+  color: $db-text-muted;
+}

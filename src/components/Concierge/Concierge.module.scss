@@ -117,6 +117,22 @@
 .step {
   display: flex;
   gap: 9px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.stepIn {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 .stepNum {

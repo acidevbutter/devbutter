@@ -1,3 +1,6 @@
+"use client";
+
+import useRevealOnce from "@/hooks/useRevealOnce";
 import styles from "./FeatureStrip.module.scss";
 
 const FEATURES = [
@@ -51,13 +54,18 @@ const FEATURES = [
 ];
 
 export default function FeatureStrip() {
+  const [gridRef, shown] = useRevealOnce<HTMLDivElement>();
+
   return (
     <section className={styles.section}>
-      <div className={styles.grid}>
-        {FEATURES.map((f) => (
+      <div ref={gridRef} className={styles.grid}>
+        {FEATURES.map((f, i) => (
           <div
             key={f.title}
-            className={`${styles.card} ${f.accent === "green" ? styles.cardGreen : styles.cardPink}`}
+            className={`${styles.card} ${shown ? styles.cardIn : ""} ${
+              f.accent === "green" ? styles.cardGreen : styles.cardPink
+            }`}
+            style={{ transitionDelay: `${i * 80}ms` }}
           >
             <div className={`${styles.iconTile} ${f.accent === "green" ? styles.iconTileGreen : styles.iconTilePink}`}>
               {f.icon}

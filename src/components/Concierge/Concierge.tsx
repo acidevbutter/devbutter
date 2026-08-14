@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import useRevealOnce from "@/hooks/useRevealOnce";
 import styles from "./Concierge.module.scss";
 
 const STEPS = [
@@ -9,6 +13,28 @@ const STEPS = [
 ];
 
 export default function Concierge() {
+  // The terminal streams its suggested flow in once it's on screen, one step at a
+  // time, with the caret blinking until the last step lands.
+  const [terminalRef, started] = useRevealOnce<HTMLDivElement>(0.3);
+  const [streamed, setStreamed] = useState(0);
+
+  useEffect(() => {
+    if (!started) return;
+    // Under reduced motion the steps are already visible via CSS; the counter still
+    // runs to completion so the caret retires when the flow is "done".
+    let n = 0;
+    let timer = 0;
+    const tick = () => {
+      n += 1;
+      setStreamed(n);
+      if (n < STEPS.length) timer = window.setTimeout(tick, 420);
+    };
+    timer = window.setTimeout(tick, 320);
+    return () => window.clearTimeout(timer);
+  }, [started]);
+
+  const streaming = streamed < STEPS.length;
+
   return (
     <section className={styles.section}>
       <div>
@@ -37,13 +63,17 @@ export default function Concierge() {
               Concluído
             </span>
           </div>
-          <div className={styles.terminalBody}>
+          <div ref={terminalRef} className={styles.terminalBody}>
             <div className={`mono gn ${styles.flowLabel}`}>
-              Fluxo sugerido <span className={styles.caret}>▮</span>
+              Fluxo sugerido{" "}
+              {streaming && <span className={styles.caret}>▮</span>}
             </div>
-            <div className={styles.steps}>
-              {STEPS.map((s) => (
-                <div key={s.num} className={styles.step}>
+            <div className={styles.steps} aria-live="polite">
+              {STEPS.map((s, i) => (
+                <div
+                  key={s.num}
+                  className={`${styles.step} ${i < streamed ? styles.stepIn : ""}`}
+                >
                   <span className={`mono ${styles.stepNum}`}>{s.num}</span>
                   {s.content}
                 </div>
