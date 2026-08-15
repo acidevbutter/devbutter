@@ -7,7 +7,7 @@ type Status = "idle" | "sending" | "done" | "error";
 
 const CONTACT_EMAIL = "contato@devbutter.com";
 
-export default function NotifyForm() {
+export default function NotifyForm({ label }: { label: string }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
 
@@ -30,7 +30,7 @@ export default function NotifyForm() {
 
   return (
     <div className={`fu ${styles.notify}`}>
-      <div className={`mono ${styles.notifyLabel}`}>avise quando o novo site entrar no ar</div>
+      <div className={`mono ${styles.notifyLabel}`}>{label}</div>
 
       {status === "done" ? (
         <p className={`mono ${styles.notifyDone}`} role="status">

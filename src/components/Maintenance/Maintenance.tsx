@@ -1,6 +1,9 @@
+import Flask3D from "@/components/Flask3D/Flask3D";
 import Logomark from "@/components/icons/Logomark";
+import FlaskSvg from "./FlaskSvg";
 import NotifyForm from "./NotifyForm";
 import StatusLog from "./StatusLog";
+import { MAINTENANCE_COPY, SUPPORT_LINE, type MaintenanceVariant } from "./copy";
 import styles from "./Maintenance.module.scss";
 
 const TAGS = [
@@ -38,10 +41,13 @@ const PULSES = [
   { path: "M436,380 H260 V250", color: "#00D26A", dur: "3.1s", delay: "2.2s" },
 ];
 
-const FLASK_PATH =
-  "M84 30h32v46l40 96a18 18 0 0 1-16.7 24.7H60.7A18 18 0 0 1 44 172l40-96V30z";
+export default function Maintenance({
+  variant = "reconstrucao",
+}: {
+  variant?: MaintenanceVariant;
+}) {
+  const copy = MAINTENANCE_COPY[variant];
 
-export default function Maintenance() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -53,7 +59,7 @@ export default function Maintenance() {
         </div>
         <span className={`mono ${styles.statusPill}`}>
           <span className={styles.statusDot} />
-          site em reconstrução
+          {copy.status}
         </span>
       </header>
 
@@ -64,24 +70,16 @@ export default function Maintenance() {
           </div>
 
           <h1 className={`fu ${styles.h1}`}>
-            <span className={styles.h1Line1}>Nosso site está sendo</span>
+            <span className={styles.h1Line1}>{copy.headline.lead}</span>
             <span className={styles.h1Line2}>
-              recons<span className="pk">truído</span>.
+              {copy.headline.prefix}
+              <span className="pk">{copy.headline.suffix}</span>.
             </span>
           </h1>
 
-          <p className={`fu ${styles.paragraph}`}>
-            A DevButter é um estúdio de tecnologia que transforma processos e problemas de operação
-            em software: sites, plataformas, agentes de IA, automações e sistemas sob medida.
-            Estamos refazendo esta página inteira para explicar isso com a clareza que o trabalho
-            exige.
-          </p>
+          <p className={`fu ${styles.paragraph}`}>{copy.intro}</p>
           <p className={`fu ${styles.paragraph} ${styles.paragraphSecond}`}>
-            <span className={styles.strong}>
-              Os projetos seguem em andamento e o atendimento continua normal.
-            </span>{" "}
-            Se você tem um problema operacional para resolver, o ponto de partida é um diagnóstico —
-            não uma tecnologia decidida de antemão.
+            <span className={styles.strong}>{copy.reassurance}</span> {SUPPORT_LINE}
           </p>
 
           <div className={`fu ${styles.tags}`}>
@@ -101,7 +99,7 @@ export default function Maintenance() {
             ))}
           </div>
 
-          <NotifyForm />
+          <NotifyForm label={copy.notifyLabel} />
 
           <div className={`fu ${styles.contact}`}>
             <div>
@@ -207,50 +205,13 @@ export default function Maintenance() {
             <circle cx="260" cy="250" r="118" fill="none" stroke="rgba(255,79,163,.2)" strokeWidth={1} strokeDasharray="1 8" />
           </svg>
 
-          <svg className={styles.flaskSvg} viewBox="0 0 200 240" aria-hidden="true">
-            <defs>
-              <clipPath id="maintenance-flask-clip">
-                <path d={FLASK_PATH} />
-              </clipPath>
-            </defs>
-            <path d={FLASK_PATH} fill="rgba(245,247,251,.05)" stroke="#f5f7fb" strokeWidth={2.4} />
-            <rect
-              x="34"
-              y="134"
-              width="132"
-              height="78"
-              fill="#79E59B"
-              clipPath="url(#maintenance-flask-clip)"
-              className={styles.flaskLiquidTop}
-            />
-            <rect
-              x="34"
-              y="162"
-              width="132"
-              height="50"
-              fill="#F64C6F"
-              clipPath="url(#maintenance-flask-clip)"
-              className={styles.flaskLiquidBottom}
-            />
-            <path
-              d="M92 52l-1.6 2 1.6 2M108 52l1.6 2-1.6 2"
-              stroke="#00D26A"
-              strokeWidth={1.7}
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <rect x="80" y="24" width="40" height="8" rx="2" fill="#0b0f18" stroke="#f5f7fb" strokeWidth={2} />
-            <g>
-              <circle cx="98" cy="20" r="2.6" fill="#79E59B" className={styles.bubble} />
-              <circle cx="106" cy="18" r="2" fill="#F64C6F" className={styles.bubble} style={{ animationDuration: "2.8s", animationDelay: ".6s" }} />
-              <circle cx="92" cy="16" r="1.6" fill="#79E59B" className={styles.bubble} style={{ animationDuration: "2.2s", animationDelay: "1.1s" }} />
-            </g>
-            <g>
-              <ellipse cx="128" cy="96" rx="2.2" ry="3.4" fill="#79E59B" className={styles.drip} />
-              <ellipse cx="74" cy="112" rx="1.8" ry="3" fill="#F64C6F" className={styles.drip} style={{ animationDuration: "4.2s", animationDelay: "1.3s" }} />
-            </g>
-          </svg>
+          <Flask3D
+            fallback={<FlaskSvg />}
+            rings
+            placement={{ lift: 0.335, scale: 0.59 }}
+            // The status log climbs to 55% of a narrow stage, so the flask moves up.
+            compact={{ query: "(max-width: 560px)", lift: 1.2, scale: 0.55 }}
+          />
 
           <div className={styles.logCard}>
             <div className={styles.logHeader}>
@@ -262,7 +223,7 @@ export default function Maintenance() {
                 em andamento
               </span>
             </div>
-            <StatusLog />
+            <StatusLog rows={copy.log} />
           </div>
         </div>
       </main>
@@ -273,9 +234,7 @@ export default function Maintenance() {
         <span>
           dev<span className="gn">Butter</span> — engenharia aplicada a problemas reais.
         </span>
-        <span className={`mono ${styles.footerNote}`}>
-          site em reconstrução · atendimento normal
-        </span>
+        <span className={`mono ${styles.footerNote}`}>{copy.status} · atendimento normal</span>
       </footer>
     </div>
   );

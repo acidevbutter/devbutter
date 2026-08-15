@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import Maintenance from "@/components/Maintenance/Maintenance";
+import { MAINTENANCE_COPY, resolveVariant } from "@/components/Maintenance/copy";
+
+const variant = resolveVariant(process.env.MAINTENANCE_VARIANT);
+const copy = MAINTENANCE_COPY[variant];
 
 export const metadata: Metadata = {
-  title: "DevButter — site em reconstrução",
-  description:
-    "Estamos refazendo o site da DevButter. Os projetos seguem em andamento e o atendimento continua normal — fale com a gente por contato@devbutter.com.",
+  title: copy.metaTitle,
+  description: copy.metaDescription,
   alternates: { canonical: "/" },
 };
 
 export default function ManutencaoPage() {
-  return <Maintenance />;
+  return <Maintenance variant={variant} />;
 }
