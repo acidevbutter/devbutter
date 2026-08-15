@@ -1,0 +1,507 @@
+@use "../../styles/tokens" as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+// ---- header ----
+
+.header {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 20px $db-section-pad-x;
+  border-bottom: 1px solid $db-border;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandName {
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: $db-text-secondary;
+  border: 1px solid rgba(255, 79, 163, 0.35);
+  background: rgba(246, 76, 111, 0.06);
+  border-radius: 20px;
+  padding: 7px 14px;
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $db-pink;
+  box-shadow: 0 0 8px $db-pink-glow;
+  animation: db-padblink 1.8s ease-in-out infinite;
+}
+
+// ---- layout ----
+
+.main {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 44px;
+  align-items: center;
+  max-width: $db-content-max;
+  width: 100%;
+  margin: 0 auto;
+  padding: 52px $db-section-pad-x 44px;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding-top: 40px;
+  }
+}
+
+// ---- copy column ----
+
+.eyebrow {
+  animation-delay: 0.05s;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: $db-green;
+  margin-bottom: 20px;
+}
+
+.h1 {
+  animation-delay: 0.12s;
+  margin: 0;
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+
+.h1Line1 {
+  display: block;
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 600;
+  color: $db-text-primary;
+}
+
+.h1Line2 {
+  display: block;
+  font-size: clamp(50px, 6.4vw, 86px);
+  color: $db-green;
+}
+
+.paragraph {
+  animation-delay: 0.22s;
+  max-width: 490px;
+  font-size: 17px;
+  line-height: 1.62;
+  color: $db-text-secondary;
+  margin: 24px 0 0;
+  text-wrap: pretty;
+}
+
+.paragraphSecond {
+  animation-delay: 0.28s;
+  margin-top: 14px;
+}
+
+.strong {
+  color: $db-chat-text-strong;
+}
+
+.tags {
+  animation-delay: 0.32s;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 26px;
+  max-width: 520px;
+}
+
+.tag {
+  font-size: 11.5px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid $db-border-interactive;
+  color: $db-text-secondary;
+}
+
+.tagGreen {
+  border-color: rgba(121, 229, 155, 0.3);
+  color: $db-green;
+}
+
+.tagPink {
+  border-color: rgba(255, 79, 163, 0.3);
+  color: $db-pink;
+}
+
+// ---- notify form ----
+
+.notify {
+  animation-delay: 0.36s;
+  margin-top: 34px;
+  max-width: 490px;
+}
+
+.notifyLabel {
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+  margin-bottom: 11px;
+}
+
+.notifyRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.notifyInput {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: $db-surface;
+  border: 1px solid $db-border-interactive;
+  color: $db-text-primary;
+  font: 15px var(--font-geist-sans);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder {
+    color: $db-text-muted;
+  }
+
+  &:focus {
+    border-color: rgba(121, 229, 155, 0.6);
+    box-shadow: 0 0 22px rgba(0, 210, 106, 0.15);
+  }
+}
+
+.notifyButton {
+  padding: 14px 24px;
+  border-radius: 12px;
+  font: 600 15px var(--font-geist-sans);
+  cursor: pointer;
+  background: $db-green;
+  color: $db-bg;
+  border: none;
+  box-shadow: 0 0 32px rgba(0, 210, 106, 0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 0 40px rgba(0, 210, 106, 0.5);
+  }
+
+  &:disabled {
+    cursor: progress;
+    opacity: 0.7;
+  }
+}
+
+.notifyDone {
+  margin: 0;
+  font-size: 13px;
+  color: $db-chat-text;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: $db-surface;
+  border: 1px solid rgba(121, 229, 155, 0.35);
+}
+
+.notifyHint {
+  font-size: 11.5px;
+  color: $db-text-muted;
+  margin-top: 10px;
+}
+
+.notifyError {
+  font-size: 11.5px;
+  color: $db-pink;
+  margin-top: 10px;
+}
+
+// ---- contact rail ----
+
+.contact {
+  animation-delay: 0.44s;
+  display: flex;
+  gap: 26px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 30px;
+  padding-top: 26px;
+  border-top: 1px solid $db-border;
+}
+
+.contactLabel {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+  margin-bottom: 6px;
+}
+
+.contactLink {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.contactLinkPink {
+  color: $db-pink;
+
+  &:hover {
+    color: $db-pink-glow;
+  }
+}
+
+.contactDivider {
+  width: 1px;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 560px) {
+    display: none;
+  }
+}
+
+// ---- illustration stage ----
+
+.stage {
+  position: relative;
+  height: 540px;
+
+  @media (max-width: 960px) {
+    height: 480px;
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 560px) {
+    height: 380px;
+  }
+}
+
+.stageGlow {
+  position: absolute;
+  inset: -6%;
+  background: radial-gradient(circle at 56% 40%, rgba(246, 76, 111, 0.16), transparent 46%),
+    radial-gradient(circle at 42% 62%, rgba(121, 229, 155, 0.16), transparent 48%);
+  animation: db-glowb 5s ease-in-out infinite;
+}
+
+.circuitSvg,
+.ringSvg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.circuitSvg {
+  overflow: visible;
+}
+
+.ringOuter {
+  transform-origin: 50% 46.3%;
+  animation: db-ringspin 34s linear infinite;
+}
+
+.ringInner {
+  transform-origin: 50% 46.3%;
+  animation: db-ringspin-r 26s linear infinite;
+}
+
+.flaskSvg {
+  position: absolute;
+  z-index: 2;
+  width: 164px;
+  height: 196px;
+  left: calc(50% - 82px);
+  top: calc(46.3% - 104px);
+
+  @media (max-width: 560px) {
+    width: 132px;
+    height: 158px;
+    left: calc(50% - 66px);
+    top: calc(32% - 79px);
+  }
+}
+
+.flaskLiquidTop {
+  animation: db-wave 6s ease-in-out infinite;
+}
+
+.flaskLiquidBottom {
+  animation: db-wave 6s ease-in-out infinite 0.5s;
+}
+
+.bubble {
+  animation: db-bubrise 2.4s ease-in infinite;
+}
+
+.drip {
+  animation: db-drip 3.4s ease-in infinite;
+}
+
+// ---- status log card ----
+
+.logCard {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 3;
+  width: min(420px, 96%);
+  border: 1px solid rgba(121, 229, 155, 0.3);
+  border-radius: 14px;
+  background: $db-surface-deep;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.logHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.logTitle {
+  font-size: 12px;
+  color: $db-text-secondary;
+
+  @media (max-width: 560px) {
+    font-size: 10.5px;
+  }
+}
+
+.logBadge {
+  font-size: 12px;
+  color: $db-pink;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+
+  @media (max-width: 560px) {
+    font-size: 10.5px;
+  }
+}
+
+.logBadgeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $db-pink-glow;
+  box-shadow: 0 0 8px $db-pink-glow;
+  animation: db-padblink 1.6s ease-in-out infinite;
+}
+
+.logBody {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 12.5px;
+  color: $db-chat-text;
+  min-height: 132px;
+}
+
+.logRow {
+  display: flex;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.logRowShown {
+  opacity: 1;
+  transform: none;
+}
+
+.logRowDim {
+  color: $db-text-muted;
+}
+
+.caret {
+  color: $db-green;
+  animation: db-caret 1s step-end infinite;
+}
+
+// ---- perspective floor ----
+
+.terrain {
+  position: absolute;
+  bottom: 0;
+  left: -15%;
+  right: -15%;
+  height: 240px;
+  z-index: 1;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(121, 229, 155, 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 79, 163, 0.18) 1px, transparent 1px);
+  background-size: 46px 46px;
+  transform: perspective(300px) rotateX(66deg);
+  transform-origin: bottom;
+  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 86%);
+  mask-image: linear-gradient(to top, #000 10%, transparent 86%);
+  animation: db-gridmove 7s linear infinite;
+}
+
+// ---- footer ----
+
+.footer {
+  position: relative;
+  z-index: 10;
+  padding: 22px $db-section-pad-x;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12.5px;
+  color: $db-text-secondary;
+  border-top: 1px solid $db-border;
+}
+
+.footerNote {
+  color: $db-text-muted;
+}
+
+// Reduced motion parks the travelling pulses mid-route instead of at the origin.
+@media (prefers-reduced-motion: reduce) {
+  .circuitSvg circle[style] {
+    offset-distance: 58% !important;
+  }
+
+  .logRow {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,7 +1,8 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Logomark from "@/components/icons/Logomark";
+import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 import styles from "./ChatSimulation.module.scss";
 
 type Role = "user" | "ai" | "result";
@@ -63,27 +64,6 @@ const MESSAGES: Message[] = [
 ];
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-const REDUCE_QUERY = "(prefers-reduced-motion: reduce)";
-
-const subscribeReduceMotion = (onChange: () => void) => {
-  const mq = window.matchMedia(REDUCE_QUERY);
-  mq.addEventListener("change", onChange);
-  return () => mq.removeEventListener("change", onChange);
-};
-
-/**
- * Reads the media query without desyncing from the server. The server has no query to
- * read, so its snapshot is "motion is fine" — which is what the HTML is rendered for —
- * and React swaps in the real value right after hydration.
- */
-function usePrefersReducedMotion() {
-  return useSyncExternalStore(
-    subscribeReduceMotion,
-    () => window.matchMedia(REDUCE_QUERY).matches,
-    () => false
-  );
-}
 
 export default function ChatSimulation() {
   const containerRef = useRef<HTMLDivElement | null>(null);
