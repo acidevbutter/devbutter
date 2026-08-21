@@ -33,8 +33,6 @@ export default function AccountForm({ account }: { account: PortalAccount }) {
         <input className={styles.field} name="business_name" defaultValue={account.businessName ?? ""} />
         <div className={styles.label}>CNPJ / CPF</div>
         <input className={styles.field} name="document" defaultValue={account.document ?? ""} />
-        <div className={styles.label}>endereço</div>
-        <textarea className={`${styles.field} ${styles.textarea}`} name="address" defaultValue={account.address ?? ""} />
       </div>
 
       <div className={styles.sec}>

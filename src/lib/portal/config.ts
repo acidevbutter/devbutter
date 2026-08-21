@@ -1,10 +1,8 @@
-// Server-only: session cookie name for the client portal (Área do Cliente).
-//
-// MOCKED — this portal is backed entirely by src/lib/portal/mock/data.ts, not
-// devbutter_backend. The session cookie just carries a JSON blob (name/email)
-// set at login/signup time, not a real JWT — there is nothing to verify
-// server-side. Swap for real auth (mirror src/lib/admin/config.ts's
-// access/refresh JWT cookies) once the backend contract for client-facing
-// login exists.
+// Server-only: the portal uses the same backend as the admin, with a separate
+// cookie namespace so the two sessions cannot overwrite each other.
+export const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000";
 
-export const PORTAL_SESSION_COOKIE = "db_portal_session";
+export const PORTAL_ACCESS_COOKIE = "db_portal_at";
+export const PORTAL_REFRESH_COOKIE = "db_portal_rt";
+export const PORTAL_ACCESS_TOKEN_MAX_AGE_SECONDS = 30 * 60;
+export const PORTAL_REFRESH_TOKEN_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;

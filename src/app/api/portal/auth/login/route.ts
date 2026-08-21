@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { PORTAL_SESSION_COOKIE } from "@/lib/portal/config";
-import { createPortalSessionCookieValue, findMockSessionByEmail } from "@/lib/portal/session";
+import {
+  API_BASE_URL,
+  PORTAL_ACCESS_COOKIE,
+  PORTAL_ACCESS_TOKEN_MAX_AGE_SECONDS,
+  PORTAL_REFRESH_COOKIE,
+  PORTAL_REFRESH_TOKEN_MAX_AGE_SECONDS,
+} from "@/lib/portal/config";
 
-// MOCKED login — no devbutter_backend call. Any password is accepted for the
-// one seeded demo account (ana@atelie-corvo.com); see lib/portal/mock/data.ts.
 export async function POST(request: Request) {
   let email: unknown;
   let password: unknown;
@@ -18,18 +21,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 400 });
   }
 
-  const session = findMockSessionByEmail(email);
-  if (!session) {
+  const loginRes = await fetch(`${API_BASE_URL}/accounts/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+    cache: "no-store",
+  });
+
+  if (!loginRes.ok) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
   }
 
+  const tokens = (await loginRes.json()) as { access_token: string; refresh_token: string };
+
   const cookieStore = await cookies();
-  cookieStore.set(PORTAL_SESSION_COOKIE, await createPortalSessionCookieValue(session), {
+  const cookieBase = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
-    maxAge: 30 * 24 * 60 * 60,
+  };
+  cookieStore.set(PORTAL_ACCESS_COOKIE, tokens.access_token, {
+    ...cookieBase,
+    maxAge: PORTAL_ACCESS_TOKEN_MAX_AGE_SECONDS,
+  });
+  cookieStore.set(PORTAL_REFRESH_COOKIE, tokens.refresh_token, {
+    ...cookieBase,
+    maxAge: PORTAL_REFRESH_TOKEN_MAX_AGE_SECONDS,
   });
 
   return NextResponse.json({ ok: true });

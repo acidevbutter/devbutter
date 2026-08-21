@@ -1,10 +1,10 @@
 import type { OrderStatus, QuoteStatus } from "@/lib/admin/types";
 
-// Types for the mocked client portal. Deliberately reuse OrderStatus/
+// Types for the client portal adapter. Deliberately reuse OrderStatus/
 // QuoteStatus from lib/admin/types (they mirror devbutter_backend's real
 // enums) and invoice status strings ("PENDING"|"OVERDUE"|"RECEIVED"|
 // "REFUNDED") so this can swap onto lib/admin/format.ts's tone/label
-// helpers and, later, onto the real GET /orders, /quotes, /orders/{id}/invoices
+// helpers and onto the real GET /orders, /quotes, /orders/{id}/invoices
 // responses with no shape changes downstream.
 
 export interface PortalSession {

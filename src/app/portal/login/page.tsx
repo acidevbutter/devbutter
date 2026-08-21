@@ -8,6 +8,7 @@ import styles from "./Login.module.scss";
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_credentials: "e-mail ou senha incorretos",
   invalid_signup: "preencha nome, e-mail e senha",
+  email_exists: "este e-mail já está cadastrado",
 };
 
 export default function PortalLoginPage() {
@@ -99,7 +100,7 @@ function LoginForm({ router }: { router: ReturnType<typeof useRouter> }) {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="qualquer senha (demo)"
+          placeholder="sua senha"
           required
         />
       </div>

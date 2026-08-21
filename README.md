@@ -1,9 +1,9 @@
 # devbutter_frontend
 
-Site institucional da DevButter — hoje uma vitrine de marca em Next.js, ainda sem nenhum backend
-próprio, CMS, autenticação ou banco de dados. É o único dos 5 serviços do ecossistema escrito em
-TypeScript/React; os outros quatro (`asaas_payment`, `butter_mind`, `butter_relay`,
-`devbutter_platform`) são FastAPI.
+Site institucional da DevButter e frontend do portal/admin em Next.js. A home continua sem CMS
+próprio, mas portal e admin usam autenticação JWT e dados do `devbutter_backend`. É o único dos 5
+serviços do ecossistema escrito em TypeScript/React; os outros quatro (`asaas_payment`,
+`butter_mind`, `butter_relay`, `devbutter_platform`) são FastAPI.
 
 > Este README substitui o boilerplate padrão do `create-next-app`. Para o levantamento completo do
 > que falta implementar (CTAs, rotas, CMS, SEO), ver
@@ -14,10 +14,10 @@ TypeScript/React; os outros quatro (`asaas_payment`, `butter_mind`, `butter_rela
 
 - Home 100% estática: projetos, copy do concierge e da simulação de chat estão hardcoded nos
   componentes — não há CMS nem fonte de dados.
-- Único endpoint com lógica real: `POST /api/waitlist` (ver abaixo) — e ele depende de uma env var
-  não configurada por padrão.
-- Único fluxo ponta a ponta funcional: a página `/manutencao` (formulário de e-mail → API →
-  webhook), atrás do toggle `MAINTENANCE_MODE`.
+- A página `/manutencao` usa `POST /api/waitlist` e depende de uma env var não configurada por
+  padrão.
+- Portal e admin fazem chamadas server-side autenticadas ao `devbutter_backend`; o chat do portal
+  usa handlers BFF em `/api/portal/conversations`.
 - Todo CTA da home ("Solicitar diagnóstico", "Falar com a IA", "Ver cases", links de projeto) é
   puramente visual — sem rota ou handler por trás.
 
@@ -43,7 +43,8 @@ flowchart TB
     API -->|POST| Webhook
     API -.->|webhook ausente| Err["503 not_configured"]
 
-    Home -.->|planejado, não existe| Platform["devbutter_platform\n(orquestrador)"]
+    Portal["/portal\nÁrea do cliente"] -->|JWT/BFF| Platform["devbutter_platform\n(orquestrador)"]
+    Admin["/admin\nPainel administrativo"] -->|JWT/BFF| Platform
 ```
 
 `src/proxy.ts` é o Next Middleware (o nome do arquivo é literal — `proxy`, não `middleware`, mas a
@@ -94,7 +95,7 @@ Este componente-a-componente corresponde ao design em
 [`design_handoff_homepage/README.md`](../design_handoff_homepage/README.md) (o handoff de design
 hi-fi) — a implementação em código segue a mesma seção-a-seção descrita lá.
 
-## `/api/waitlist` — único endpoint real
+## `/api/waitlist`
 
 Valida o formato do e-mail com regex, e só então encaminha `{ email, source: "manutencao" }` via
 `POST` para `WAITLIST_WEBHOOK_URL`. Sem essa env var configurada, responde `503 not_configured` —
@@ -122,7 +123,7 @@ presente no `package.json` — o projeto hoje não tem suíte de testes.
 | `MAINTENANCE_MODE` | `false` | Reescreve toda rota para `/manutencao` quando `true` |
 | `MAINTENANCE_VARIANT` | `reconstrucao` | Ou `construcao` — lida em build time, muda a copy da página de manutenção |
 | `WAITLIST_WEBHOOK_URL` | — (vazio) | Sem ela, `/api/waitlist` sempre responde 503 |
-| `API_BASE_URL` | `http://localhost:8000` | Origem server-only da API consumida pelo painel administrativo |
+| `API_BASE_URL` | `http://localhost:8000` | Origem server-only da API consumida pelo portal e painel administrativo |
 
 ## Rodando localmente
 
@@ -145,8 +146,8 @@ relevantes do ponto de vista de arquitetura de código:
   `href="#"`.
 - Nenhuma fonte de dados (CMS/MDX/JSON/banco) para os cases em `Projects.tsx` — editar um projeto
   em destaque hoje exige alterar código e novo deploy.
-- Nenhuma integração com `devbutter_platform`, `butter_mind` ou qualquer backend — todo CTA que
-  deveria abrir um fluxo real (diagnóstico, chat com IA) é decorativo.
+- A home ainda não integra `devbutter_platform`: CTAs de diagnóstico e chat continuam decorativos;
+  o concierge funcional está no portal autenticado.
 - Sem `sitemap.xml`, `robots.txt`, OG image, analytics ou dados estruturados (schema.org) — só
   `title`/`description` em `layout.tsx`.
 - Sem política de privacidade/termos — necessário antes de captar e-mail/lead sob a LGPD.

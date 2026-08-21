@@ -8,36 +8,64 @@ type Message = { role: "ai" | "me"; content: string };
 
 const INITIAL_AI_MESSAGE = "Oi! Vi que você já tem projetos com a gente. Me conta o que você precisa agora.";
 
-// MOCKED concierge — same voice as the public site's Concierge component
-// (src/components/Concierge), but scripted: no real POST /conversations
-// call. Swap for the real flow once the backend conversation contract is
-// wired up for the client portal.
-const SCRIPTED_REPLIES = [
-  "Entendi. Isso seria para um projeto novo ou algo dentro do que já estamos construindo?",
-  "Combinado — vou registrar isso e nossa equipe entra em contato com uma proposta em breve.",
-];
-
 export default function NewQuoteModal({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([{ role: "ai", content: INITIAL_AI_MESSAGE }]);
   const [draft, setDraft] = useState("");
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function send() {
+  async function send() {
     const content = draft.trim();
-    if (!content || submitted) return;
-    const nextMessages: Message[] = [...messages, { role: "me", content }];
-    const replyIndex = messages.filter((m) => m.role === "me").length;
-    const reply = SCRIPTED_REPLIES[Math.min(replyIndex, SCRIPTED_REPLIES.length - 1)];
-    nextMessages.push({ role: "ai", content: reply });
-    setMessages(nextMessages);
+    if (!content || submitted || busy) return;
+    setBusy(true);
+    setError(null);
     setDraft("");
-    if (replyIndex >= SCRIPTED_REPLIES.length - 1) setSubmitted(true);
+
+    try {
+      let activeConversationId = conversationId;
+      if (!activeConversationId) {
+        const conversationRes = await fetch("/api/portal/conversations", { method: "POST" });
+        if (!conversationRes.ok) throw new Error("Não foi possível iniciar a conversa.");
+        const conversation = (await conversationRes.json()) as { id: string };
+        activeConversationId = conversation.id;
+        setConversationId(activeConversationId);
+      }
+
+      const turnRes = await fetch(`/api/portal/conversations/${activeConversationId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      if (!turnRes.ok) throw new Error("Não foi possível enviar sua mensagem.");
+
+      const turn = (await turnRes.json()) as { reply: string; ready_to_submit: boolean };
+      setMessages((current) => [...current, { role: "me", content }, { role: "ai", content: turn.reply }]);
+      setSubmitted(turn.ready_to_submit);
+    } catch (err) {
+      setDraft(content);
+      setError(err instanceof Error ? err.message : "Não foi possível continuar a conversa.");
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function handleDone() {
-    router.refresh();
-    onClose();
+  async function handleDone() {
+    if (!conversationId || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/portal/conversations/${conversationId}/draft-quote`, { method: "POST" });
+      if (!response.ok) throw new Error("Não foi possível registrar o orçamento.");
+      router.refresh();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível registrar o orçamento.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -59,8 +87,8 @@ export default function NewQuoteModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {submitted ? (
-          <button type="button" className={styles.submit} onClick={handleDone}>
-            Concluir
+          <button type="button" className={styles.submit} onClick={handleDone} disabled={busy}>
+            {busy ? "Registrando…" : "Concluir"}
           </button>
         ) : (
           <div className={styles.composer}>
@@ -76,11 +104,13 @@ export default function NewQuoteModal({ onClose }: { onClose: () => void }) {
                 }
               }}
             />
-            <button type="button" className={styles.submit} onClick={send} disabled={!draft.trim()}>
-              Enviar
+            <button type="button" className={styles.submit} onClick={send} disabled={!draft.trim() || busy}>
+              {busy ? "Enviando…" : "Enviar"}
             </button>
           </div>
         )}
+
+        {error && <div style={{ color: "var(--db-pink)", fontSize: 12 }}>{error}</div>}
 
         <div className={styles.altContact}>Prefiro falar direto com a DevButter</div>
       </div>

@@ -1,7 +1,22 @@
 import "server-only";
-import { mockInvoices } from "../mock/data";
+import { listOrderContexts } from "./orders";
 import type { PortalInvoice } from "../types";
 
 export async function listInvoices(): Promise<PortalInvoice[]> {
-  return [...mockInvoices].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+  const contexts = await listOrderContexts();
+  return contexts
+    .flatMap(({ order, quote, invoices }) =>
+      invoices.map((invoice, index) => ({
+        id: invoice.id,
+        projectId: order.id,
+        projectTitle: quote.scope_summary,
+        installmentLabel: `Fatura ${index + 1} de ${invoices.length}`,
+        amount: String(invoice.amount),
+        dueDate: invoice.due_date,
+        status: invoice.status as PortalInvoice["status"],
+        pixCode: null,
+        boletoUrl: invoice.payment_link,
+      }))
+    )
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
 }
