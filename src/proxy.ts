@@ -3,11 +3,12 @@ import type { NextRequest } from "next/server";
 import {
   ADMIN_ACCESS_COOKIE,
   ADMIN_ACCESS_TOKEN_MAX_AGE_SECONDS,
-  ADMIN_API_BASE_URL,
+  API_BASE_URL,
   ADMIN_REFRESH_COOKIE,
   ADMIN_REFRESH_TOKEN_MAX_AGE_SECONDS,
 } from "@/lib/admin/config";
 import { isJwtExpiringSoon } from "@/lib/admin/token";
+import { PORTAL_SESSION_COOKIE } from "@/lib/portal/config";
 
 const COOKIE_BASE = {
   httpOnly: true,
@@ -17,6 +18,10 @@ const COOKIE_BASE = {
 };
 
 export async function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith("/portal")) {
+    return portalProxy(request);
+  }
+
   const accessToken = request.cookies.get(ADMIN_ACCESS_COOKIE)?.value;
   const refreshToken = request.cookies.get(ADMIN_REFRESH_COOKIE)?.value;
 
@@ -52,7 +57,7 @@ async function refreshTokenPair(
   refreshToken: string
 ): Promise<{ access_token: string; refresh_token: string } | null> {
   try {
-    const res = await fetch(`${ADMIN_API_BASE_URL}/accounts/refresh`, {
+    const res = await fetch(`${API_BASE_URL}/accounts/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),
@@ -65,6 +70,20 @@ async function refreshTokenPair(
   }
 }
 
+// MOCKED session, no token refresh needed — just gate on the cookie's presence.
+function portalProxy(request: NextRequest) {
+  const session = request.cookies.get(PORTAL_SESSION_COOKIE)?.value;
+  if (!session) {
+    return NextResponse.redirect(new URL("/portal/login", request.url));
+  }
+  return NextResponse.next();
+}
+
 export const config = {
-  matcher: ["/admin", "/admin/((?!login).*)"],
+  matcher: [
+    "/admin",
+    "/admin/((?!login).*)",
+    "/portal",
+    "/portal/((?!login|signup).*)",
+  ],
 };

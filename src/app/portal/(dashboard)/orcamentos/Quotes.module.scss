@@ -1,0 +1,101 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin-top: 3px;
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  @include admin.card;
+  padding: 14px 16px;
+}
+
+.cardPending {
+  background: rgba(229, 183, 90, 0.05);
+  border-style: dashed;
+}
+
+.cardRejected {
+  opacity: 0.65;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.date {
+  font: 10px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.cardDesc {
+  margin: 5px 0 0;
+  font-size: 12.5px;
+  color: $db-text-secondary;
+  line-height: 1.45;
+}
+
+.cardBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.mono {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.cardLink {
+  font: 500 11.5px "Geist Mono", monospace;
+  color: $db-green;
+}
+
+.cardMuted {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.footNote {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px dashed $admin-border;
+  font: 10.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}

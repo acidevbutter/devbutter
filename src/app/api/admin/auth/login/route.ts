@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import {
   ADMIN_ACCESS_COOKIE,
   ADMIN_ACCESS_TOKEN_MAX_AGE_SECONDS,
-  ADMIN_API_BASE_URL,
+  API_BASE_URL,
   ADMIN_REFRESH_COOKIE,
   ADMIN_REFRESH_TOKEN_MAX_AGE_SECONDS,
 } from "@/lib/admin/config";
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 400 });
   }
 
-  const loginRes = await fetch(`${ADMIN_API_BASE_URL}/accounts/login`, {
+  const loginRes = await fetch(`${API_BASE_URL}/accounts/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
   const tokens = (await loginRes.json()) as { access_token: string; refresh_token: string };
 
-  const meRes = await fetch(`${ADMIN_API_BASE_URL}/accounts/me`, {
+  const meRes = await fetch(`${API_BASE_URL}/accounts/me`, {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
     cache: "no-store",
   });

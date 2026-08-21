@@ -1,6 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { ADMIN_ACCESS_COOKIE, ADMIN_API_BASE_URL } from "./config";
+import { ADMIN_ACCESS_COOKIE, API_BASE_URL } from "./config";
 
 export class AdminApiError extends Error {
   status: number;
@@ -38,7 +38,7 @@ export async function adminFetch<T>(
     throw new AdminUnauthenticatedError();
   }
 
-  const res = await fetch(`${ADMIN_API_BASE_URL}${path}`, {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     cache: "no-store",
     headers: {

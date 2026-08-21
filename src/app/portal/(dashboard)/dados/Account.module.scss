@@ -1,0 +1,91 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+.page {
+  @include admin.panel;
+  max-width: 560px;
+  padding: 20px 24px 24px;
+  display: block;
+}
+
+.title {
+  margin: 0 0 18px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.sec {
+  padding: 16px 0;
+  border-top: 1px solid $admin-border;
+
+  &:first-of-type {
+    border-top: none;
+  }
+}
+
+.kick {
+  @include admin.mono-label;
+  margin-bottom: 10px;
+}
+
+.warnCard {
+  font: 11px "Geist Mono", monospace;
+  line-height: 1.5;
+  color: $admin-amber;
+  background: rgba(229, 183, 90, 0.1);
+  border: 1px solid rgba(229, 183, 90, 0.35);
+  border-radius: 8px;
+  padding: 9px 11px;
+  margin-bottom: 12px;
+}
+
+.label {
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+  margin: 12px 0 5px;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.field {
+  width: 100%;
+  background: rgba(5, 7, 13, 0.35);
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: 13px "Geist Mono", monospace;
+  color: $db-text-primary;
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.textarea {
+  min-height: 56px;
+  resize: vertical;
+}
+
+.error {
+  margin-top: 12px;
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-pink;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.save {
+  @include admin.button-solid;
+}
+
+.discard {
+  @include admin.button-outline;
+}

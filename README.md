@@ -122,6 +122,7 @@ presente no `package.json` — o projeto hoje não tem suíte de testes.
 | `MAINTENANCE_MODE` | `false` | Reescreve toda rota para `/manutencao` quando `true` |
 | `MAINTENANCE_VARIANT` | `reconstrucao` | Ou `construcao` — lida em build time, muda a copy da página de manutenção |
 | `WAITLIST_WEBHOOK_URL` | — (vazio) | Sem ela, `/api/waitlist` sempre responde 503 |
+| `API_BASE_URL` | `http://localhost:8000` | Origem server-only da API consumida pelo painel administrativo |
 
 ## Rodando localmente
 

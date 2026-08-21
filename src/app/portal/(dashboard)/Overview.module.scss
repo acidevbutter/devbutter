@@ -1,0 +1,143 @@
+@use "../../../styles/admin" as admin;
+@use "../../../styles/tokens" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: $db-text-secondary;
+  font-size: 13.5px;
+}
+
+.pending {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pendingCard {
+  @include admin.card;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+}
+
+.pendingHot {
+  background: rgba(246, 76, 111, 0.08);
+  border-color: rgba(246, 76, 111, 0.3);
+}
+
+.pendingKick {
+  @include admin.mono-label;
+}
+
+.pendingAmount {
+  font-size: 17px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.pendingTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.pendingMeta {
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+  margin-top: 4px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kick {
+  @include admin.mono-label;
+}
+
+.projects {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.projectCard {
+  @include admin.card;
+  display: block;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: $admin-border-interactive;
+  }
+}
+
+.projectTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.projectTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.progress {
+  height: 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  margin-top: 10px;
+
+  i {
+    display: block;
+    height: 100%;
+    background: $db-green;
+  }
+}
+
+.projectMeta {
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+  margin-top: 8px;
+}
+
+.cta {
+  @include admin.panel;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+}
+
+.ctaTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ctaHint {
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+  margin-top: 4px;
+}

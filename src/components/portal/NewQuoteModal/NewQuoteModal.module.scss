@@ -1,0 +1,123 @@
+@use "../../../styles/tokens" as *;
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 13, 0.72);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 50;
+}
+
+.card {
+  width: 380px;
+  max-width: 100%;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  background: $admin-panel;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kick {
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+}
+
+.close {
+  background: none;
+  border: none;
+  color: $db-text-muted;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+  overflow-y: auto;
+}
+
+.msg {
+  max-width: 85%;
+  border-radius: 12px;
+  padding: 9px 11px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.msgAi {
+  align-self: flex-start;
+  background: $admin-card;
+  border: 1px solid $admin-border;
+  color: $db-text-secondary;
+}
+
+.msgMe {
+  align-self: flex-end;
+  background: rgba(121, 229, 155, 0.14);
+  border: 1px solid rgba(121, 229, 155, 0.3);
+  color: $db-text-primary;
+}
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.textarea {
+  min-height: 64px;
+  background: rgba(5, 7, 13, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: 13px "Geist Mono", monospace;
+  color: $db-text-primary;
+  resize: vertical;
+}
+
+.submit {
+  width: 100%;
+  background: $db-green;
+  color: $admin-bg;
+  border: none;
+  border-radius: 9px;
+  padding: 11px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 12px;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.altContact {
+  text-align: center;
+  margin-top: 10px;
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+}

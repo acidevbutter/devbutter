@@ -2,7 +2,7 @@
 // URL and token cookies stay off the client bundle on purpose (see the BFF
 // auth design in docs/admin-api-contracts.md's surrounding plan).
 
-export const ADMIN_API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000";
+export const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000";
 
 export const ADMIN_ACCESS_COOKIE = "db_admin_at";
 export const ADMIN_REFRESH_COOKIE = "db_admin_rt";

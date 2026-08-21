@@ -1,0 +1,145 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+$cols: 1.4fr 0.7fr 0.7fr 0.7fr 0.6fr;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  font: 500 11.5px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 20px;
+  padding: 4px 11px;
+  background: none;
+  cursor: pointer;
+}
+
+.chipActive {
+  background: rgba(121, 229, 155, 0.14);
+  color: $db-green;
+  border-color: rgba(121, 229, 155, 0.4);
+}
+
+.panel {
+  @include admin.panel;
+}
+
+.headerRow {
+  @include admin.table-header($cols);
+}
+
+.row {
+  @include admin.table-row($cols);
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
+.rowAlert {
+  background: rgba(246, 76, 111, 0.06);
+}
+
+.mono {
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.empty {
+  padding: 30px 16px;
+  text-align: center;
+  color: $db-text-muted;
+  font: 13px "Geist Mono", monospace;
+}
+
+.expandedPanel {
+  @include admin.card;
+  padding: 16px;
+}
+
+.expandedTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.expandedAmount {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.expandedMeta {
+  font: 11px "Geist Mono", monospace;
+  color: $db-pink;
+  margin-top: 4px;
+}
+
+.expandedGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.qrBox {
+  border: 2px dashed $admin-border-interactive;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 22px 12px;
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field {
+  border: 1px solid $admin-border-interactive;
+  border-radius: 8px;
+  padding: 9px 11px;
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  background: $admin-card;
+}
+
+.payBtn {
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.note {
+  margin-top: 12px;
+  font: 10.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}

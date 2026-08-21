@@ -1,0 +1,174 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  max-width: 480px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: $db-text-secondary;
+}
+
+.addButton {
+  @include admin.button-solid;
+  white-space: nowrap;
+}
+
+.list {
+  @include admin.panel;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 0.8fr 2fr 0.5fr;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 13px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.type {
+  font: 500 10px "Geist Mono", monospace;
+  color: $db-text-muted;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 20px;
+  padding: 2px 8px;
+  width: fit-content;
+}
+
+.desc {
+  color: $db-text-primary;
+}
+
+.editLink {
+  justify-self: end;
+  background: none;
+  border: none;
+  font: 10.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+  cursor: pointer;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}
+
+.empty {
+  padding: 30px 20px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: $db-text-muted;
+}
+
+.editorCard {
+  @include admin.card;
+  padding: 18px;
+}
+
+.editorTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.editorTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.close {
+  background: none;
+  border: none;
+  color: $db-text-muted;
+  cursor: pointer;
+}
+
+.label {
+  @include admin.mono-label;
+  margin: 14px 0 7px;
+}
+
+.typeChips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.typeChip {
+  font: 500 11px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 20px;
+  padding: 5px 12px;
+  background: none;
+  cursor: pointer;
+}
+
+.typeChipActive {
+  background: rgba(121, 229, 155, 0.14);
+  color: $db-green;
+  border-color: rgba(121, 229, 155, 0.4);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 64px;
+  background: rgba(5, 7, 13, 0.35);
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: 13px "Geist Mono", monospace;
+  color: $db-text-primary;
+  resize: vertical;
+}
+
+.error {
+  margin-top: 10px;
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-pink;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.save {
+  @include admin.button-solid;
+}
+
+.cancel {
+  @include admin.button-outline;
+}
+
+.remove {
+  @include admin.button-danger;
+  margin-left: auto;
+}
