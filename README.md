@@ -1,36 +1,151 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# devbutter_frontend
 
-## Getting Started
+Site institucional da DevButter — hoje uma vitrine de marca em Next.js, ainda sem nenhum backend
+próprio, CMS, autenticação ou banco de dados. É o único dos 5 serviços do ecossistema escrito em
+TypeScript/React; os outros quatro (`asaas_payment`, `butter_mind`, `butter_relay`,
+`devbutter_platform`) são FastAPI.
 
-First, run the development server:
+> Este README substitui o boilerplate padrão do `create-next-app`. Para o levantamento completo do
+> que falta implementar (CTAs, rotas, CMS, SEO), ver
+> [`docs/funcoes-necessarias-site.md`](../docs/funcoes-necessarias-site.md) — este documento cobre
+> a estrutura e o estado atual do código, não repete aquele levantamento.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Estado atual (resumo)
+
+- Home 100% estática: projetos, copy do concierge e da simulação de chat estão hardcoded nos
+  componentes — não há CMS nem fonte de dados.
+- Único endpoint com lógica real: `POST /api/waitlist` (ver abaixo) — e ele depende de uma env var
+  não configurada por padrão.
+- Único fluxo ponta a ponta funcional: a página `/manutencao` (formulário de e-mail → API →
+  webhook), atrás do toggle `MAINTENANCE_MODE`.
+- Todo CTA da home ("Solicitar diagnóstico", "Falar com a IA", "Ver cases", links de projeto) é
+  puramente visual — sem rota ou handler por trás.
+
+## Arquitetura
+
+```mermaid
+flowchart TB
+    Visitor["Visitante"]
+
+    subgraph Next["devbutter_frontend (Next.js 16 / React 19)"]
+        Proxy["src/proxy.ts\n(Next Middleware)\nMAINTENANCE_MODE gate"]
+        Home["/ (page.tsx)\n100% estático,\nCTAs sem ação"]
+        Maint["/manutencao\nformulário funcional"]
+        API["/api/waitlist\n(route.ts)"]
+    end
+
+    Webhook[("WAITLIST_WEBHOOK_URL\nnão configurada por padrão")]
+
+    Visitor --> Proxy
+    Proxy -->|MAINTENANCE_MODE=false| Home
+    Proxy -->|MAINTENANCE_MODE=true\nrewrite para /manutencao| Maint
+    Maint --> API
+    API -->|POST| Webhook
+    API -.->|webhook ausente| Err["503 not_configured"]
+
+    Home -.->|planejado, não existe| Platform["devbutter_platform\n(orquestrador)"]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`src/proxy.ts` é o Next Middleware (o nome do arquivo é literal — `proxy`, não `middleware`, mas a
+função exportada e o `matcher` seguem a API padrão do Next). Com `MAINTENANCE_MODE=true`, toda rota
+é reescrita para `/manutencao` preservando a URL visível, exceto `api/`, assets estáticos e a
+própria rota de manutenção — decidido em build time via env var, então mudar o valor exige novo
+deploy.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estrutura de componentes (home)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/app/
+├── layout.tsx            # fontes Geist/Geist Mono, <html lang="pt-BR">, metadata (title/description)
+├── page.tsx               # monta a home: Nav, Hero, FeatureStrip, Projects, Concierge,
+│                          # DataDecision, ChatSimulation, ClosingCta, Footer
+├── manutencao/page.tsx     # página de waitlist (único fluxo ponta a ponta)
+└── api/waitlist/route.ts    # POST — valida e-mail, encaminha para WAITLIST_WEBHOOK_URL
 
-## Learn More
+src/components/
+├── Nav/                  # header sticky, CTAs "Falar com a IA" / "Solicitar diagnóstico" (sem ação)
+├── Hero/                 # headline + ilustração (node-map/flask SVG, ver Flask3D)
+├── Flask3D/              # cena 3D (react-three-fiber + three.js) do frasco da marca
+├── FeatureStrip/         # 4 cards de feature (estático)
+├── Projects/             # cases em destaque — hardcoded (Crate Diggr, Orbit AI, GranAI, PlantOS, Spotme)
+├── Concierge/             # simulação do "concierge de IA" (terminal), texto fixo
+├── DataDecision/          # seção de animação scroll-scrubbed ("Da informação à decisão")
+│   ├── storyboard.ts        # dados da timeline da animação
+│   ├── StoryboardStage.tsx    # renderização da cena
+│   └── StoryboardCompact.tsx   # variante compacta
+├── ChatSimulation/        # simulação de chat "na prática" — mensagens hardcoded, sem input real
+├── ClosingCta/            # CTA final "Solicitar diagnóstico"
+├── Footer/                # sem links reais (redes sociais, e-mail, endereço)
+├── Maintenance/           # página /manutencao: formulário, status log, copy por variante
+├── StreamingText/          # efeito de texto "digitando" reutilizado em Concierge/ChatSimulation
+└── icons/                 # Logomark (frasco + `</>`) e outros ícones inline SVG
 
-To learn more about Next.js, take a look at the following resources:
+src/hooks/
+├── useMediaQuery.ts
+├── usePrefersReducedMotion.ts   # respeita prefers-reduced-motion (ver design_handoff_homepage/README.md)
+└── useRevealOnce.ts             # IntersectionObserver, dispara reveal uma única vez
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+src/styles/
+├── _tokens.scss       # cores, espaçamento (paleta DevButter: verde #79E59B, rosa #F64C6F)
+└── _animations.scss   # keyframes reutilizados (fadeUp, floaty, gridmove etc.)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Este componente-a-componente corresponde ao design em
+[`design_handoff_homepage/README.md`](../design_handoff_homepage/README.md) (o handoff de design
+hi-fi) — a implementação em código segue a mesma seção-a-seção descrita lá.
 
-## Deploy on Vercel
+## `/api/waitlist` — único endpoint real
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Valida o formato do e-mail com regex, e só então encaminha `{ email, source: "manutencao" }` via
+`POST` para `WAITLIST_WEBHOOK_URL`. Sem essa env var configurada, responde `503 not_configured` —
+esse é o estado padrão hoje (`.env.example` a deixa vazia). Não há deduplicação de e-mail nem
+confirmação por e-mail ao inscrito — só confirmação visual na tela.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech stack
+
+| Camada | Escolha |
+|---|---|
+| Framework | Next.js 16 (App Router) + React 19 |
+| 3D/animação | `@react-three/fiber` 9 + `three` 0.185 (usado só em `Flask3D`) |
+| Estilo | Sass Modules (`.module.scss`) + tokens em `_tokens.scss` — sem Tailwind/CSS-in-JS |
+| Fontes | Geist / Geist Mono via `next/font/google` |
+| Lint | ESLint 9 (`eslint-config-next`) |
+| Package manager | Yarn 1 (`packageManager` fixado no `package.json`) |
+
+Nenhuma dependência de banco de dados, autenticação, CMS, analytics ou testes automatizados está
+presente no `package.json` — o projeto hoje não tem suíte de testes.
+
+## Variáveis de ambiente
+
+| Variável | Default | Notas |
+|---|---|---|
+| `MAINTENANCE_MODE` | `false` | Reescreve toda rota para `/manutencao` quando `true` |
+| `MAINTENANCE_VARIANT` | `reconstrucao` | Ou `construcao` — lida em build time, muda a copy da página de manutenção |
+| `WAITLIST_WEBHOOK_URL` | — (vazio) | Sem ela, `/api/waitlist` sempre responde 503 |
+
+## Rodando localmente
+
+```bash
+yarn install
+yarn dev
+```
+
+Abra `http://localhost:3000`. `AGENTS.md`/`CLAUDE.md` documentam que esta é uma versão do Next.js
+com breaking changes relevantes para agentes de IA gerando código aqui — ver
+`node_modules/next/dist/docs/` antes de assumir comportamento de versões anteriores.
+
+## Lacunas conhecidas
+
+Ver o levantamento completo em
+[`docs/funcoes-necessarias-site.md`](../docs/funcoes-necessarias-site.md). Resumo das mais
+relevantes do ponto de vista de arquitetura de código:
+
+- Nenhuma rota existe para os itens do menu (`Soluções`, `Cases`, `Sobre`, `Insights`) — todos são
+  `href="#"`.
+- Nenhuma fonte de dados (CMS/MDX/JSON/banco) para os cases em `Projects.tsx` — editar um projeto
+  em destaque hoje exige alterar código e novo deploy.
+- Nenhuma integração com `devbutter_platform`, `butter_mind` ou qualquer backend — todo CTA que
+  deveria abrir um fluxo real (diagnóstico, chat com IA) é decorativo.
+- Sem `sitemap.xml`, `robots.txt`, OG image, analytics ou dados estruturados (schema.org) — só
+  `title`/`description` em `layout.tsx`.
+- Sem política de privacidade/termos — necessário antes de captar e-mail/lead sob a LGPD.

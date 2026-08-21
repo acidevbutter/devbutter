@@ -27,6 +27,12 @@ const FLASK_PROFILE: [number, number][] = [
   [0.33, 1.39],
 ];
 
+/** Derived from the profile so the pixel sizing below stays honest if the shape moves. */
+const FLASK_BOTTOM = FLASK_PROFILE[0][1];
+const FLASK_TOP = FLASK_PROFILE[FLASK_PROFILE.length - 1][1];
+const FLASK_UNITS = FLASK_TOP - FLASK_BOTTOM;
+const FLASK_CENTRE = (FLASK_TOP + FLASK_BOTTOM) / 2;
+
 const LIQUID_TOP = -0.15;
 const LIQUID_BASE = -1.24;
 /** Where green gives way to pink, matching the two-tone fill of the flat logomark. */
@@ -250,6 +256,8 @@ type RingProps = {
   radius: number;
   count: number;
   tilt: [number, number, number];
+  /** Spin axis in the ring's own tilted frame — three different ones read as a gimbal. */
+  axis: "x" | "y" | "z";
   speed: number;
   pulses: number;
   animated: boolean;
@@ -258,8 +266,9 @@ type RingProps = {
 /**
  * The systems half of the brand: discrete nodes on a shared orbit, with pulses running
  * between them — the same "flows and dependencies" the flat circuit behind it draws.
+ * Three of these on three axes precess past each other like a gyroscope.
  */
-function OrbitRing({ radius, count, tilt, speed, pulses, animated }: RingProps) {
+function OrbitRing({ radius, count, tilt, axis, speed, pulses, animated }: RingProps) {
   const group = useRef<THREE.Group>(null);
   const pulseRefs = useRef<(THREE.Mesh | null)[]>([]);
 
@@ -327,7 +336,7 @@ function OrbitRing({ radius, count, tilt, speed, pulses, animated }: RingProps) 
 
   useFrame((state, delta) => {
     if (!animated) return;
-    if (group.current) group.current.rotation.y += delta * speed;
+    if (group.current) group.current.rotation[axis] += delta * speed;
 
     const t = state.clock.elapsedTime;
     for (let i = 0; i < pulses; i++) {
@@ -377,20 +386,55 @@ function OrbitRing({ radius, count, tilt, speed, pulses, animated }: RingProps) 
 const REST_TILT_X = 0.06;
 const REST_TILT_Y = 0.32;
 
+/**
+ * How the flask sits on its canvas. Pixels match a flat SVG of fixed size (a stage that
+ * has a flat counterpart); fractions suit a canvas with no counterpart to match, such as
+ * the mobile backdrop, where the flask should simply scale with the viewport.
+ */
+export type FlaskPlacement = {
+  heightPx?: number;
+  heightFraction?: number;
+  /** Centre relative to the canvas centre; negative is above. */
+  offsetPx?: number;
+  offsetFraction?: number;
+};
+
 /** Tilts the whole assembly toward the pointer so the depth is legible while still. */
 function Scene({
   animated,
-  lift,
-  scale,
+  placement,
   rings,
 }: {
   animated: boolean;
-  lift: number;
-  scale: number;
+  placement: FlaskPlacement;
   rings: boolean;
 }) {
   const root = useRef<THREE.Group>(null);
   const pointer = useRef({ x: 0, y: 0 });
+  const size = useThree((state) => state.size);
+  const camera = useThree((state) => state.camera) as THREE.PerspectiveCamera;
+
+  // The flat flask is a fixed pixel size while the stage height changes by breakpoint, so
+  // placing the scene in world units only ever matches at the height it was tuned for.
+  // Resolving px → units against the live canvas keeps the handover exact at every width.
+  const { heightPx, offsetPx, heightFraction, offsetFraction } = placement;
+  const { scale, lift } = useMemo(() => {
+    const visibleUnits =
+      2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360);
+    const pxPerUnit = size.height / visibleUnits;
+    const h = heightPx ?? (heightFraction ?? 0.3) * size.height;
+    const o = offsetPx ?? (offsetFraction ?? 0) * size.height;
+    const s = h / (FLASK_UNITS * pxPerUnit);
+    return { scale: s, lift: -o / pxPerUnit - FLASK_CENTRE * s };
+  }, [
+    size.height,
+    camera.position.z,
+    camera.fov,
+    heightPx,
+    offsetPx,
+    heightFraction,
+    offsetFraction,
+  ]);
 
   useEffect(() => {
     // The canvas ignores pointer events so the form underneath stays clickable, which
@@ -429,19 +473,30 @@ function Scene({
       {rings && (
         <>
           <OrbitRing
-            radius={2.0}
+            radius={1.9}
             count={8}
             tilt={[1.2, 0, 0.16]}
-            speed={0.1}
+            axis="y"
+            speed={0.26}
             pulses={2}
             animated={animated}
           />
           <OrbitRing
-            radius={2.6}
+            radius={2.3}
             count={6}
-            tilt={[-1.04, 0, -0.42]}
-            speed={-0.07}
+            tilt={[-1.0, 0, -0.45]}
+            axis="x"
+            speed={0.19}
             pulses={1}
+            animated={animated}
+          />
+          <OrbitRing
+            radius={2.65}
+            count={7}
+            tilt={[0.25, 0.6, 1.15]}
+            axis="z"
+            speed={-0.22}
+            pulses={2}
             animated={animated}
           />
         </>
@@ -482,15 +537,13 @@ function FirstFrame({
 export default function Scene3D({
   animated,
   frameloop,
-  lift,
-  scale,
+  placement,
   rings,
   onReady,
 }: {
   animated: boolean;
   frameloop: "always" | "demand" | "never";
-  lift: number;
-  scale: number;
+  placement: FlaskPlacement;
   rings: boolean;
   onReady?: () => void;
 }) {
@@ -503,7 +556,7 @@ export default function Scene3D({
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
     >
       <FirstFrame frameloop={frameloop} onFirst={onReady} />
-      <Scene animated={animated} lift={lift} scale={scale} rings={rings} />
+      <Scene animated={animated} placement={placement} rings={rings} />
     </Canvas>
   );
 }

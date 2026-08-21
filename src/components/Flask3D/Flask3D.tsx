@@ -4,25 +4,28 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
+import type { FlaskPlacement } from "./Scene3D";
 import styles from "./Flask3D.module.scss";
+
+export type { FlaskPlacement };
+
+/** A query that never matches, so an unused variant can still be hooked unconditionally. */
+const NEVER = "(width: 0)";
 
 // three.js is the heaviest thing on these pages by far, and no copy, form or contact
 // detail is worth delaying for it — so it never enters the server render and only
 // downloads once the browser is idle.
 const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false });
 
-/** How the flask is placed on a given stage; `lift` is in scene units, not pixels. */
-export type FlaskPlacement = {
-  lift: number;
-  scale: number;
-};
-
 type Flask3DProps = {
   /** The flat SVG flask. Server-rendered, and the permanent fallback where 3D can't run. */
   fallback: ReactNode;
   placement: FlaskPlacement;
-  /** Placement swap for a narrower stage, e.g. when a card crowds the flask. */
-  compact?: FlaskPlacement & { query: string };
+  /**
+   * Where the stage gets too cramped to hold the flask beside the content, it leaves the
+   * stage and sits behind the whole page instead — kept quiet enough to read text over.
+   */
+  backdrop?: FlaskPlacement & { query: string };
   /** Orbiting node rings. Off where the stage already carries its own node layer. */
   rings?: boolean;
 };
@@ -56,13 +59,12 @@ function whenIdle(run: () => void) {
 export default function Flask3D({
   fallback,
   placement,
-  compact,
+  backdrop,
   rings = false,
 }: Flask3DProps) {
   const reduced = usePrefersReducedMotion();
-  // Hooks can't be conditional, so a stage with no compact variant watches a query that
-  // never matches and keeps its one placement.
-  const isCompact = useMediaQuery(compact?.query ?? "(width: 0)");
+  // Hooks can't be conditional, so an unused variant watches a query that never matches.
+  const isBackdrop = useMediaQuery(backdrop?.query ?? NEVER);
   const host = useRef<HTMLDivElement>(null);
 
   const [mount, setMount] = useState(false);
@@ -96,11 +98,18 @@ export default function Flask3D({
 
   // Parked off screen and in background tabs; drawn once and left alone for visitors who
   // asked for reduced motion; running only when it is actually being looked at.
-  const frameloop = !inView || !tabVisible ? "never" : reduced ? "demand" : "always";
-  const active = compact && isCompact ? compact : placement;
+  // As a fixed backdrop it is always on screen, so only the tab state can park it.
+  const parked = backdrop && isBackdrop ? !tabVisible : !inView || !tabVisible;
+  const frameloop = parked ? "never" : reduced ? "demand" : "always";
+
+  const active = backdrop && isBackdrop ? backdrop : placement;
 
   return (
-    <div className={styles.root} ref={host} aria-hidden="true">
+    <div
+      className={`${styles.root} ${backdrop && isBackdrop ? styles.backdrop : ""}`}
+      ref={host}
+      aria-hidden="true"
+    >
       <div className={`${styles.fallback} ${live ? styles.fallbackHidden : ""}`}>
         {fallback}
       </div>
@@ -109,8 +118,7 @@ export default function Flask3D({
           <Scene3D
             animated={!reduced}
             frameloop={frameloop}
-            lift={active.lift}
-            scale={active.scale}
+            placement={active}
             rings={rings}
             onReady={() => setLive(true)}
           />

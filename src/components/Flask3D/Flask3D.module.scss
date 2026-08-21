@@ -26,3 +26,22 @@
 .canvasWrapLive {
   opacity: 1;
 }
+
+/// Too narrow to sit beside the content, so it leaves the stage and backs the whole page.
+/// `.page` paints no background of its own, and the content above it carries a z-index,
+/// so this sits behind everything without a negative index.
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  /// Body copy sits over this, so it stays faint enough to keep text contrast at AA.
+  /// Measured: 0.22 put the worst case at 4.36:1, just under the 4.5 minimum.
+  opacity: 0.14;
+
+  /// The flat SVG is positioned for its stage, so centre it once it has left one.
+  .fallback svg {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}

@@ -223,12 +223,10 @@ export default function Hero() {
           </svg>
 
           {/* No orbit rings here — the keyword nodes already carry that layer. */}
+          {/* The flat flask keeps one size across every breakpoint, so this does too. */}
           <Flask3D
             fallback={<HeroFlaskSvg />}
-            placement={{ lift: 0.21, scale: 0.51 }}
-            // The stage loses 140px of height here while the flat flask keeps its size,
-            // so the scene scales up to hand over at the same size it took.
-            compact={{ query: "(max-width: 940px)", lift: 0.29, scale: 0.71 }}
+            placement={{ heightPx: 125, offsetPx: -11 }}
           />
 
           {CHIPS.map((c) => (

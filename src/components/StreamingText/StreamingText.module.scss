@@ -1,0 +1,55 @@
+.word {
+  opacity: 0;
+  animation: db-token-in 0.32s ease forwards;
+}
+
+@keyframes db-token-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/// Sits after the last token and clears itself once the sentence has finished arriving.
+.caret {
+  display: inline-block;
+  width: 0.5em;
+  margin-left: 0.06em;
+  color: var(--db-green, #79e59b);
+  opacity: 0;
+  animation:
+    db-caret-blink 1s steps(1, end) infinite,
+    db-caret-off 0.01s linear forwards;
+}
+
+@keyframes db-caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes db-caret-off {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+// The global reduce rule kills every animation, which would strand these tokens at
+// opacity 0 — i.e. invisible body copy. They have to be forced back on.
+@media (prefers-reduced-motion: reduce) {
+  .word {
+    opacity: 1 !important;
+  }
+
+  .caret {
+    display: none !important;
+  }
+}

@@ -1,4 +1,8 @@
 import Flask3D from "@/components/Flask3D/Flask3D";
+import StreamingText, {
+  PER_WORD_MS,
+  countWords,
+} from "@/components/StreamingText/StreamingText";
 import Logomark from "@/components/icons/Logomark";
 import FlaskSvg from "./FlaskSvg";
 import NotifyForm from "./NotifyForm";
@@ -48,6 +52,15 @@ export default function Maintenance({
 }) {
   const copy = MAINTENANCE_COPY[variant];
 
+  // Each block starts as the one before it finishes, so the page reads like a single
+  // response being written. Derived from the copy itself rather than hardcoded, so
+  // rewording a paragraph can't desynchronise the sequence.
+  const headline = `${copy.headline.lead} ${copy.headline.prefix}${copy.headline.suffix}`;
+  const headlineStart = 140;
+  const introStart = headlineStart + countWords(headline) * PER_WORD_MS + 140;
+  const reassuranceStart =
+    introStart + countWords(copy.intro) * PER_WORD_MS + 80;
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -69,17 +82,23 @@ export default function Maintenance({
             Estúdio de tecnologia · <span className="pk">engenharia aplicada a problemas reais</span>
           </div>
 
-          <h1 className={`fu ${styles.h1}`}>
-            <span className={styles.h1Line1}>{copy.headline.lead}</span>
-            <span className={styles.h1Line2}>
-              {copy.headline.prefix}
-              <span className="pk">{copy.headline.suffix}</span>.
-            </span>
+          <h1 className={styles.h1}>
+            <StreamingText startMs={headlineStart}>
+              <span className={styles.h1Line1}>{copy.headline.lead}</span>
+              <span className={styles.h1Line2}>
+                {copy.headline.prefix}
+                <span className="pk">{copy.headline.suffix}</span>.
+              </span>
+            </StreamingText>
           </h1>
 
-          <p className={`fu ${styles.paragraph}`}>{copy.intro}</p>
-          <p className={`fu ${styles.paragraph} ${styles.paragraphSecond}`}>
-            <span className={styles.strong}>{copy.reassurance}</span> {SUPPORT_LINE}
+          <p className={styles.paragraph}>
+            <StreamingText startMs={introStart}>{copy.intro}</StreamingText>
+          </p>
+          <p className={`${styles.paragraph} ${styles.paragraphSecond}`}>
+            <StreamingText startMs={reassuranceStart} caret>
+              <span className={styles.strong}>{copy.reassurance}</span> {SUPPORT_LINE}
+            </StreamingText>
           </p>
 
           <div className={`fu ${styles.tags}`}>
@@ -208,9 +227,13 @@ export default function Maintenance({
           <Flask3D
             fallback={<FlaskSvg />}
             rings
-            placement={{ lift: 0.335, scale: 0.59 }}
-            // The status log climbs to 55% of a narrow stage, so the flask moves up.
-            compact={{ query: "(max-width: 560px)", lift: 1.2, scale: 0.55 }}
+            placement={{ heightPx: 136, offsetPx: -30 }}
+            // Below this the stage can't hold it beside the content, so it backs the page.
+            backdrop={{
+              query: "(max-width: 560px)",
+              heightFraction: 0.3,
+              offsetFraction: 0,
+            }}
           />
 
           <div className={styles.logCard}>
