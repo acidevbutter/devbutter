@@ -32,7 +32,7 @@ export default function CatalogClient({ entries }: { entries: PortalCatalogEntry
             nada cadastrado ainda
             <br />
             <br />
-            "Conte o que seu negócio faz — usamos isso para montar orçamentos mais precisos."
+            &ldquo;Conte o que seu negócio faz — usamos isso para montar orçamentos mais precisos.&rdquo;
             <br />
             <br />
             <button type="button" className={styles.addButton} onClick={() => setEditing("new")}>
