@@ -1,0 +1,13 @@
+@use "../../../../styles/admin" as admin;
+
+.solid {
+  @include admin.button-solid;
+}
+
+.outline {
+  @include admin.button-outline;
+}
+
+.danger {
+  @include admin.button-danger;
+}

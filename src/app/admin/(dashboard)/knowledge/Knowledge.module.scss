@@ -1,0 +1,112 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+.layout {
+  display: flex;
+  gap: 0;
+  min-height: 560px;
+  @include admin.panel;
+}
+
+.side {
+  width: 260px;
+  flex: none;
+  border-right: 1px solid $admin-border;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.search {
+  width: 100%;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 8px;
+  padding: 8px 11px;
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-primary;
+}
+
+.entryButton {
+  text-align: left;
+  background: none;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: $db-text-primary;
+  cursor: pointer;
+}
+
+.entryButtonActive {
+  background: rgba(121, 229, 155, 0.1);
+  border-color: rgba(121, 229, 155, 0.4);
+}
+
+.entryName {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.entryMeta {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+  margin-top: 4px;
+}
+
+.addButton {
+  border: 1px dashed $admin-border-interactive;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: 12.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.editor {
+  flex: 1;
+  min-width: 0;
+  padding: 24px 26px;
+}
+
+.name {
+  margin: 0 0 20px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.textarea,
+.input {
+  width: 100%;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 12px 13px;
+  font-size: 13.5px;
+  color: $db-text-primary;
+}
+
+.input {
+  font: 13.5px "Geist Mono", monospace;
+}
+
+.textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+}

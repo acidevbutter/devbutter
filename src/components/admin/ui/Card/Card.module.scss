@@ -1,0 +1,15 @@
+@use "../../../../styles/admin" as admin;
+
+.card {
+  @include admin.card;
+  padding: 14px;
+}
+
+.panel {
+  @include admin.panel;
+}
+
+.label {
+  @include admin.mono-label;
+  margin-bottom: 7px;
+}

@@ -1,0 +1,111 @@
+// Shared building blocks for the admin dashboard (src/app/admin/**).
+// Source: Claude Design "Admin Platform.dc.html". Import with
+// `@use "@/styles/admin" as admin;` from a component's .module.scss.
+
+@use "tokens" as *;
+
+@mixin panel {
+  background: $admin-panel;
+  border: 1px solid $admin-border;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+@mixin card {
+  background: $admin-card;
+  border: 1px solid $admin-border;
+  border-radius: 12px;
+}
+
+@mixin mono-label {
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+}
+
+@mixin button-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: $db-green;
+  color: $admin-bg;
+  border: none;
+  border-radius: 9px;
+  padding: 11px 16px;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  color: $db-text-primary;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 9px;
+  padding: 10px 16px;
+  font-weight: 500;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-danger {
+  @include button-outline;
+  color: $db-pink;
+  border-color: rgba(246, 76, 111, 0.45);
+
+  &:hover {
+    border-color: $db-pink;
+  }
+}
+
+@mixin table-row($columns) {
+  display: grid;
+  grid-template-columns: $columns;
+  gap: 12px;
+  align-items: center;
+  padding: 13px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+@mixin table-header($columns) {
+  display: grid;
+  grid-template-columns: $columns;
+  gap: 12px;
+  padding: 12px 16px;
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+  border-bottom: 1px solid $admin-border;
+}

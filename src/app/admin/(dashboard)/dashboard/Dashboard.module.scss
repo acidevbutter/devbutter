@@ -1,0 +1,150 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-muted;
+  margin-top: 5px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.tile {
+  @include admin.card;
+  padding: 14px;
+}
+
+.tileWarn {
+  background: rgba(246, 76, 111, 0.08);
+  border-color: rgba(246, 76, 111, 0.35);
+}
+
+.tileLabel {
+  @include admin.mono-label;
+}
+
+.tileLabelWarn {
+  @include admin.mono-label;
+  color: $db-pink;
+}
+
+.tileValue {
+  font-size: 30px;
+  font-weight: 600;
+  margin-top: 6px;
+  letter-spacing: -0.02em;
+}
+
+.tileValueWarn {
+  font-size: 30px;
+  font-weight: 600;
+  margin-top: 6px;
+  letter-spacing: -0.02em;
+  color: $db-pink;
+}
+
+.tileHint {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.queuePanel {
+  @include admin.panel;
+}
+
+.queueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid $admin-border;
+}
+
+.queueTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.queueHint {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.queueTable {
+  padding: 4px 16px 14px;
+}
+
+.queueHeaderRow {
+  @include admin.table-header(1.2fr 2fr 0.8fr 0.6fr 0.7fr);
+}
+
+.queueRow {
+  @include admin.table-row(1.2fr 2fr 0.8fr 0.6fr 0.7fr);
+  text-decoration: none;
+  color: inherit;
+}
+
+.queueEmpty {
+  padding: 44px 16px;
+  text-align: center;
+}
+
+.queueEmptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: $db-green;
+}
+
+.queueEmptyHint {
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-muted;
+  margin-top: 6px;
+}
+
+.lowerGrid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding-left: 14px;
+  border-left: 1px solid $admin-border-interactive;
+}
+
+.activityItem {
+  font: 12.5px "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.shortcuts {
+  @include admin.card;
+  padding: 16px;
+}
+
+.shortcutsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}

@@ -52,3 +52,21 @@ $db-border-interactive: rgba(255, 255, 255, 0.14);
 
 $db-content-max: 1280px;
 $db-section-pad-x: 4vw;
+
+// Admin dashboard — same DevButter language, tuned surfaces for dense UI.
+// Source: Claude Design "Admin Platform.dc.html".
+:root {
+  --admin-bg: #05070d;
+  --admin-panel: #0a0e16;
+  --admin-card: #10151f;
+  --admin-border: rgba(255, 255, 255, 0.08);
+  --admin-border-interactive: rgba(255, 255, 255, 0.14);
+  --admin-amber: #e5b75a;
+}
+
+$admin-bg: #05070d;
+$admin-panel: #0a0e16;
+$admin-card: #10151f;
+$admin-border: rgba(255, 255, 255, 0.08);
+$admin-border-interactive: rgba(255, 255, 255, 0.14);
+$admin-amber: #e5b75a;

@@ -1,0 +1,114 @@
+@use "../../../../../styles/admin" as admin;
+@use "../../../../../styles/tokens" as *;
+
+.panel {
+  @include admin.panel;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid $admin-border;
+  background: rgba(255, 255, 255, 0.02);
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.split {
+  display: flex;
+  align-items: stretch;
+  min-height: 480px;
+}
+
+.main {
+  flex: 1.5;
+  min-width: 0;
+  padding: 24px 26px;
+  border-right: 1px solid $admin-border;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.field {
+  margin-top: 20px;
+}
+
+.textarea {
+  width: 100%;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: $db-text-primary;
+  resize: vertical;
+  min-height: 90px;
+}
+
+.input {
+  width: 100%;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 11px 13px;
+  font: 13.5px "Geist Mono", monospace;
+  color: $db-text-primary;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.readonlyNote {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+  margin-top: 10px;
+}
+
+.side {
+  width: 340px;
+  flex: none;
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.outcome {
+  background: rgba(121, 229, 155, 0.07);
+  border: 1px solid rgba(121, 229, 155, 0.3);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.error {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-pink;
+  margin-top: 4px;
+}

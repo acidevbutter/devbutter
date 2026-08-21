@@ -1,0 +1,156 @@
+@use "../../../styles/tokens" as *;
+
+.shell {
+  min-height: 100vh;
+  background: $admin-bg;
+  color: $db-text-primary;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-bottom: 1px solid $admin-border;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.wordmark {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pill {
+  font: 500 9.5px "Geist Mono", monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $db-text-secondary;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 5px;
+  padding: 2px 6px;
+}
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.search {
+  width: 240px;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 8px;
+  padding: 7px 11px;
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-primary;
+
+  &::placeholder {
+    color: $db-text-muted;
+  }
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, $db-green, $db-pink);
+  display: grid;
+  place-items: center;
+  font: 600 11px "Geist", sans-serif;
+  color: $admin-bg;
+  flex: none;
+}
+
+.identityName {
+  font-size: 12.5px;
+  color: $db-text-secondary;
+}
+
+.logoutForm button {
+  background: none;
+  border: none;
+  color: $db-text-muted;
+  font: 11.5px "Geist Mono", monospace;
+  cursor: pointer;
+  padding: 4px 0;
+
+  &:hover {
+    color: $db-pink;
+  }
+}
+
+.body {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(100vh - 53px);
+}
+
+.sidebar {
+  width: 196px;
+  flex: none;
+  border-right: 1px solid $admin-border;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 11px;
+  border-radius: 9px;
+  font-size: 13px;
+  color: $db-text-secondary;
+  transition: background 0.15s ease;
+
+  &:hover {
+    color: $db-text-primary;
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.navItemActive {
+  color: $db-text-primary;
+  font-weight: 500;
+  background: rgba(121, 229, 155, 0.1);
+  box-shadow: inset 2px 0 0 $db-green;
+
+  &:hover {
+    background: rgba(121, 229, 155, 0.1);
+  }
+}
+
+.navBadge {
+  font: 500 10px "Geist Mono", monospace;
+  background: $db-pink;
+  color: $admin-bg;
+  border-radius: 20px;
+  padding: 1px 6px;
+}
+
+.navDivider {
+  height: 1px;
+  background: $admin-border;
+  margin: 11px 4px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 24px;
+}

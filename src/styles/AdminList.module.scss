@@ -1,0 +1,125 @@
+// Shared layout for every admin list screen (Quotes, Clients, Orders,
+// Invoices, Catálogo) — header + search + action, filter chips, table panel.
+@use "admin" as admin;
+@use "tokens" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.headerActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search {
+  width: 240px;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 8px;
+  padding: 8px 11px;
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-primary;
+
+  &::placeholder {
+    color: $db-text-muted;
+  }
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  font: 500 11.5px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 20px;
+  padding: 4px 11px;
+  text-decoration: none;
+}
+
+.chipActive {
+  background: rgba(121, 229, 155, 0.14);
+  color: $db-green;
+  border-color: rgba(121, 229, 155, 0.4);
+}
+
+.chipAlert {
+  background: rgba(246, 76, 111, 0.12);
+  color: $db-pink;
+  border-color: rgba(246, 76, 111, 0.3);
+}
+
+.chipSep {
+  width: 1px;
+  height: 16px;
+  background: $admin-border-interactive;
+  margin: 0 4px;
+}
+
+.panel {
+  margin-top: 18px;
+  @include admin.panel;
+}
+
+.headerRow {
+  @include admin.table-header(var(--cols));
+}
+
+.row {
+  @include admin.table-row(var(--cols));
+  text-decoration: none;
+  color: inherit;
+  display: grid;
+}
+
+.rowMuted {
+  color: $db-text-muted;
+}
+
+.rowAlert {
+  background: rgba(246, 76, 111, 0.06);
+}
+
+.rowHighlight {
+  background: rgba(121, 229, 155, 0.04);
+}
+
+.empty {
+  padding: 44px 16px;
+  text-align: center;
+  color: $db-text-muted;
+  font: 13px "Geist Mono", monospace;
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}

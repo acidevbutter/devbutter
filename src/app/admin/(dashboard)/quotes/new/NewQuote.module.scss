@@ -1,0 +1,78 @@
+@use "../../../../../styles/admin" as admin;
+@use "../../../../../styles/tokens" as *;
+
+.panel {
+  @include admin.panel;
+  width: 620px;
+}
+
+.header {
+  padding: 16px 22px;
+  border-bottom: 1px solid $admin-border;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerTitle {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.headerHint {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionLabel {
+  @include admin.mono-label;
+  color: $db-green;
+  margin-bottom: 10px;
+}
+
+.select,
+.input,
+.textarea {
+  width: 100%;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 11px 13px;
+  font: 13px "Geist Mono", monospace;
+  color: $db-text-primary;
+}
+
+.textarea {
+  min-height: 64px;
+  resize: vertical;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.rangeRow {
+  display: flex;
+  gap: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.error {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-pink;
+}

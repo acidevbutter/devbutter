@@ -1,0 +1,102 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+.layout {
+  display: flex;
+  min-height: 560px;
+  @include admin.panel;
+}
+
+.side {
+  width: 260px;
+  flex: none;
+  border-right: 1px solid $admin-border;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filters {
+  display: flex;
+  gap: 6px;
+}
+
+.filterChip {
+  font: 500 11px "Geist Mono", monospace;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 20px;
+  padding: 4px 10px;
+  color: $db-text-secondary;
+  text-decoration: none;
+}
+
+.filterChipActive {
+  background: rgba(121, 229, 155, 0.14);
+  color: $db-green;
+  border-color: rgba(121, 229, 155, 0.4);
+}
+
+.entry {
+  display: block;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-decoration: none;
+  color: $db-text-primary;
+}
+
+.entryActive {
+  background: rgba(121, 229, 155, 0.1);
+  border-color: rgba(121, 229, 155, 0.4);
+}
+
+.entryName {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.entryMeta {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+  margin-top: 4px;
+}
+
+.transcript {
+  flex: 1;
+  min-width: 0;
+  padding: 24px 26px;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.bubble {
+  max-width: 70%;
+  padding: 10px 13px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  border-radius: 12px 12px 12px 4px;
+  background: $admin-card;
+  align-self: flex-start;
+}
+
+.bubbleVisitor {
+  border-radius: 12px 12px 4px 12px;
+  background: rgba(121, 229, 155, 0.1);
+  align-self: flex-end;
+}
+
+.draft {
+  margin-top: 20px;
+  background: rgba(121, 229, 155, 0.07);
+  border: 1px solid rgba(121, 229, 155, 0.3);
+  border-radius: 12px;
+  padding: 14px;
+}

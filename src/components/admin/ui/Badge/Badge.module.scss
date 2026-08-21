@@ -1,0 +1,37 @@
+@use "../../../../styles/tokens" as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font: 500 10px "Geist Mono", monospace;
+  border-radius: 20px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.green {
+  color: $db-green;
+  border-color: rgba(121, 229, 155, 0.4);
+}
+
+.pink {
+  color: $db-pink;
+  border-color: rgba(246, 76, 111, 0.4);
+}
+
+.pinkFilled {
+  color: $db-pink;
+  background: rgba(246, 76, 111, 0.12);
+  border-color: rgba(246, 76, 111, 0.3);
+}
+
+.amber {
+  color: $admin-amber;
+  border-color: rgba(229, 183, 90, 0.4);
+}
+
+.neutral {
+  color: $db-text-secondary;
+  border-color: $admin-border-interactive;
+}

@@ -1,0 +1,106 @@
+@use "../../../../../styles/admin" as admin;
+@use "../../../../../styles/tokens" as *;
+
+.panel {
+  @include admin.panel;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid $admin-border;
+  background: rgba(255, 255, 255, 0.02);
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.split {
+  display: flex;
+  align-items: stretch;
+  min-height: 400px;
+}
+
+.col {
+  flex: 1;
+  min-width: 0;
+  padding: 24px 26px;
+}
+
+.colBorder {
+  border-right: 1px solid $admin-border;
+  flex: 1.1;
+}
+
+.label {
+  @include admin.mono-label;
+  margin-bottom: 8px;
+}
+
+.name {
+  margin: 0 0 18px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.body {
+  font-size: 14px;
+  line-height: 1.55;
+  color: $db-text-secondary;
+}
+
+.deliverables {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  font: 13px "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.statsRow {
+  display: flex;
+  gap: 28px;
+  margin-top: 20px;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.invoiceCard {
+  @include admin.card;
+  padding: 13px 14px;
+  margin-bottom: 10px;
+}
+
+.invoiceTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.invoiceSub {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+  margin-top: 6px;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 14px;
+  border-left: 1px solid $admin-border-interactive;
+  margin-top: 8px;
+}
+
+.timelineItem {
+  font: 12.5px "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
