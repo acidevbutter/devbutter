@@ -20,8 +20,8 @@ export async function saveAccountAction(_prevState: ActionState, formData: FormD
       body: JSON.stringify({
         name,
         phone: phone || null,
-        business_name: businessName || null,
-        document: document || null,
+        company_name: businessName || null,
+        cnpj: document || null,
       }),
     });
   } catch {

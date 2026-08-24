@@ -1,0 +1,22 @@
+flowchart TD
+    turn[POST /messages retorna\nready_to_submit = true]:::ai --> summary[IA conclui o diagnóstico]:::ai
+    summary --> scope[Resumo do escopo]:::quote
+    summary --> price[Faixa estimada\ntexto livre: R$ 8k – 15k]:::quote
+    summary --> timeline[Prazo estimado\ntexto livre: 6–8 semanas]:::quote
+    scope --> ready[Modal troca composer por\nConfirmar e enviar]:::ui
+    price --> ready
+    timeline --> ready
+    ready --> confirm[Clique do cliente]:::cta
+    confirm --> draft[POST /api/portal/conversations/{id}/draft-quote]:::api
+    draft --> backend[POST /conversations/{id}/draft-quote]:::api
+    backend --> quote[Quote source=ai\nstatus=draft / aguardando revisão]:::quote
+
+    quote -. contrato real .-> response[quote_id, scope_summary,\nprice_range, timeline]:::api
+    response -. incompatibilidade atual .-> bug[⚠ UI tipa como QuoteRead\ne usa id + created_at]:::issue
+
+    classDef ai fill:#102A23,stroke:#79E59B,color:#F5F7FB
+    classDef quote fill:#173A2A,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef ui fill:#172033,stroke:#9CA6B5,color:#F5F7FB
+    classDef api fill:#202A35,stroke:#7AA2F7,color:#F5F7FB
+    classDef cta fill:#351827,stroke:#F64C6F,color:#F5F7FB,stroke-width:2px
+    classDef issue fill:#3A1520,stroke:#F64C6F,color:#FFD6DE,stroke-width:3px

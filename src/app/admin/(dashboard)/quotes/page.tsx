@@ -23,24 +23,30 @@ export default async function AdminQuotesPage({
 }) {
   const { status, origin, q } = await searchParams;
   const quotes = await listAllQuotesForTable();
+  const clientLabels = await Promise.all(
+    quotes.map((quote) => resolveClientLabel(quote.account_id))
+  );
 
   const counts = quotes.reduce<Record<string, number>>((acc, quote) => {
     acc[quote.status] = (acc[quote.status] ?? 0) + 1;
     return acc;
   }, {});
 
-  const filtered = quotes.filter((quote) => {
-    if (status && quote.status !== status) return false;
-    if (origin && quote.source !== origin) return false;
-    if (q) {
-      const needle = q.toLowerCase();
-      const clientName = resolveClientLabel(quote.account_id).toLowerCase();
-      if (!clientName.includes(needle) && !quote.scope_summary.toLowerCase().includes(needle)) {
-        return false;
+  const filteredPairs = quotes
+    .map((quote, i) => ({ quote, label: clientLabels[i] }))
+    .filter(({ quote, label }) => {
+      if (status && quote.status !== status) return false;
+      if (origin && quote.source !== origin) return false;
+      if (q) {
+        const needle = q.toLowerCase();
+        if (!label.toLowerCase().includes(needle) && !quote.scope_summary.toLowerCase().includes(needle)) {
+          return false;
+        }
       }
-    }
-    return true;
-  });
+      return true;
+    });
+  const filtered = filteredPairs.map(({ quote }) => quote);
+  const filteredLabels = filteredPairs.map(({ label }) => label);
 
   function filterHref(next: { status?: string; origin?: string }) {
     const params = new URLSearchParams();
@@ -107,7 +113,7 @@ export default async function AdminQuotesPage({
           <span>data</span>
         </div>
         {filtered.length === 0 && <div className={styles.empty}>Nenhum quote encontrado.</div>}
-        {filtered.map((quote) => (
+        {filtered.map((quote, i) => (
           <Link
             key={quote.id}
             href={`/admin/quotes/${quote.id}`}
@@ -115,9 +121,9 @@ export default async function AdminQuotesPage({
             style={{ ["--cols" as string]: COLUMNS }}
           >
             <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12, color: "var(--db-text-secondary)" }}>
-              {quote.id.startsWith("mock-") ? quote.id.replace("mock-quote-", "").toUpperCase() : quote.id.slice(0, 8)}
+              {quote.id.slice(0, 8)}
             </span>
-            <span style={{ fontWeight: 600 }}>{resolveClientLabel(quote.account_id)}</span>
+            <span style={{ fontWeight: 600 }}>{filteredLabels[i]}</span>
             <span style={{ color: "var(--db-text-secondary)" }}>{quote.scope_summary}</span>
             <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
               {quote.price_range ?? "—"}

@@ -1,11 +1,20 @@
 import "server-only";
-import { mockInvoices } from "../mock/data";
+import { adminFetch } from "../api";
 import type { AdminInvoiceListItem } from "../types";
 
-// MOCK: contract in docs/admin-api-contracts.md#get-admininvoices — no
-// top-level invoice listing exists on the backend yet (only nested under a
-// known order via GET /orders/{order_id}/invoices, which IS real and is
-// used from the Order Detail page).
+interface AdminInvoiceListPage {
+  items: AdminInvoiceListItem[];
+  total: number;
+  page: number;
+  page_size: number;
+  synced_at: string | null;
+}
+
+// Real: GET /admin/invoices. page_size capped at 100 server-side; fetch the
+// max so the client-side status chips (Pendente/Vencida/Paga/Reemb.) count
+// against the same full set they filter, matching the previous mock's
+// behavior of counting across everything, not just one page.
 export async function listInvoices(): Promise<AdminInvoiceListItem[]> {
-  return mockInvoices;
+  const page = await adminFetch<AdminInvoiceListPage>("/admin/invoices?page_size=100");
+  return page.items;
 }

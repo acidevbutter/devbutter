@@ -1,19 +1,32 @@
 import "server-only";
-import { mockConversationList, mockConversations } from "../mock/data";
+import { AdminApiError, adminFetch } from "../api";
 import type { AdminConversationDetail, AdminConversationListItem } from "../types";
 
-// MOCK: contract in docs/admin-api-contracts.md#get-adminconversations —
-// conversations today are only readable by their owning account, no
-// admin-wide list exists.
+interface AdminConversationListPage {
+  items: AdminConversationListItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+// Real: GET /admin/conversations.
 export async function listConversations(filter?: {
   hasQuote?: boolean;
 }): Promise<AdminConversationListItem[]> {
-  if (filter?.hasQuote === undefined) return mockConversationList;
-  return mockConversationList.filter((c) =>
-    filter.hasQuote ? c.resulting_quote_id !== null : c.resulting_quote_id === null
+  const params = new URLSearchParams({ page_size: "100" });
+  if (filter?.hasQuote !== undefined) params.set("has_quote", String(filter.hasQuote));
+  const page = await adminFetch<AdminConversationListPage>(
+    `/admin/conversations?${params.toString()}`
   );
+  return page.items;
 }
 
+// Real: GET /admin/conversations/{id}.
 export async function getConversation(id: string): Promise<AdminConversationDetail | null> {
-  return mockConversations.find((c) => c.id === id) ?? null;
+  try {
+    return await adminFetch<AdminConversationDetail>(`/admin/conversations/${id}`);
+  } catch (err) {
+    if (err instanceof AdminApiError && err.status === 404) return null;
+    throw err;
+  }
 }

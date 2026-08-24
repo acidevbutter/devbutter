@@ -1,0 +1,27 @@
+flowchart TD
+    client([Cliente autenticado]):::actor --> portal[Portal do cliente\nVisão geral · Projetos · Orçamentos]:::ui
+    portal --> action[Solicitar novo orçamento]:::cta
+    action --> modal[NewQuoteModal]:::ui
+    modal --> chat[Conversa de qualificação com IA]:::ai
+    chat --> ready[ready_to_submit = true]:::ai
+    ready --> confirm[Confirmar e enviar]:::cta
+    confirm --> api[POST /draft-quote com token do portal]:::api
+    api --> draft[Quote source=ai\nstatus=draft]:::quote
+    draft --> confirmation[Confirmação + aguardando revisão]:::review
+    confirmation --> quotes[/portal/orcamentos]:::ui
+
+    note[Sem gate de conta:\naccount_id já está no token]:::state
+    client -. contexto .-> note
+
+    problem[Fluxo atual quebra na renderização\nda confirmação por contrato QuoteRead incorreto]:::issue
+    draft -. resposta chega .-> problem
+
+    classDef actor fill:#111827,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef ui fill:#172033,stroke:#9CA6B5,color:#F5F7FB
+    classDef cta fill:#351827,stroke:#F64C6F,color:#F5F7FB,stroke-width:2px
+    classDef ai fill:#102A23,stroke:#79E59B,color:#F5F7FB
+    classDef api fill:#202A35,stroke:#7AA2F7,color:#F5F7FB
+    classDef quote fill:#173A2A,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef review fill:#3B2D16,stroke:#F6C85F,color:#FFE9A8
+    classDef state fill:#242A35,stroke:#9CA6B5,color:#D8DEE9,stroke-dasharray:4 3
+    classDef issue fill:#3A1520,stroke:#F64C6F,color:#FFD6DE,stroke-width:3px

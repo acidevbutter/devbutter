@@ -1,0 +1,21 @@
+flowchart LR
+    visitor([Visitante sem conta]):::actor --> chat[Conversa anônima com a IA]:::ai
+    chat --> ready[Diagnóstico pronto]:::ai
+    ready --> gate[Crie uma conta para salvar\ne acompanhar sua cotação]:::account
+    gate --> signup[POST /accounts/signup]:::api
+    gate --> login[POST /accounts/login]:::api
+    signup --> link[Vincular conversation.account_id]:::account
+    login --> link
+    link --> draft[POST /conversations/{id}/draft-quote]:::api
+    draft --> review[Quote draft aguardando revisão]:::quote
+
+    current[Implementação atual]:::issue --> early[CTA público já exige login\nantes de abrir o chat]:::issue
+    current --> noLink[Não existe ainda a transferência\nde conversa anônima para a conta]:::issue
+    early -. substitui .-> chat
+
+    classDef actor fill:#111827,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef ai fill:#102A23,stroke:#79E59B,color:#F5F7FB
+    classDef account fill:#351827,stroke:#F64C6F,color:#F5F7FB,stroke-width:2px
+    classDef api fill:#202A35,stroke:#7AA2F7,color:#F5F7FB
+    classDef quote fill:#173A2A,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef issue fill:#3A1520,stroke:#F64C6F,color:#FFD6DE,stroke-width:2px

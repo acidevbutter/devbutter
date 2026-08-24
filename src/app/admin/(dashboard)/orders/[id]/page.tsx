@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
 import { getOrder, getOrderInvoices } from "@/lib/admin/services/orders";
-import { resolveClientLabel } from "@/lib/admin/services/clients";
 import { formatCurrency, formatDate, formatDateTime, invoiceStatusLabel, invoiceStatusTone, orderStatusTone } from "@/lib/admin/format";
 import Badge from "@/components/admin/ui/Badge/Badge";
 import Button from "@/components/admin/ui/Button/Button";
-import type { AdminOrderListItem, OrderRead } from "@/lib/admin/types";
 import styles from "./OrderDetail.module.scss";
 
 export default async function AdminOrderDetailPage({
@@ -21,7 +19,7 @@ export default async function AdminOrderDetailPage({
     notFound();
   }
 
-  const { order, scope_summary, deliverables, timeline, quote_label, isMock } = data;
+  const { order, account_name, scope_summary, deliverables, timeline, quote_label } = data;
   const invoicesRaw = await getOrderInvoices(id);
   const invoices = invoicesRaw.map((inv) => ({
     amount: inv.amount,
@@ -30,12 +28,9 @@ export default async function AdminOrderDetailPage({
     payment_link: inv.payment_link,
   }));
 
-  const clientName = isMock
-    ? (order as AdminOrderListItem).account_name
-    : resolveClientLabel((order as OrderRead).account_id);
-
+  const clientName = account_name;
   const totalAmount = invoices.reduce((sum, inv) => sum + Number(inv.amount), 0);
-  const orderIdLabel = id.startsWith("mock-order-") ? `#${id.replace("mock-order-", "")}` : `#${id.slice(0, 8)}`;
+  const orderIdLabel = `#${id.slice(0, 8)}`;
 
   return (
     <div className={styles.panel}>
@@ -79,7 +74,7 @@ export default async function AdminOrderDetailPage({
 
           {quote_label && (
             <div style={{ marginTop: 22 }}>
-              <Button variant="outline" href={isMock ? "#" : `/admin/quotes/${(order as OrderRead).quote_id}`}>
+              <Button variant="outline" href={`/admin/quotes/${order.quote_id}`}>
                 Ver quote {quote_label}
               </Button>
               <span style={{ marginLeft: 10, fontSize: 11.5, color: "var(--db-text-muted)", fontFamily: "'Geist Mono', monospace" }}>
@@ -112,7 +107,6 @@ export default async function AdminOrderDetailPage({
           </div>
           <div className={styles.timeline}>
             <div className={styles.timelineItem}>order criada a partir do quote · {formatDateTime(order.created_at)}</div>
-            {isMock && <div className={styles.timelineItem}>asaas customer criado · {formatDateTime(order.created_at)}</div>}
           </div>
         </div>
       </div>

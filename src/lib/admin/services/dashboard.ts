@@ -1,17 +1,16 @@
 import "server-only";
-import { mockDashboard } from "../mock/data";
+import { adminFetch } from "../api";
 import { listReviewQueue } from "./quotes";
 import type { AdminDashboardMetrics, QuoteRead } from "../types";
 
-/**
- * The review-queue table is real (GET /admin/quotes). Everything else on the
- * Dashboard screen (1b) — stat tiles, activity feed — has no aggregate
- * endpoint yet: MOCK, contract in docs/admin-api-contracts.md#get-admindashboard.
- */
+/** Real: GET /admin/dashboard + GET /admin/quotes (the review queue table). */
 export async function getDashboardData(): Promise<{
   metrics: AdminDashboardMetrics;
   reviewQueue: QuoteRead[];
 }> {
-  const reviewQueue = await listReviewQueue();
-  return { metrics: mockDashboard, reviewQueue };
+  const [metrics, reviewQueue] = await Promise.all([
+    adminFetch<AdminDashboardMetrics>("/admin/dashboard"),
+    listReviewQueue(),
+  ]);
+  return { metrics, reviewQueue };
 }

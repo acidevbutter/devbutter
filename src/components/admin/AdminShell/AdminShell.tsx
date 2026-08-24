@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin/dashboard" },
   { label: "Quotes", href: "/admin/quotes", badgeKey: "quotes" as const },
   { label: "Clientes", href: "/admin/clients" },
+  { label: "Empresas", href: "/admin/companies" },
   { label: "Orders", href: "/admin/orders" },
   { label: "Invoices", href: "/admin/invoices" },
   { divider: true as const },

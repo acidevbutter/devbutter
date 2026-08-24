@@ -1,0 +1,18 @@
+flowchart TD
+    submit[Cliente confirma e envia]:::cta --> route[POST /draft-quote]:::api
+    route --> created[Backend cria Quote\nsource=ai, status=draft]:::quote
+    created --> expected[Tela de confirmação]:::target
+    expected --> badge[aguardando revisão]:::review
+    expected --> summary[escopo + faixa + prazo]:::quote
+    expected --> panel[Ir para meu painel]:::cta
+
+    created -. resposta real .-> payload[quote_id + scope_summary +\nprice_range + timeline]:::api
+    payload --> crash[⚠ Modal atual tenta\nconfirmedQuote.id.slice(...)\nconfirmedQuote.created_at]:::issue
+    crash --> noConfirmation[Sem confirmação visual\napós sucesso do backend]:::issue
+
+    classDef cta fill:#351827,stroke:#F64C6F,color:#F5F7FB,stroke-width:2px
+    classDef api fill:#202A35,stroke:#7AA2F7,color:#F5F7FB
+    classDef quote fill:#173A2A,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef target fill:#202A22,stroke:#79E59B,color:#79E59B,stroke-dasharray:5 5
+    classDef review fill:#3B2D16,stroke:#F6C85F,color:#FFE9A8
+    classDef issue fill:#3A1520,stroke:#F64C6F,color:#FFD6DE,stroke-width:3px

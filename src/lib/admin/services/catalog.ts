@@ -1,10 +1,9 @@
 import "server-only";
-import { mockCatalogEntries } from "../mock/data";
+import { adminFetch } from "../api";
 import type { AdminCatalogEntry } from "../types";
 
-// MOCK: contract in docs/admin-api-contracts.md#get-admincatalog — the real
-// service_catalog router is CRUD-complete but scoped to CurrentAccount, no
-// cross-account admin view exists yet.
+// Real: GET /admin/catalog.
 export async function listCatalogEntries(): Promise<AdminCatalogEntry[]> {
-  return mockCatalogEntries;
+  const page = await adminFetch<{ items: AdminCatalogEntry[] }>("/admin/catalog");
+  return page.items;
 }

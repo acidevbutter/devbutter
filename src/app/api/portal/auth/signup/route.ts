@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import {
-  API_BASE_URL,
-  PORTAL_ACCESS_COOKIE,
-  PORTAL_ACCESS_TOKEN_MAX_AGE_SECONDS,
-  PORTAL_REFRESH_COOKIE,
-  PORTAL_REFRESH_TOKEN_MAX_AGE_SECONDS,
-} from "@/lib/portal/config";
+import { API_BASE_URL } from "@/lib/portal/config";
+import { setPortalSessionCookies } from "@/lib/portal/session";
 
 export async function POST(request: Request) {
   let name: unknown;
@@ -43,21 +37,7 @@ export async function POST(request: Request) {
   }
 
   const tokens = (await signupRes.json()) as { access_token: string; refresh_token: string };
-  const cookieStore = await cookies();
-  const cookieBase = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-  };
-  cookieStore.set(PORTAL_ACCESS_COOKIE, tokens.access_token, {
-    ...cookieBase,
-    maxAge: PORTAL_ACCESS_TOKEN_MAX_AGE_SECONDS,
-  });
-  cookieStore.set(PORTAL_REFRESH_COOKIE, tokens.refresh_token, {
-    ...cookieBase,
-    maxAge: PORTAL_REFRESH_TOKEN_MAX_AGE_SECONDS,
-  });
+  await setPortalSessionCookies(tokens);
 
   return NextResponse.json({ ok: true });
 }

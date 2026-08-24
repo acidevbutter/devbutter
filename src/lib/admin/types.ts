@@ -5,13 +5,27 @@
 
 export interface AccountRead {
   id: string;
+  user_id: string;
   email: string;
   name: string;
-  document: string | null;
+  cpf: string | null;
   phone: string | null;
-  business_name: string | null;
+  product_name: string;
+  company_id: string;
+  company_name: string;
+  cnpj: string | null;
   is_admin: boolean;
   is_active: boolean;
+  created_at: string;
+  accounts: AccountSelectionRead[];
+}
+
+export interface AccountSelectionRead {
+  id: string;
+  product_name: string;
+  company_id: string;
+  company_name: string;
+  cnpj: string | null;
   created_at: string;
 }
 
@@ -89,7 +103,7 @@ export interface ServiceCatalogEntryRead {
   created_at: string;
 }
 
-// ---- catalog cross-account view (mocked — #get-admincatalog) ---------------
+// ---- catalog cross-account view (real — GET /admin/catalog) ----------------
 
 export interface AdminCatalogEntry {
   id: string;
@@ -100,14 +114,15 @@ export interface AdminCatalogEntry {
   created_at: string;
 }
 
-// ---- clients (mocked — docs/admin-api-contracts.md#get-adminclients) -------
+// ---- clients (real — GET /admin/clients) -----------------------------------
 
 export interface AdminClientListItem {
   id: string;
   name: string;
   business_name: string | null;
   email: string;
-  document: string | null;
+  cpf: string | null;
+  cnpj: string | null;
   created_at: string;
   asaas_customer_id: string | null;
   quotes_count: number;
@@ -121,7 +136,8 @@ export interface AdminClientDetail {
   name: string;
   business_name: string | null;
   email: string;
-  document: string | null;
+  cpf: string | null;
+  cnpj: string | null;
   phone: string | null;
   created_at: string;
   asaas_customer_id: string | null;
@@ -135,7 +151,7 @@ export interface AdminClientDetail {
   };
 }
 
-// ---- orders/invoices list (mocked — #get-adminorders / #get-admininvoices) --
+// ---- orders/invoices list (real — GET /admin/orders / GET /admin/invoices) --
 
 export interface AdminOrderListItem {
   id: string;
@@ -159,9 +175,10 @@ export interface AdminInvoiceListItem {
   payment_link: string | null;
 }
 
-// ---- dashboard (mocked — #get-admindashboard) -------------------------------
+// ---- dashboard (real — GET /admin/dashboard) -------------------------------
 
 export interface AdminDashboardMetrics {
+  quotes_to_review: number;
   active_orders: number;
   receivable_open_amount: string;
   overdue_amount: string;
@@ -174,7 +191,7 @@ export interface AdminDashboardMetrics {
   }>;
 }
 
-// ---- knowledge base (mocked — #knowledge-base) ------------------------------
+// ---- knowledge base (real — GET/POST /admin/knowledge-entries) -------------
 
 export interface KnowledgeEntry {
   id: string;
@@ -187,7 +204,7 @@ export interface KnowledgeEntry {
   updated_at: string;
 }
 
-// ---- conversations (mocked — #get-adminconversations) -----------------------
+// ---- conversations (real — GET /admin/conversations) -----------------------
 
 export interface AdminConversationListItem {
   id: string;
@@ -201,19 +218,18 @@ export interface AdminConversationListItem {
 export interface ConversationMessage {
   role: "assistant" | "visitor";
   content: string;
-  at: string;
 }
 
 export interface AdminConversationDetail extends AdminConversationListItem {
   messages: ConversationMessage[];
   draft: {
     scope_summary: string;
-    price_range: string;
-    timeline: string;
+    price_range: string | null;
+    timeline: string | null;
   } | null;
 }
 
-// ---- webhook event log (mocked — #webhook-event-log) -------------------------
+// ---- webhook event log (real — GET /admin/webhooks/events) -----------------
 
 export interface AdminWebhookEvent {
   id: string;
@@ -224,4 +240,65 @@ export interface AdminWebhookEvent {
   error_message: string | null;
   payload: Record<string, unknown>;
   received_at: string;
+}
+
+// ---- companies / split quota / features (real — GET /admin/companies, see
+// docs/plano-admin-empresas-cota-split.md and docs/plano-feature-venda-via-api.md) ----
+
+export interface AdminCompanyListItem {
+  id: string;
+  name: string;
+  cnpj: string | null;
+  owner_name: string;
+  has_payment_method: boolean;
+  onboarding_status: string | null;
+  approval_status: string | null;
+  split_quota_percent: string | null;
+  used_percent: string | null;
+}
+
+export interface AdminSubaccountLink {
+  asaas_account_id: string;
+  wallet_id: string | null;
+  onboarding_status: string | null;
+  approval_status: string | null;
+  split_quota_percent: string | null;
+  quota_set_by: string | null;
+  quota_updated_at: string | null;
+}
+
+export interface AdminSplitRule {
+  id: string;
+  walletId?: string;
+  wallet_id?: string;
+  type: "FIXED" | "PERCENTAGE";
+  value: string;
+  active: boolean;
+  created_by?: string | null;
+  updated_by?: string | null;
+}
+
+export interface AdminCompanyDetail {
+  id: string;
+  name: string;
+  cnpj: string | null;
+  owner_name: string;
+  owner_email: string;
+  link: AdminSubaccountLink | null;
+  split_rules: AdminSplitRule[];
+  access_tokens: Record<string, unknown>;
+  used_percent: string | null;
+}
+
+export type CompanyFeatureStatus = "pending" | "active" | "error" | "disabled";
+
+export interface AdminCompanyFeature {
+  id: string;
+  feature_code: string;
+  status: CompanyFeatureStatus;
+  asaas_access_token_id: string | null;
+  enabled_by: string | null;
+  enabled_at: string | null;
+  disabled_at: string | null;
+  last_error: string | null;
 }

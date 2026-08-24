@@ -57,7 +57,7 @@ export default function FeatureStrip() {
   const [gridRef, shown] = useRevealOnce<HTMLDivElement>();
 
   return (
-    <section className={styles.section}>
+    <section id="solucoes" className={styles.section}>
       <div ref={gridRef} className={styles.grid}>
         {FEATURES.map((f, i) => (
           <div

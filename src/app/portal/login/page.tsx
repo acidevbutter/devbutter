@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Logomark from "@/components/icons/Logomark";
 import styles from "./Login.module.scss";
 
@@ -12,8 +12,19 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export default function PortalLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <PortalLoginForm />
+    </Suspense>
+  );
+}
+
+function PortalLoginForm() {
   const router = useRouter();
-  const [tab, setTab] = useState<"entrar" | "criar">("entrar");
+  const searchParams = useSearchParams();
+  const isQuoteIntent = searchParams.get("intent") === "quote";
+  const destination = isQuoteIntent ? "/portal/orcamentos?new=1" : "/portal";
+  const [tab, setTab] = useState<"entrar" | "criar">(isQuoteIntent ? "criar" : "entrar");
 
   return (
     <div className={styles.screen}>
@@ -25,7 +36,11 @@ export default function PortalLoginPage() {
           </span>
         </div>
 
-        <div className={styles.hint}>Crie uma conta para salvar e acompanhar seu orçamento</div>
+        <div className={styles.hint}>
+          {isQuoteIntent
+            ? "Crie uma conta para conversar com a IA e montar sua cotação"
+            : "Crie uma conta para salvar e acompanhar seu orçamento"}
+        </div>
 
         <div className={styles.tabs}>
           <button
@@ -44,13 +59,23 @@ export default function PortalLoginPage() {
           </button>
         </div>
 
-        {tab === "entrar" ? <LoginForm router={router} /> : <SignupForm router={router} />}
+        {tab === "entrar" ? (
+          <LoginForm router={router} destination={destination} />
+        ) : (
+          <SignupForm router={router} destination={destination} />
+        )}
       </div>
     </div>
   );
 }
 
-function LoginForm({ router }: { router: ReturnType<typeof useRouter> }) {
+function LoginForm({
+  router,
+  destination,
+}: {
+  router: ReturnType<typeof useRouter>;
+  destination: string;
+}) {
   const [email, setEmail] = useState("ana@atelie-corvo.com");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +98,8 @@ function LoginForm({ router }: { router: ReturnType<typeof useRouter> }) {
         setLoading(false);
         return;
       }
-      router.push("/portal");
+      const body = (await res.json().catch(() => null)) as { isAdmin?: boolean } | null;
+      router.push(body?.isAdmin ? "/admin/dashboard" : destination);
       router.refresh();
     } catch {
       setError("falha de conexão — tente novamente");
@@ -113,7 +139,13 @@ function LoginForm({ router }: { router: ReturnType<typeof useRouter> }) {
   );
 }
 
-function SignupForm({ router }: { router: ReturnType<typeof useRouter> }) {
+function SignupForm({
+  router,
+  destination,
+}: {
+  router: ReturnType<typeof useRouter>;
+  destination: string;
+}) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -137,7 +169,7 @@ function SignupForm({ router }: { router: ReturnType<typeof useRouter> }) {
         setLoading(false);
         return;
       }
-      router.push("/portal");
+      router.push(destination);
       router.refresh();
     } catch {
       setError("falha de conexão — tente novamente");

@@ -75,7 +75,7 @@ export default function Projects() {
   const [rowRef, shown] = useRevealOnce<HTMLDivElement>();
 
   return (
-    <section className={styles.section}>
+    <section id="cases" className={styles.section}>
       <div className={`mono gn ${styles.eyebrow}`}>Selected work</div>
       <div className={styles.headRow}>
         <h2 className={styles.h2}>

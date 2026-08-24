@@ -1,13 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getClient } from "@/lib/admin/services/clients";
-import {
-  mockCatalogEntries,
-  mockConversationList,
-  mockInvoices,
-  mockNonDraftQuotes,
-  mockOrders,
-} from "@/lib/admin/mock/data";
+import { listAllQuotesForTable } from "@/lib/admin/services/quotes";
+import { listOrders } from "@/lib/admin/services/orders";
+import { listInvoices } from "@/lib/admin/services/invoices";
+import { listCatalogEntries } from "@/lib/admin/services/catalog";
+import { listConversations } from "@/lib/admin/services/conversations";
 import { formatCurrency, formatDate, invoiceStatusLabel, invoiceStatusTone, orderStatusTone, quoteStatusTone } from "@/lib/admin/format";
 import Badge from "@/components/admin/ui/Badge/Badge";
 import Button from "@/components/admin/ui/Button/Button";
@@ -34,12 +32,20 @@ export default async function AdminClientDetailPage({
   const client = await getClient(id);
   if (!client) notFound();
 
-  const quotes = mockNonDraftQuotes.filter((q) => q.account_id === id);
-  const orders = mockOrders.filter((o) => o.account_id === id);
+  const [allQuotes, allOrders, allInvoices, allCatalog, allConversations] = await Promise.all([
+    listAllQuotesForTable(),
+    listOrders(),
+    listInvoices(),
+    listCatalogEntries(),
+    listConversations(),
+  ]);
+
+  const quotes = allQuotes.filter((q) => q.account_id === id);
+  const orders = allOrders.filter((o) => o.account_id === id);
   const orderIds = new Set(orders.map((o) => o.id));
-  const invoices = mockInvoices.filter((i) => orderIds.has(i.order_id));
-  const catalog = mockCatalogEntries.filter((c) => c.account_id === id);
-  const conversations = mockConversationList.filter((c) => c.account_id === id);
+  const invoices = allInvoices.filter((i) => orderIds.has(i.order_id));
+  const catalog = allCatalog.filter((c) => c.account_id === id);
+  const conversations = allConversations.filter((c) => c.account_id === id);
 
   return (
     <div className={styles.panel}>
@@ -53,7 +59,7 @@ export default async function AdminClientDetailPage({
             <h1 className={styles.name}>{client.business_name ?? client.name}</h1>
             <div className={styles.meta}>
               {client.email}
-              {client.document ? ` · CNPJ ${client.document}` : ""} · cliente desde{" "}
+              {client.cnpj ? ` · CNPJ ${client.cnpj}` : ""} · cliente desde{" "}
               {formatDate(client.created_at)}
             </div>
           </div>
@@ -96,7 +102,7 @@ export default async function AdminClientDetailPage({
               header={["id", "escopo", "faixa", "status", "data"]}
               rows={quotes.map((q) => [
                 <Link key="id" href={`/admin/quotes/${q.id}`} style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
-                  {q.id.replace("mock-quote-", "").toUpperCase()}
+                  {q.id.slice(0, 8).toUpperCase()}
                 </Link>,
                 q.scope_summary,
                 q.price_range ?? "—",
@@ -115,7 +121,7 @@ export default async function AdminClientDetailPage({
               header={["id", "valor", "status", "data"]}
               rows={orders.map((o) => [
                 <Link key="id" href={`/admin/orders/${o.id}`} style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
-                  #{o.id.replace("mock-order-", "")}
+                  #{o.id.slice(0, 8)}
                 </Link>,
                 formatCurrency(o.amount),
                 <Badge key="status" tone={orderStatusTone(o.status)}>{o.status}</Badge>,
@@ -132,7 +138,7 @@ export default async function AdminClientDetailPage({
               columns="1fr 1fr .8fr .8fr"
               header={["order", "valor", "venc.", "status"]}
               rows={invoices.map((i) => [
-                `#${i.order_id.replace("mock-order-", "")}`,
+                `#${i.order_id.slice(0, 8)}`,
                 formatCurrency(i.amount),
                 formatDate(i.due_date),
                 <Badge key="status" tone={invoiceStatusTone(i.status)}>{invoiceStatusLabel(i.status)}</Badge>,

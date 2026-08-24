@@ -51,7 +51,7 @@ export default async function AdminOrdersPage({
             style={{ ["--cols" as string]: COLUMNS }}
           >
             <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
-              #{o.id.startsWith("mock-order-") ? o.id.replace("mock-order-", "") : o.id.slice(0, 8)}
+              #{o.id.slice(0, 8)}
             </span>
             <span style={{ fontWeight: 600 }}>{o.account_name}</span>
             <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>

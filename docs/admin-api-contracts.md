@@ -1,12 +1,10 @@
-# Admin API contracts — routes the backend doesn't have yet
+# Admin API contracts
 
 This document is the source of truth for every backend route the admin dashboard
-(`src/app/admin/**`) needs but `devbutter_backend` doesn't expose today. It is written
+(`src/app/admin/**`) consumes. The routes are implemented in `devbutter_backend`; it is written
 from the frontend so the mock layer (`src/lib/admin/mock/*.ts`, `src/lib/admin/services/*.ts`)
 has an exact shape to implement against — **when `devbutter_backend` builds these for real,
 the mocks should be swappable for a `fetch` call with no shape changes downstream.**
-
-Nothing in this document has been implemented in `devbutter_backend` — this is a proposal only.
 
 Conventions match the existing backend (`app/admin/router.py`, `app/accounts/schemas.py`, etc.):
 JWT bearer auth via `CurrentAdminAccount`, `snake_case` fields, UUIDs as strings, `datetime` as
@@ -14,14 +12,26 @@ ISO-8601, `Decimal` amounts serialize as JSON strings, errors as `{"detail": ...
 
 ---
 
+## `GET /admin/quotes`
+
+Returns the draft review queue used by the approval workflow.
+
+## `GET /admin/quotes/all`
+
+Returns all quotes with optional `status`, `page` and `page_size` filters for the complete Cotações list.
+
+**Response `200`**: `{ items: QuoteRead[], total, page, page_size }`
+
+---
+
 ## `GET /admin/clients`
 
-List every account (client), for the admin Clientes list/search — today `GET /accounts/me` only
-returns the caller's own account, and admin has no cross-account listing.
+List every account (client), for the admin Clientes list/search. `GET /accounts/me` remains scoped to
+the caller's own account.
 
 **Auth**: `CurrentAdminAccount`
 
-**Query params**: `search?: string` (matches name/email/document), `page?: int = 1`, `page_size?: int = 20`
+**Query params**: `search?: string` (matches name/email/CPF/CNPJ), `page?: int = 1`, `page_size?: int = 20`
 
 **Response `200`**: `AdminClientListRead`
 ```jsonc
@@ -32,7 +42,8 @@ returns the caller's own account, and admin has no cross-account listing.
       "name": "string",
       "business_name": "string | null",
       "email": "string",
-      "document": "string | null",
+      "cpf": "string | null",
+      "cnpj": "string | null",
       "created_at": "datetime",
       "asaas_customer_id": "string | null",  // from AsaasCustomerLink, null if never linked
       "quotes_count": "int",
@@ -59,7 +70,8 @@ Reuses `AccountRead` fields plus admin-only aggregate data.
   "name": "string",
   "business_name": "string | null",
   "email": "string",
-  "document": "string | null",
+  "cpf": "string | null",
+  "cnpj": "string | null",
   "phone": "string | null",
   "created_at": "datetime",
   "asaas_customer_id": "string | null",
@@ -72,8 +84,8 @@ Reuses `AccountRead` fields plus admin-only aggregate data.
 
 ## `GET /admin/orders`
 
-All orders across every account, for the Orders list screen — `GET /orders` today only returns the
-caller's own orders (admin has no cross-account list, only `GET /orders/{id}` once you already have an id).
+All orders across every account, for the Orders list screen. `GET /orders` remains scoped to the
+caller's own orders.
 
 **Auth**: `CurrentAdminAccount`
 
@@ -99,8 +111,8 @@ caller's own orders (admin has no cross-account list, only `GET /orders/{id}` on
 
 ## `GET /admin/invoices`
 
-All invoices across every account/order, for the Invoices list screen (1h) — invoices today are only
-reachable nested under a known order (`GET /orders/{order_id}/invoices`).
+All invoices across every account/order, for the Invoices list screen (1h). The nested
+`GET /orders/{order_id}/invoices` route remains available for a known order.
 
 **Auth**: `CurrentAdminAccount`
 
@@ -153,9 +165,8 @@ directly, this endpoint only covers the stat tiles and activity feed.
 ## `GET /admin/catalog`
 
 Cross-account view of `service_catalog` entries for the top-level Catálogo nav item. The real
-`service_catalog` router (`app/service_catalog/router.py`) is real and fully CRUD, but every route
-is scoped to `CurrentAccount` (the caller's own entries) — there's no way for an admin to browse or
-search entries across every client's catalog today. Reuses `ServiceCatalogEntryRead`'s fields.
+`service_catalog` router (`app/service_catalog/router.py`) remains scoped to `CurrentAccount`; this
+admin route provides the cross-account read view. Reuses `ServiceCatalogEntryRead`'s fields.
 
 **Auth**: `CurrentAdminAccount`
 
@@ -170,7 +181,7 @@ search entries across every client's catalog today. Reuses `ServiceCatalogEntryR
 
 ## Knowledge base ("Conhecimento") — feeds AI quote suggestions
 
-No model/table exists for this at all today. New resource, admin-only.
+New admin-only resource persisted by `devbutter_backend`.
 
 ### `GET /admin/knowledge-entries`
 **Response `200`**: `KnowledgeEntryRead[]`
@@ -192,8 +203,8 @@ No model/table exists for this at all today. New resource, admin-only.
 
 ## `GET /admin/conversations`
 
-All AI concierge conversations across accounts, for the Conversas screen (1j) — `conversations` router
-today only exposes single-conversation read/write for the owning account, no admin list.
+All AI concierge conversations across accounts, for the Conversas screen (1j). The regular
+`conversations` router remains scoped to the owning account; this admin route provides the cross-account view.
 
 **Auth**: `CurrentAdminAccount`
 
@@ -224,8 +235,8 @@ of `account_id != caller and not is_admin -> 404`).
 
 ## Webhook event log
 
-`POST /webhooks/asaas` processes events inline today but persists nothing — there's no record to
-list or replay. New resource: persist every inbound webhook call, admin-only read/replay.
+`POST /webhooks/asaas` persists every accepted inbound event in an admin-only audit log, which can
+be listed and replayed.
 
 ### `GET /admin/webhooks/events`
 **Query params**: `event_type?: string`, `has_error?: bool`, `page?`, `page_size?`

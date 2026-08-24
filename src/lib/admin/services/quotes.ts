@@ -1,6 +1,5 @@
 import "server-only";
 import { adminFetch } from "../api";
-import { mockNonDraftQuotes } from "../mock/data";
 import type { OrderApprovalRequest, OrderRead, QuoteEdit, QuoteManualCreate, QuoteRead } from "../types";
 
 /** Real: GET /admin/quotes — the draft review queue. */
@@ -8,28 +7,21 @@ export function listReviewQueue() {
   return adminFetch<QuoteRead[]>("/admin/quotes");
 }
 
-/**
- * Quotes List screen (1c) needs every status, but GET /admin/quotes only
- * returns drafts (see docs/admin-api-contracts.md — no "list all" route
- * exists). Merge the real drafts with mocked approved/edited/rejected rows.
- */
+interface AdminQuoteListPage {
+  items: QuoteRead[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+/** Real: GET /admin/quotes/all — every quote, any status. */
 export async function listAllQuotesForTable(): Promise<QuoteRead[]> {
-  const drafts = await listReviewQueue();
-  return [...drafts, ...mockNonDraftQuotes].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  const page = await adminFetch<AdminQuoteListPage>("/admin/quotes/all?page_size=100");
+  return page.items;
 }
 
-export function isMockQuoteId(id: string) {
-  return id.startsWith("mock-");
-}
-
-export async function getQuote(id: string): Promise<QuoteRead> {
-  if (isMockQuoteId(id)) {
-    const found = mockNonDraftQuotes.find((q) => q.id === id);
-    if (!found) throw new Error("Mock quote not found");
-    return found;
-  }
+/** Real: GET /quotes/{id}. */
+export function getQuote(id: string): Promise<QuoteRead> {
   return adminFetch<QuoteRead>(`/quotes/${id}`);
 }
 

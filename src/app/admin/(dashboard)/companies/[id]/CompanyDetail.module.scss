@@ -1,0 +1,127 @@
+@use "../../../../../styles/admin" as admin;
+@use "../../../../../styles/tokens" as *;
+
+.panel {
+  @include admin.panel;
+}
+
+.breadcrumb {
+  padding: 12px 18px;
+  border-bottom: 1px solid $admin-border;
+  background: rgba(255, 255, 255, 0.02);
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.header {
+  padding: 22px 24px 0;
+}
+
+.name {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.meta {
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  margin-top: 6px;
+}
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 24px 24px;
+}
+
+.block {
+  @include admin.card;
+  padding: 16px 18px;
+}
+
+.blockTitle {
+  @include admin.mono-label;
+  margin-bottom: 12px;
+}
+
+.blockBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fieldLabel {
+  color: $db-text-muted;
+  font: 11px "Geist Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mono {
+  font: 12.5px "Geist Mono", monospace;
+}
+
+.emptyHint {
+  color: $db-text-muted;
+  font: 13px "Geist Mono", monospace;
+  margin: 0;
+}
+
+.input {
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 8px;
+  padding: 8px 11px;
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-primary;
+  max-width: 280px;
+
+  &::placeholder {
+    color: $db-text-muted;
+  }
+}
+
+.inlineForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.quotaBar {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.quotaBarFill {
+  height: 100%;
+  background: $db-green;
+}
+
+.quotaLabel {
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.error {
+  color: $db-pink;
+  font: 12px "Geist Mono", monospace;
+  margin: 0;
+}
+
+.featureRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}

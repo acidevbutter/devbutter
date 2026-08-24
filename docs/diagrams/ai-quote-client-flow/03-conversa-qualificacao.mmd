@@ -1,0 +1,33 @@
+sequenceDiagram
+    autonumber
+    participant C as Cliente
+    participant U as NewQuoteModal
+    participant API as API Next.js
+    participant P as devbutter_backend
+    participant AI as butter_mind
+
+    C->>U: Escreve necessidade e envia
+    U->>API: POST /api/portal/conversations (primeiro envio)
+    API->>P: POST /conversations
+    P->>AI: Cria sessão de diagnóstico
+    AI-->>P: mind_session_id
+    P-->>API: conversation { id, account_id }
+    API-->>U: conversation id
+    U->>API: POST /conversations/{id}/messages
+    API->>P: POST /conversations/{id}/messages
+    P->>AI: Envia conteúdo do cliente
+    AI-->>P: { reply, ready_to_submit }
+    P-->>API: Espelha transcript e devolve turno
+    API-->>U: { reply, ready_to_submit: false }
+    U-->>C: Renderiza bolha do cliente + resposta da IA
+    C->>U: Responde perguntas sobre negócio, problema e solução
+    U->>API: Repete POST /messages
+    API->>P: Repete POST /messages
+    P->>AI: Continua diagnóstico
+    AI-->>P: Nova pergunta ou pronto para enviar
+    P-->>U: reply + ready_to_submit
+    U-->>C: Atualiza histórico
+
+    Note over C,AI: Exemplos: loja, WhatsApp, catálogo, ERP, atendimento humano
+
+    %% Visual legend: client = blue, UI/API = gray, AI = green, persistence = pink

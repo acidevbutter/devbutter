@@ -4,15 +4,21 @@ import { useState } from "react";
 import Button from "@/components/admin/ui/Button/Button";
 import NewQuoteModal from "./NewQuoteModal";
 
-export default function NewQuoteButton({ label = "Solicitar novo orçamento" }: { label?: string }) {
-  const [open, setOpen] = useState(false);
+export default function NewQuoteButton({
+  label = "Solicitar novo orçamento",
+  autoOpen = false,
+}: {
+  label?: string;
+  autoOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(autoOpen);
 
   return (
     <>
       <Button variant="solid" type="button" onClick={() => setOpen(true)}>
         {label}
       </Button>
-      {open && <NewQuoteModal onClose={() => setOpen(false)} />}
+      {open && <NewQuoteModal onClose={() => setOpen(false)} mode="portal" />}
     </>
   );
 }

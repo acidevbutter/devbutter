@@ -20,6 +20,10 @@ export default async function AdminDashboardPage() {
     getDashboardData(),
   ]);
 
+  const clientLabels = await Promise.all(
+    reviewQueue.map((quote) => resolveClientLabel(quote.account_id))
+  );
+
   const now = new Date();
   const firstName = account.name.split(" ")[0];
 
@@ -75,9 +79,9 @@ export default async function AdminDashboardPage() {
               <span>origem</span>
               <span />
             </div>
-            {reviewQueue.map((quote) => (
+            {reviewQueue.map((quote, i) => (
               <Link key={quote.id} href={`/admin/quotes/${quote.id}`} className={styles.queueRow}>
-                <span style={{ fontWeight: 600 }}>{resolveClientLabel(quote.account_id)}</span>
+                <span style={{ fontWeight: 600 }}>{clientLabels[i]}</span>
                 <span style={{ color: "var(--db-text-secondary)" }}>{quote.scope_summary}</span>
                 <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12.5 }}>
                   {quote.price_range ?? "—"}

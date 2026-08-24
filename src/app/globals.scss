@@ -5,7 +5,10 @@
   box-sizing: border-box;
 }
 
-html,
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -13,6 +16,16 @@ body {
   color: $db-text-primary;
   font-family: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+section[id] {
+  scroll-margin-top: 84px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 a {

@@ -148,7 +148,7 @@ export default function DataDecision() {
   }, []);
 
   return (
-    <section ref={section} className={styles.section}>
+    <section id="sobre" ref={section} className={styles.section}>
       <div ref={viewport} className={styles.viewport}>
         <div className={styles.stageWrap}>
           <StoryboardStage ref={stage} />

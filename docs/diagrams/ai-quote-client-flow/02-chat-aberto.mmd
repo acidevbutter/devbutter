@@ -1,0 +1,15 @@
+flowchart TD
+    start[Cliente autenticado em /portal/orcamentos]:::actor --> open[Clica em Solicitar novo]:::cta
+    start --> auto[Entrada com ?new=1]:::cta
+    open --> modal[NewQuoteModal aberto]:::ui
+    auto --> modal
+    modal --> header[DevButter IA\nonline · novo orçamento]:::ai
+    header --> first[IA: Oi! Vi que você já tem projetos com a gente.\nMe conta o que você precisa agora.]:::ai
+    first --> composer[Composer focado\ntextarea + Enviar]:::ui
+    composer --> ready[Pronto para receber a primeira resposta do cliente]:::state
+
+    classDef actor fill:#111827,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef ui fill:#172033,stroke:#9CA6B5,color:#F5F7FB
+    classDef ai fill:#102A23,stroke:#79E59B,color:#F5F7FB
+    classDef cta fill:#173A2A,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef state fill:#242A35,stroke:#9CA6B5,color:#D8DEE9,stroke-dasharray:4 3

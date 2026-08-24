@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getQuote, isMockQuoteId } from "@/lib/admin/services/quotes";
+import { getQuote } from "@/lib/admin/services/quotes";
 import { resolveClientLabel } from "@/lib/admin/services/clients";
 import QuoteDetailClient from "./QuoteDetailClient";
 
@@ -17,11 +17,7 @@ export default async function AdminQuoteDetailPage({
     notFound();
   }
 
-  return (
-    <QuoteDetailClient
-      quote={quote}
-      clientLabel={resolveClientLabel(quote.account_id)}
-      readOnly={isMockQuoteId(id)}
-    />
-  );
+  const clientLabel = await resolveClientLabel(quote.account_id);
+
+  return <QuoteDetailClient quote={quote} clientLabel={clientLabel} readOnly={false} />;
 }

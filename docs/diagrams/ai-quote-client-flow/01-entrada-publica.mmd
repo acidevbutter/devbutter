@@ -1,0 +1,16 @@
+flowchart LR
+    visitor([Cliente visitante]):::actor --> home[Home pública]:::ui
+    home --> cta[Falar com a IA / Solicitar diagnóstico]:::cta
+    cta --> login[/portal/login?intent=quote]:::account
+    login --> signup[ criar conta ou entrar ]:::account
+    signup --> portal[/portal/orcamentos?new=1]:::ui
+    portal --> modal[NewQuoteModal]:::ui
+
+    target[Alvo desejado: abrir o chat sem interromper o visitante]:::target
+    cta -. deveria levar a .-> target
+
+    classDef actor fill:#111827,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef ui fill:#172033,stroke:#9CA6B5,color:#F5F7FB
+    classDef cta fill:#173A2A,stroke:#79E59B,color:#F5F7FB,stroke-width:2px
+    classDef account fill:#351827,stroke:#F64C6F,color:#F5F7FB
+    classDef target fill:#202A22,stroke:#79E59B,color:#79E59B,stroke-dasharray:5 5

@@ -1,29 +1,37 @@
 import "server-only";
-import { mockClientDetails, mockClients } from "../mock/data";
+import { AdminApiError, adminFetch } from "../api";
 import type { AdminClientDetail, AdminClientListItem } from "../types";
 
-// MOCK: contract in docs/admin-api-contracts.md#get-adminclients — no
-// cross-account client listing exists on the backend yet (GET /accounts/me
-// only returns the caller's own account).
-export async function listClients(search?: string): Promise<AdminClientListItem[]> {
-  if (!search) return mockClients;
-  const needle = search.toLowerCase();
-  return mockClients.filter(
-    (c) => c.name.toLowerCase().includes(needle) || c.email.toLowerCase().includes(needle)
-  );
+interface AdminClientListPage {
+  items: AdminClientListItem[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
-// MOCK: contract in docs/admin-api-contracts.md#get-adminclientsaccount_id
+// Real: GET /admin/clients.
+export async function listClients(search?: string): Promise<AdminClientListItem[]> {
+  const query = search ? `?search=${encodeURIComponent(search)}&page_size=100` : "?page_size=100";
+  const page = await adminFetch<AdminClientListPage>(`/admin/clients${query}`);
+  return page.items;
+}
+
+// Real: GET /admin/clients/{account_id}.
 export async function getClient(id: string): Promise<AdminClientDetail | null> {
-  return mockClientDetails[id] ?? null;
+  try {
+    return await adminFetch<AdminClientDetail>(`/admin/clients/${id}`);
+  } catch (err) {
+    if (err instanceof AdminApiError && err.status === 404) return null;
+    throw err;
+  }
 }
 
 /**
- * Real quotes/orders only carry an account_id (see app/quotes/schemas.py) —
- * there's no admin endpoint to resolve it to a name yet (same gap as
- * GET /admin/clients/{account_id} above). Falls back to a short id label so
- * real-backend rows still render something readable instead of nothing.
+ * Real quotes/orders only carry an account_id — there's no bulk
+ * id-to-name resolver, so this falls back to a short id label if the
+ * per-account lookup fails (e.g. a stale/deleted account).
  */
-export function resolveClientLabel(accountId: string): string {
-  return mockClientDetails[accountId]?.name ?? `Conta ${accountId.slice(0, 8)}`;
+export async function resolveClientLabel(accountId: string): Promise<string> {
+  const client = await getClient(accountId);
+  return client?.name ?? `Conta ${accountId.slice(0, 8)}`;
 }

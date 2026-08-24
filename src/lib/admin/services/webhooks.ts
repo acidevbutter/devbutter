@@ -1,20 +1,42 @@
 import "server-only";
-import { mockWebhookEvents } from "../mock/data";
+import { adminFetch } from "../api";
 import type { AdminWebhookEvent } from "../types";
 
-// MOCK: contract in docs/admin-api-contracts.md#webhook-event-log — inbound
-// Asaas webhooks are processed inline (app/webhooks/router.py) but nothing
-// persists an event log for admin to inspect/replay.
-export async function listWebhookEvents(): Promise<AdminWebhookEvent[]> {
-  return mockWebhookEvents;
+interface BackendWebhookEvent {
+  id: string;
+  event_type: string;
+  related_invoice_id: string | null;
+  processed_ok: boolean;
+  error_message: string | null;
+  payload: Record<string, unknown>;
+  received_at: string;
 }
 
+interface AdminWebhookEventListPage {
+  items: BackendWebhookEvent[];
+  total: number;
+  page: number;
+  page_size: number;
+  error_count: number;
+}
+
+function toFrontendEvent(event: BackendWebhookEvent): AdminWebhookEvent {
+  return {
+    ...event,
+    related_label: event.related_invoice_id ? `invoice ${event.related_invoice_id.slice(0, 8)}` : "—",
+  };
+}
+
+// Real: GET /admin/webhooks/events.
+export async function listWebhookEvents(): Promise<AdminWebhookEvent[]> {
+  const page = await adminFetch<AdminWebhookEventListPage>("/admin/webhooks/events?page_size=100");
+  return page.items.map(toFrontendEvent);
+}
+
+// Real: POST /admin/webhooks/events/{id}/reprocess.
 export async function reprocessWebhookEvent(id: string): Promise<AdminWebhookEvent> {
-  const event = mockWebhookEvents.find((e) => e.id === id);
-  if (!event) throw new Error("Webhook event not found");
-  // Stand-in only — a real reprocess would re-run POST /webhooks/asaas
-  // against the stored payload (see the contract doc).
-  event.processed_ok = true;
-  event.error_message = null;
-  return event;
+  const event = await adminFetch<BackendWebhookEvent>(`/admin/webhooks/events/${id}/reprocess`, {
+    method: "POST",
+  });
+  return toFrontendEvent(event);
 }

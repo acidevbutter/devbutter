@@ -12,8 +12,12 @@ const STATUS_LABEL: Record<string, string> = {
   rejected: "Não aprovado",
 };
 
-export default async function PortalQuotesPage() {
-  const quotes = await listQuotes();
+export default async function PortalQuotesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ new?: string }>;
+}) {
+  const [quotes, { new: autoOpenParam }] = await Promise.all([listQuotes(), searchParams]);
 
   return (
     <div className={styles.page}>
@@ -22,7 +26,7 @@ export default async function PortalQuotesPage() {
           <h1 className={styles.title}>Meus orçamentos</h1>
           <div className={styles.subtitle}>tudo que você já pediu pra gente</div>
         </div>
-        <NewQuoteButton label="Solicitar novo" />
+        <NewQuoteButton label="Solicitar novo" autoOpen={autoOpenParam === "1"} />
       </div>
 
       <div className={styles.list}>

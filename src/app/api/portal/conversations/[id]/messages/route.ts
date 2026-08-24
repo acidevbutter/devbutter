@@ -1,4 +1,4 @@
-import { portalErrorResponse, portalFetch } from "@/lib/portal/api";
+import { portalErrorResponse, portalFetchOptionalAuth } from "@/lib/portal/api";
 
 export async function POST(
   request: Request,
@@ -7,7 +7,7 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await request.json();
-    const turn = await portalFetch(`/conversations/${id}/messages`, {
+    const turn = await portalFetchOptionalAuth(`/conversations/${id}/messages`, {
       method: "POST",
       body: JSON.stringify(body),
     });

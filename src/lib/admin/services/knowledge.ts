@@ -1,42 +1,41 @@
 import "server-only";
-import { mockKnowledgeEntries } from "../mock/data";
+import { AdminApiError, adminFetch } from "../api";
 import type { KnowledgeEntry } from "../types";
 
-// MOCK: contract in docs/admin-api-contracts.md#knowledge-base--feeds-ai-quote-suggestions
-// No knowledge-base model exists on the backend at all yet. Mutates the
-// in-memory seed array directly — resets on server restart, same as every
-// other mock in this file tree.
-
+// Real: GET /admin/knowledge-entries.
 export async function listKnowledgeEntries(): Promise<KnowledgeEntry[]> {
-  return mockKnowledgeEntries;
+  return adminFetch<KnowledgeEntry[]>("/admin/knowledge-entries");
 }
 
 export async function getKnowledgeEntry(id: string): Promise<KnowledgeEntry | null> {
-  return mockKnowledgeEntries.find((e) => e.id === id) ?? null;
+  try {
+    const entries = await listKnowledgeEntries();
+    return entries.find((e) => e.id === id) ?? null;
+  } catch (err) {
+    if (err instanceof AdminApiError && err.status === 404) return null;
+    throw err;
+  }
 }
 
 export async function saveKnowledgeEntry(
   input: Omit<KnowledgeEntry, "id" | "updated_at"> & { id?: string }
 ): Promise<KnowledgeEntry> {
-  const now = new Date().toISOString();
-
-  if (input.id) {
-    const existing = mockKnowledgeEntries.find((e) => e.id === input.id);
-    if (!existing) throw new Error("Knowledge entry not found");
-    Object.assign(existing, input, { updated_at: now });
-    return existing;
+  const { id, ...payload } = input;
+  if (id) {
+    return adminFetch<KnowledgeEntry>(`/admin/knowledge-entries/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
   }
-
-  const created: KnowledgeEntry = {
-    ...input,
-    id: `mock-kb-${crypto.randomUUID()}`,
-    updated_at: now,
-  };
-  mockKnowledgeEntries.push(created);
-  return created;
+  return adminFetch<KnowledgeEntry>("/admin/knowledge-entries", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function deleteKnowledgeEntry(id: string): Promise<void> {
-  const index = mockKnowledgeEntries.findIndex((e) => e.id === id);
-  if (index !== -1) mockKnowledgeEntries.splice(index, 1);
+  await adminFetch(`/admin/knowledge-entries/${id}`, {
+    method: "DELETE",
+    parseJson: false,
+  });
 }

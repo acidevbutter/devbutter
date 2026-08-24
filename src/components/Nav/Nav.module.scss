@@ -52,6 +52,27 @@
   flex-shrink: 0;
 }
 
+.loginBtn {
+  display: flex;
+  align-items: center;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font: 600 13px var(--font-geist-sans);
+  cursor: pointer;
+  background: transparent;
+  color: $db-text-secondary;
+  border: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
 .ghostBtn {
   padding: 9px 16px;
   border-radius: 10px;

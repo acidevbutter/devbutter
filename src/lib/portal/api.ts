@@ -64,3 +64,38 @@ export async function portalFetch<T>(
   if (response.status === 204 || init?.parseJson === false) return undefined as T;
   return (await response.json()) as T;
 }
+
+// Same as portalFetch, but for endpoints that accept visitors: the access
+// token is attached when present, but its absence doesn't throw — the
+// request just goes out unauthenticated and the backend resolves it via
+// OptionalCurrentAccount (see docs/plano-onboarding-conversa-primeiro.md).
+export async function portalFetchOptionalAuth<T>(
+  path: string,
+  init?: RequestInit & { parseJson?: boolean }
+): Promise<T> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get(PORTAL_ACCESS_COOKIE)?.value;
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...init,
+    cache: "no-store",
+    headers: {
+      ...(init?.body ? { "Content-Type": "application/json" } : {}),
+      ...init?.headers,
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+  });
+
+  if (!response.ok) {
+    let detail: unknown;
+    try {
+      detail = (await response.json())?.detail;
+    } catch {
+      detail = await response.text().catch(() => null);
+    }
+    throw new PortalApiError(response.status, detail);
+  }
+
+  if (response.status === 204 || init?.parseJson === false) return undefined as T;
+  return (await response.json()) as T;
+}
