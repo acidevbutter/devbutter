@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Adicionado controle de orçamento mensal e custo por fluxo na tela IA & Métricas.
+
 - Adicionado painel administrativo de IA com métricas de grounding/tokens, configurações de
   diagnóstico e métricas por conversa, consumindo o backend autenticado.
 - O modal de novo orçamento exibe a prévia estruturada do diagnóstico, grounding e pendências,

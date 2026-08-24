@@ -34,5 +34,13 @@
 .field input { min-width: 0; box-sizing: border-box; border: 1px solid $admin-border-interactive; border-radius: 8px; background: $admin-card; color: $db-text-primary; padding: 8px 9px; font: 13px "Geist Mono", monospace; }
 .settingsMeta { grid-column: 1 / -1; display: flex; gap: 16px; flex-wrap: wrap; color: $db-text-muted; font: 11px "Geist Mono", monospace; }
 .settingsAction { grid-column: 1 / -1; }
+.budgetTable { padding: 4px 16px 12px; }
+.budgetHead, .budgetRow { display: grid; grid-template-columns: 1.4fr repeat(2, .8fr) 1.5fr; gap: 10px; align-items: center; }
+.budgetHead { @include admin.mono-label; padding: 10px 0 7px; }
+.budgetRow { padding: 10px 0; border-top: 1px solid $admin-border; font: 12px "Geist Mono", monospace; }
+.budgetRow > span:not(:first-child) { color: $db-text-secondary; }
+.budgetRow label { display: flex; gap: 8px; align-items: center; }
+.budgetRow input { min-width: 0; width: 100%; box-sizing: border-box; border: 1px solid $admin-border-interactive; border-radius: 8px; background: $admin-card; color: $db-text-primary; padding: 7px 8px; font: inherit; }
+@media (max-width: 700px) { .budgetHead { display: none; } .budgetRow { grid-template-columns: 1fr; gap: 7px; } }
 .unavailable { @include admin.panel; padding: 22px; }
 @media (max-width: 980px) { .tiles { grid-template-columns: repeat(2, 1fr); } .grid { grid-template-columns: 1fr; } .settingsForm { grid-template-columns: repeat(2, 1fr); } }

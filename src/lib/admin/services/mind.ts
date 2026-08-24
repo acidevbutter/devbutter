@@ -3,17 +3,30 @@ import type {
   AdminMindDashboard,
   AdminMindGovernance,
   AdminMindTurnMetric,
+  AdminLLMBudget,
+  AdminLLMUsageSummary,
 } from "../types";
+
+export const mindBudgetFlows = [
+  "general_chat",
+  "site_text_generation",
+  "diagnosis_chat",
+  "diagnosis_extraction",
+] as const;
 
 export async function getMindDashboardData(): Promise<{
   overview: AdminMindDashboard;
   governance: AdminMindGovernance;
+  usage: AdminLLMUsageSummary;
+  budgets: Array<AdminLLMBudget | null>;
 }> {
-  const [overview, governance] = await Promise.all([
+  const [overview, governance, usage, ...budgets] = await Promise.all([
     adminFetch<AdminMindDashboard>("/admin/mind/overview"),
     adminFetch<AdminMindGovernance>("/admin/mind/settings"),
+    adminFetch<AdminLLMUsageSummary>("/admin/mind/usage"),
+    ...mindBudgetFlows.map((flow) => adminFetch<AdminLLMBudget | null>(`/admin/mind/budgets/${flow}`)),
   ]);
-  return { overview, governance };
+  return { overview, governance, usage, budgets };
 }
 
 export async function getMindTurnMetrics(
@@ -35,5 +48,12 @@ export async function updateMindGovernance(
   return adminFetch<AdminMindGovernance>("/admin/mind/settings", {
     method: "PATCH",
     body: JSON.stringify(input),
+  });
+}
+
+export async function updateMindBudget(flow: string, monthlyBudgetBrl: number): Promise<AdminLLMBudget> {
+  return adminFetch<AdminLLMBudget>(`/admin/mind/budgets/${flow}`, {
+    method: "PUT",
+    body: JSON.stringify({ monthly_budget_brl: monthlyBudgetBrl }),
   });
 }

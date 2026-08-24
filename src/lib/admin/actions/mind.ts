@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { updateMindGovernance } from "../services/mind";
+import { updateMindBudget, updateMindGovernance } from "../services/mind";
 
 function numberValue(formData: FormData, field: string): number {
   const value = Number(formData.get(field));
@@ -17,5 +17,10 @@ export async function updateMindGovernanceAction(formData: FormData): Promise<vo
     diagnosis_grounding_top_k: numberValue(formData, "diagnosis_grounding_top_k"),
     diagnosis_grounding_min_score: numberValue(formData, "diagnosis_grounding_min_score"),
   });
+  revalidatePath("/admin/mind");
+}
+
+export async function updateMindBudgetAction(flow: string, formData: FormData): Promise<void> {
+  await updateMindBudget(flow, numberValue(formData, "monthly_budget_brl"));
   revalidatePath("/admin/mind");
 }

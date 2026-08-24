@@ -242,6 +242,26 @@ export interface AdminMindTurnMetric {
   created_at: string;
 }
 
+export interface AdminLLMBudget {
+  flow: string;
+  monthly_budget_brl: string;
+  updated_at: string;
+}
+
+export interface AdminLLMFlowUsage {
+  flow: string;
+  input_tokens: number;
+  cached_input_tokens: number;
+  output_tokens: number;
+  estimated_cost_brl: string;
+  monthly_budget_brl: string | null;
+}
+
+export interface AdminLLMUsageSummary {
+  month: string;
+  flows: AdminLLMFlowUsage[];
+}
+
 // ---- knowledge base (real — GET/POST /admin/knowledge-entries) -------------
 
 export interface KnowledgeEntry {

@@ -1,11 +1,15 @@
 import { AdminApiError } from "@/lib/admin/api";
-import { updateMindGovernanceAction } from "@/lib/admin/actions/mind";
-import { getMindDashboardData } from "@/lib/admin/services/mind";
+import { updateMindBudgetAction, updateMindGovernanceAction } from "@/lib/admin/actions/mind";
+import { getMindDashboardData, mindBudgetFlows } from "@/lib/admin/services/mind";
 import Button from "@/components/admin/ui/Button/Button";
 import styles from "./MindDashboard.module.scss";
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("pt-BR").format(value);
+}
+
+function formatCurrency(value: string | number) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(value));
 }
 
 export default async function AdminMindDashboardPage() {
@@ -26,7 +30,9 @@ export default async function AdminMindDashboardPage() {
     );
   }
 
-  const { overview, governance } = result.data;
+  const { overview, governance, usage, budgets } = result.data;
+  const usageByFlow = new Map(usage.flows.map((flow) => [flow.flow, flow]));
+  const budgetByFlow = new Map(budgets.filter((budget): budget is NonNullable<typeof budget> => budget !== null).map((budget) => [budget.flow, budget]));
   const groundingRate = overview.assistant_turns
     ? Math.round((overview.grounded_turns / overview.assistant_turns) * 100)
     : 0;
@@ -123,6 +129,34 @@ export default async function AdminMindDashboardPage() {
             </div>
             <div className={styles.settingsAction}><Button variant="solid">Salvar configurações</Button></div>
           </form>
+        </section>
+
+        <section className={styles.panel}>
+          <header className={styles.panelHeader}>
+            <div>
+              <h2>Orçamento mensal por fluxo</h2>
+              <p>Bloqueia uma chamada antes que seu pior caso ultrapasse o teto.</p>
+            </div>
+            <span className={styles.privatePill}>{usage.month}</span>
+          </header>
+          <div className={styles.budgetTable}>
+            <div className={styles.budgetHead}>
+              <span>fluxo</span><span>custo no mês</span><span>tokens cacheados</span><span>teto mensal</span>
+            </div>
+            {mindBudgetFlows.map((flow) => {
+              const current = usageByFlow.get(flow);
+              const budget = budgetByFlow.get(flow);
+              return (
+                <form action={updateMindBudgetAction.bind(null, flow)} className={styles.budgetRow} key={flow}>
+                  <span>{flow}</span>
+                  <span>{current ? formatCurrency(current.estimated_cost_brl) : formatCurrency(0)}</span>
+                  <span>{formatNumber(current?.cached_input_tokens ?? 0)}</span>
+                  <label><input name="monthly_budget_brl" type="number" defaultValue={budget?.monthly_budget_brl ?? ""} min="0.01" step="0.01" placeholder="não definido" required /><Button variant="outline">Salvar</Button></label>
+                </form>
+              );
+            })}
+          </div>
+          <p className={styles.note}>Sem teto definido, o fluxo apenas registra custo e tokens.</p>
         </section>
       </div>
   );
