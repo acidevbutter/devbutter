@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listConversations, getConversation } from "@/lib/admin/services/conversations";
+import { getMindTurnMetrics } from "@/lib/admin/services/mind";
 import { formatDate } from "@/lib/admin/format";
 import styles from "./Conversations.module.scss";
 
@@ -13,7 +14,9 @@ export default async function AdminConversationsPage({
   const conversations = await listConversations({ hasQuote });
 
   const selectedId = open ?? conversations[0]?.id;
-  const selected = selectedId ? await getConversation(selectedId) : null;
+  const [selected, mindMetrics] = selectedId
+    ? await Promise.all([getConversation(selectedId), getMindTurnMetrics(selectedId)])
+    : [null, null];
 
   function filterHref(value: boolean | undefined) {
     return value === undefined ? "/admin/conversations" : `/admin/conversations?has_quote=${value}`;
@@ -73,6 +76,18 @@ export default async function AdminConversationsPage({
                     Abrir quote →
                   </Link>
                 )}
+              </div>
+            )}
+            {mindMetrics && (
+              <div className={styles.metrics}>
+                <div className={styles.metricsTitle}>métricas da IA</div>
+                {mindMetrics.length ? mindMetrics.map((metric) => (
+                  <div key={metric.id} className={styles.metricRow}>
+                    <span>{metric.chunks_used_count} chunks</span>
+                    <span>{metric.input_tokens ?? "—"} in · {metric.cached_input_tokens ?? "—"} cache · {metric.output_tokens ?? "—"} out</span>
+                    <span>{metric.model ?? "stream"}</span>
+                  </div>
+                )) : <span className={styles.metricEmpty}>Sem métricas disponíveis para esta conversa.</span>}
               </div>
             )}
           </>

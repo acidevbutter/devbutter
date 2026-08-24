@@ -162,6 +162,20 @@ directly, this endpoint only covers the stat tiles and activity feed.
 }
 ```
 
+## `GET /admin/mind/overview`, `GET/PATCH /admin/mind/settings`
+
+Dashboard de operação da IA e limites seguros do diagnóstico. Todas as rotas exigem
+`CurrentAdminAccount`; o `devbutter_backend` consulta o `butter_mind` na rede privada com sua
+chave interna, que não é enviada ao navegador.
+
+- `GET /admin/mind/overview`: sessões, leads, grounding, tokens conhecidos, base RAG e uso por
+  modelo. Turnos via streaming sem `usage` permanecem explicitamente fora dos totais.
+- `GET /admin/mind/settings`: valores efetivos de `max_output_tokens`, histórico, turnos, top-k e
+  score mínimo, além de metadados somente leitura do modelo e embeddings.
+- `PATCH /admin/mind/settings`: atualiza apenas esses cinco limites com validação de faixa.
+- `GET /admin/mind/conversations/{conversation_id}/turn-metrics`: métricas por resposta para a
+  conversa exibida no admin.
+
 ## `GET /admin/catalog`
 
 Cross-account view of `service_catalog` entries for the top-level Catálogo nav item. The real

@@ -149,6 +149,9 @@ export default async function AdminDashboardPage() {
             <Button variant="outline" href="/admin/conversations?has_quote=false">
               Ver conversas sem quote
             </Button>
+            <Button variant="outline" href="/admin/mind">
+              Abrir métricas da IA
+            </Button>
           </div>
         </div>
       </div>

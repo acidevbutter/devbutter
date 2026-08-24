@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Adicionado painel administrativo de IA com métricas de grounding/tokens, configurações de
+  diagnóstico e métricas por conversa, consumindo o backend autenticado.
 - O modal de novo orçamento exibe a prévia estruturada do diagnóstico, grounding e pendências,
   inclusive ao retomar uma conversa; documentadas as alterações do fluxo recomendado.
 - Unificado o nome interno da URL da API em `API_BASE_URL`.

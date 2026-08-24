@@ -1,0 +1,38 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+.page { display: flex; flex-direction: column; gap: 18px; }
+.heading, .panelHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.title { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.subtitle, .panelHeader p, .note { margin: 5px 0 0; font: 11.5px "Geist Mono", monospace; color: $db-text-muted; }
+.privatePill, .override, .deploy { border: 1px solid $admin-border-interactive; border-radius: 20px; padding: 4px 9px; font: 500 10px "Geist Mono", monospace; color: $db-text-secondary; white-space: nowrap; }
+.override { color: $db-green; border-color: rgba(121, 229, 155, 0.4); background: rgba(121, 229, 155, 0.08); }
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.tile { @include admin.card; padding: 14px; display: flex; flex-direction: column; gap: 5px; }
+.tile span, .field span { @include admin.mono-label; }
+.tile strong { font-size: 27px; letter-spacing: -0.02em; }
+.tile small { font: 11px "Geist Mono", monospace; color: $db-text-muted; }
+.tileWarning { background: rgba(246, 76, 111, 0.08); border-color: rgba(246, 76, 111, 0.35); }
+.tileWarning strong { color: $db-pink; }
+.grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px; }
+.panel { @include admin.panel; overflow: hidden; }
+.panelHeader { padding: 14px 16px; border-bottom: 1px solid $admin-border; }
+.panelHeader h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.table { padding: 4px 16px 12px; }
+.tableHead, .tableRow { display: grid; grid-template-columns: 1.6fr repeat(4, .7fr); gap: 10px; align-items: center; }
+.tableHead { @include admin.mono-label; padding: 10px 0 7px; }
+.tableRow { padding: 10px 0; border-top: 1px solid $admin-border; font-size: 12.5px; }
+.tableRow span:not(:first-child) { font-family: "Geist Mono", monospace; color: $db-text-secondary; }
+.empty { padding: 32px 16px; color: $db-text-muted; font-size: 13px; }
+.note { padding: 0 16px 14px; }
+.knowledgeStats { display: grid; grid-template-columns: repeat(2, 1fr); padding: 18px 16px 12px; gap: 12px; }
+.knowledgeStats div { display: flex; flex-direction: column; gap: 4px; }
+.knowledgeStats strong { font-size: 27px; }
+.knowledgeStats span { font: 11px "Geist Mono", monospace; color: $db-text-muted; }
+.settingsForm { padding: 16px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field input { min-width: 0; box-sizing: border-box; border: 1px solid $admin-border-interactive; border-radius: 8px; background: $admin-card; color: $db-text-primary; padding: 8px 9px; font: 13px "Geist Mono", monospace; }
+.settingsMeta { grid-column: 1 / -1; display: flex; gap: 16px; flex-wrap: wrap; color: $db-text-muted; font: 11px "Geist Mono", monospace; }
+.settingsAction { grid-column: 1 / -1; }
+.unavailable { @include admin.panel; padding: 22px; }
+@media (max-width: 980px) { .tiles { grid-template-columns: repeat(2, 1fr); } .grid { grid-template-columns: 1fr; } .settingsForm { grid-template-columns: repeat(2, 1fr); } }

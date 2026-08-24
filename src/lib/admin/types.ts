@@ -191,6 +191,57 @@ export interface AdminDashboardMetrics {
   }>;
 }
 
+// ---- butter_mind (real — GET/PATCH /admin/mind/*) -------------------------
+
+export interface AdminMindModelUsage {
+  model: string | null;
+  turns: number;
+  input_tokens: number;
+  cached_input_tokens: number;
+  output_tokens: number;
+  turns_without_token_usage: number;
+}
+
+export interface AdminMindDashboard {
+  diagnosis_sessions: number;
+  sessions_in_progress: number;
+  submitted_requests: number;
+  possibly_ungrounded_requests: number;
+  assistant_turns: number;
+  grounded_turns: number;
+  turns_without_token_usage: number;
+  input_tokens: number;
+  cached_input_tokens: number;
+  output_tokens: number;
+  knowledge_sources: number;
+  knowledge_chunks: number;
+  last_knowledge_update_at: string | null;
+  model_usage: AdminMindModelUsage[];
+}
+
+export interface AdminMindGovernance {
+  diagnosis_max_output_tokens: number;
+  diagnosis_max_history_messages: number;
+  diagnosis_max_turns: number;
+  diagnosis_grounding_top_k: number;
+  diagnosis_grounding_min_score: number;
+  uses_runtime_override: boolean;
+  maritaca_model: string;
+  embeddings_model_name: string;
+}
+
+export interface AdminMindTurnMetric {
+  id: string;
+  assistant_message_id: string;
+  chunks_retrieved: Array<{ chunk_id: string; score: number }>;
+  chunks_used_count: number;
+  input_tokens: number | null;
+  cached_input_tokens: number | null;
+  output_tokens: number | null;
+  model: string | null;
+  created_at: string;
+}
+
 // ---- knowledge base (real — GET/POST /admin/knowledge-entries) -------------
 
 export interface KnowledgeEntry {

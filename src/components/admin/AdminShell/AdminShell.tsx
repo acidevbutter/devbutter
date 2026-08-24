@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { label: "Catálogo", href: "/admin/catalog" },
   { label: "Conhecimento", href: "/admin/knowledge" },
   { label: "Conversas", href: "/admin/conversations" },
+  { label: "IA & Métricas", href: "/admin/mind" },
   { label: "Webhooks", href: "/admin/webhooks" },
 ];
 
