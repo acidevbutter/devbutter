@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Adicionadas rotas BFF autenticadas para contexto e envio opaco de métodos de pagamento, sem receber ou persistir dados de cartão em claro.
+
 - Adicionado helper client-side de envelope AES-256-GCM v1 para payloads sensíveis, sem persistência de dados do cartão.
 
 - Adicionado controle de orçamento mensal e custo por fluxo na tela IA & Métricas.
