@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Adicionado helper client-side de envelope AES-256-GCM v1 para payloads sensíveis, sem persistência de dados do cartão.
+
 - Adicionado controle de orçamento mensal e custo por fluxo na tela IA & Métricas.
 
 - Adicionado painel administrativo de IA com métricas de grounding/tokens, configurações de
