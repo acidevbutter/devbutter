@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Badge from "@/components/admin/ui/Badge/Badge";
-import Button from "@/components/admin/ui/Button/Button";
+import PaymentMethods from "@/components/portal/PaymentMethods/PaymentMethods";
+import PaymentStatus from "@/components/portal/PaymentStatus/PaymentStatus";
+import PixBoletoView from "@/components/portal/PixBoletoView/PixBoletoView";
 import { formatCurrency, formatDate, invoiceStatusLabel, invoiceStatusTone } from "@/lib/admin/format";
 import type { PortalInvoice } from "@/lib/portal/types";
 import styles from "./Invoices.module.scss";
@@ -30,6 +32,7 @@ export default function InvoicesClient({ invoices }: { invoices: PortalInvoice[]
 
   const filtered = invoices.filter((i) => matchesFilter(i, filter));
   const expanded = invoices.find((i) => i.id === expandedId) ?? null;
+  const [paymentState, setPaymentState] = useState<string | null>(null);
 
   return (
     <div className={styles.page}>
@@ -74,7 +77,7 @@ export default function InvoicesClient({ invoices }: { invoices: PortalInvoice[]
         ))}
       </div>
 
-      {expanded && (expanded.pixCode || expanded.boletoUrl) && (
+      {expanded && (
         <div className={styles.expandedPanel}>
           <div className={styles.expandedTop}>
             <div>
@@ -87,16 +90,25 @@ export default function InvoicesClient({ invoices }: { invoices: PortalInvoice[]
             <Badge tone={invoiceStatusTone(expanded.status)}>{invoiceStatusLabel(expanded.status)}</Badge>
           </div>
           <div className={styles.expandedGrid}>
-            <div className={styles.qrBox}>QR code Pix</div>
+            <PixBoletoView
+              pixCode={expanded.pixCode}
+              boletoUrl={expanded.boletoUrl}
+              amount={expanded.amount}
+              dueDate={expanded.dueDate}
+              projectTitle={expanded.projectTitle}
+            />
             <div className={styles.stack}>
-              <div className={styles.field}>Copiar código Pix</div>
-              <div className={styles.field}>Baixar boleto (PDF)</div>
-              <Button variant="danger" href={expanded.boletoUrl ?? "#"} className={styles.payBtn}>
-                Pagar com cartão
-              </Button>
+              <PaymentMethods invoiceId={expanded.id} onPaymentSubmitted={setPaymentState} />
             </div>
           </div>
           <div className={styles.note}>links vêm do Asaas; a tela só exibe o que o pagamento devolveu</div>
+          {paymentState && (
+            <PaymentStatus
+              state={paymentState}
+              invoiceHref="/portal/faturas"
+              onRetry={() => setPaymentState(null)}
+            />
+          )}
         </div>
       )}
     </div>

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+- Adicionada composição Docker de desenvolvimento com autoreload, volume do código e conexão à
+  rede externa `devbutter_shared`.
+
+- Alinhado o contrato do portal para `invoice_id` e operações `save_only`/`save_and_pay`;
+  adicionados BFFs para listar e revogar métodos de pagamento.
+
 - Adicionadas rotas BFF autenticadas para contexto e envio opaco de métodos de pagamento, sem receber ou persistir dados de cartão em claro.
 
 - Adicionado helper client-side de envelope AES-256-GCM v1 para payloads sensíveis, sem persistência de dados do cartão.

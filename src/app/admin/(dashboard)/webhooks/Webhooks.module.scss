@@ -1,0 +1,170 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 13, 0.55);
+  z-index: 60;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawer {
+  width: min(460px, 100%);
+  height: 100%;
+  background: $admin-panel;
+  border-left: 1px solid $admin-border-interactive;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  animation: drawerIn 0.18s ease-out;
+}
+
+@keyframes drawerIn {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.drawerHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid $admin-border;
+}
+
+.drawerTitle {
+  font: 500 13px "Geist Mono", monospace;
+  color: $db-text-primary;
+}
+
+.drawerMeta {
+  margin-top: 4px;
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: $db-text-muted;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}
+
+.drawerBody {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionLabel {
+  @include admin.mono-label;
+  margin-bottom: 7px;
+}
+
+.errorBox {
+  border: 1px solid rgba(246, 76, 111, 0.4);
+  background: rgba(246, 76, 111, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: 12px/1.5 "Geist Mono", monospace;
+  color: $db-pink;
+}
+
+.payload {
+  margin: 0;
+  padding: 12px;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  font: 11.5px/1.5 "Geist Mono", monospace;
+  color: $db-text-secondary;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.copyBtn {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 7px;
+  padding: 5px 10px;
+  font: 500 11px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  cursor: pointer;
+
+  &:hover {
+    color: $db-text-primary;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.relChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font: 500 11px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  text-decoration: none;
+
+  &:hover {
+    color: $db-green;
+    border-color: rgba(121, 229, 155, 0.4);
+  }
+}
+
+.drawerFooter {
+  margin-top: auto;
+  padding: 14px 18px;
+  border-top: 1px solid $admin-border;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reprocessBtn {
+  @include admin.button-outline;
+  color: $db-pink;
+  border-color: rgba(246, 76, 111, 0.45);
+}
+
+.confirmText {
+  font: 11.5px/1.5 "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.confirmRow {
+  display: flex;
+  gap: 10px;
+}
+
+.rowButton {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}

@@ -1,0 +1,107 @@
+@use "../../../styles/tokens" as *;
+
+.panel {
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.heading {
+  color: $db-text-primary;
+  font: 600 12px "Geist Mono", monospace;
+  text-transform: lowercase;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.method {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+}
+
+.method strong,
+.method span {
+  display: block;
+}
+
+.method strong {
+  color: $db-text-primary;
+  font: 12px "Geist Mono", monospace;
+}
+
+.method span,
+.feedback,
+.note {
+  color: $db-text-muted;
+  font: 10.5px "Geist Mono", monospace;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pay,
+.revoke {
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  font: 10px "Geist Mono", monospace;
+}
+
+.pay {
+  border: 1px solid rgba(121, 229, 155, 0.5);
+  color: $db-green;
+  background: rgba(121, 229, 155, 0.08);
+}
+
+.revoke {
+  border: 1px solid rgba(246, 76, 111, 0.4);
+  color: $db-pink;
+  background: transparent;
+}
+
+.pay:disabled,
+.revoke:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.feedback {
+  margin-top: 10px;
+}
+
+.error {
+  margin-top: 10px;
+  color: $db-pink;
+  font: 11px "Geist Mono", monospace;
+}
+
+.note {
+  margin-top: 10px;
+}
+
+@media (max-width: 640px) {
+  .method {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+}

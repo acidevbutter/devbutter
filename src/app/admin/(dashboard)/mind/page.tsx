@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AdminApiError } from "@/lib/admin/api";
 import { updateMindBudgetAction, updateMindGovernanceAction } from "@/lib/admin/actions/mind";
 import { getMindDashboardData, mindBudgetFlows } from "@/lib/admin/services/mind";
@@ -23,8 +24,11 @@ export default async function AdminMindDashboardPage() {
       : "Falha ao consultar a Mind API.";
     return (
       <div className={styles.unavailable}>
-        <h1 className={styles.title}>IA &amp; Métricas</h1>
-        <p>{detail}</p>
+        <div className={styles.crumb}>
+          <Link href="/admin/config">Configurações</Link> / Butter Mind
+        </div>
+        <h1 className={styles.title}>Configurações · Butter Mind</h1>
+        <p style={{ color: "var(--db-pink)" }}>conexão privada com erro — {detail}</p>
         <p className={styles.note}>Confirme a conectividade privada e a chave interna entre backend e butter_mind.</p>
       </div>
     );
@@ -39,14 +43,17 @@ export default async function AdminMindDashboardPage() {
 
   return (
       <div className={styles.page}>
+        <div className={styles.crumb}>
+          <Link href="/admin/config">Configurações</Link> / Butter Mind
+        </div>
         <div className={styles.heading}>
           <div>
-            <h1 className={styles.title}>IA &amp; Métricas</h1>
+            <h1 className={styles.title}>Configurações · Butter Mind</h1>
             <p className={styles.subtitle}>
-              diagnóstico, grounding e governança do butter_mind
+              conexão privada, base de conhecimento, grounding e governança do butter_mind
             </p>
           </div>
-          <span className={styles.privatePill}>interno · API privada</span>
+          <span className={styles.override}>conexão privada · ativa</span>
         </div>
 
         <section className={styles.tiles} aria-label="Resumo da IA">
@@ -104,6 +111,12 @@ export default async function AdminMindDashboardPage() {
             <p className={styles.note}>
               Última ingestão: {overview.last_knowledge_update_at ? new Date(overview.last_knowledge_update_at).toLocaleString("pt-BR") : "nenhuma"}.
             </p>
+            <div className={styles.knowledgeAction}>
+              <Button variant="outline" disabled title="disponível quando o backend expuser a rota de reingestão">
+                Reprocessar conhecimento
+              </Button>
+              <span>ação disponível quando o backend expuser a rota de reingestão</span>
+            </div>
           </section>
         </div>
 

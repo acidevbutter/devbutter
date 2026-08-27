@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { saveAccountAction } from "@/lib/portal/actions/account";
 import type { ActionState } from "@/lib/portal/actions/types";
 import type { PortalAccount } from "@/lib/portal/types";
@@ -33,6 +34,16 @@ export default function AccountForm({ account }: { account: PortalAccount }) {
         <input className={styles.field} name="business_name" defaultValue={account.businessName ?? ""} />
         <div className={styles.label}>CNPJ / CPF</div>
         <input className={styles.field} name="document" defaultValue={account.document ?? ""} />
+      </div>
+
+      <div className={styles.sec}>
+        <div className={styles.kick}>meios de pagamento</div>
+        <div className={styles.linkRow}>
+          <p>Cartões salvos para pagar faturas mais rápido.</p>
+          <Link href="/portal/dados/cartoes" className={styles.linkBtn}>
+            Gerenciar cartões
+          </Link>
+        </div>
       </div>
 
       <div className={styles.sec}>

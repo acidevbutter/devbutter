@@ -136,6 +136,15 @@ Abra `http://localhost:3000`. `AGENTS.md`/`CLAUDE.md` documentam que esta é uma
 com breaking changes relevantes para agentes de IA gerando código aqui — ver
 `node_modules/next/dist/docs/` antes de assumir comportamento de versões anteriores.
 
+Para rodar com Docker, mantendo autoreload e acesso ao backend pela `devbutter_shared`:
+
+```bash
+docker compose --env-file .env up -d --build
+```
+
+Abra `http://localhost:3000`. O código é montado em `/app`; alterações locais são observadas por
+polling. O backend é acessado internamente como `http://platform-api:8000`.
+
 ## Lacunas conhecidas
 
 Ver o levantamento completo em

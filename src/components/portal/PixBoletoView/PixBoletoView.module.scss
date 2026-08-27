@@ -1,0 +1,96 @@
+@use "../../../styles/tokens" as *;
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.method {
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+}
+
+.pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 10px "Geist Mono", monospace;
+  color: $admin-amber;
+  border: 1px solid rgba(229, 183, 90, 0.4);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.codeBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 8px;
+  background: $admin-card;
+  padding: 9px 11px;
+}
+
+.code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 12px "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.copyBtn {
+  flex: none;
+  background: none;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 7px;
+  padding: 4px 9px;
+  font: 500 11px "Geist Mono", monospace;
+  color: $db-text-primary;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.32);
+  }
+}
+
+.boletoLink {
+  display: inline-block;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 8px;
+  padding: 9px 11px;
+  font: 12px "Geist Mono", monospace;
+  color: $db-green;
+  text-decoration: none;
+  background: $admin-card;
+
+  &:hover {
+    border-color: rgba(121, 229, 155, 0.4);
+  }
+}
+
+.meta {
+  font: 10.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.empty {
+  border: 2px dashed $admin-border-interactive;
+  border-radius: 10px;
+  padding: 20px 12px;
+  text-align: center;
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+}

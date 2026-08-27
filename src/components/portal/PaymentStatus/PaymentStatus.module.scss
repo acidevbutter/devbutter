@@ -1,0 +1,89 @@
+@use "../../../styles/tokens" as *;
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid $admin-border-interactive;
+  padding: 12px 14px;
+  background: $admin-card;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.label {
+  font: 600 12px "Geist", sans-serif;
+}
+
+.body {
+  font: 11px/1.5 "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.action {
+  align-self: flex-start;
+  margin-top: 2px;
+  font: 500 11px "Geist Mono", monospace;
+  background: none;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 7px;
+  padding: 5px 10px;
+  color: $db-text-primary;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.32);
+  }
+}
+
+.pending {
+  border-color: rgba(229, 183, 90, 0.4);
+  .dot {
+    background: $admin-amber;
+  }
+  .label {
+    color: $admin-amber;
+  }
+}
+
+.ok {
+  border-color: rgba(121, 229, 155, 0.4);
+  .dot {
+    background: $db-green;
+  }
+  .label {
+    color: $db-green;
+  }
+}
+
+.failed {
+  border-color: rgba(246, 76, 111, 0.4);
+  .dot {
+    background: $db-pink;
+  }
+  .label {
+    color: $db-pink;
+  }
+}
+
+.error {
+  .dot {
+    background: $db-text-muted;
+  }
+  .label {
+    color: $db-text-secondary;
+  }
+}

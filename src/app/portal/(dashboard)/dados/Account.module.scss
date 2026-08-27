@@ -89,3 +89,22 @@
 .discard {
   @include admin.button-outline;
 }
+
+.linkRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.linkRow p {
+  margin: 0;
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.linkBtn {
+  @include admin.button-outline;
+  text-decoration: none;
+}

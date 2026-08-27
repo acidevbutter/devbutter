@@ -128,6 +128,8 @@ export const config = {
     "/admin",
     "/admin/((?!login).*)",
     "/portal",
-    "/portal/((?!login|signup).*)",
+    // sessao-expirada / acesso-negado are the unauthenticated fallbacks the
+    // portal redirects *to*, so they must stay reachable without a session.
+    "/portal/((?!login|signup|sessao-expirada|acesso-negado).*)",
   ],
 };

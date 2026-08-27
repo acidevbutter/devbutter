@@ -8,7 +8,7 @@ export default async function PortalDashboardLayout({ children }: { children: Re
     account = await getPortalAccount();
   } catch (err) {
     if (err instanceof PortalUnauthenticatedError) {
-      redirect("/portal/login");
+      redirect("/portal/sessao-expirada");
     }
     throw err;
   }

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Logomark from "@/components/icons/Logomark";
+import GlobalSearch from "@/components/admin/GlobalSearch/GlobalSearch";
 import styles from "./AdminShell.module.scss";
 
 const NAV_ITEMS = [
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { label: "Conversas", href: "/admin/conversations" },
   { label: "IA & Métricas", href: "/admin/mind" },
   { label: "Webhooks", href: "/admin/webhooks" },
+  { label: "Configurações", href: "/admin/config" },
 ];
 
 export default function AdminShell({
@@ -41,7 +43,7 @@ export default function AdminShell({
           <span className={styles.pill}>admin</span>
         </div>
         <div className={styles.topbarActions}>
-          <input className={styles.search} placeholder="buscar cliente, quote, order…" disabled />
+          <GlobalSearch />
           <div className={styles.identity}>
             <span className={styles.identityName}>{accountName}</span>
             <div className={styles.avatar}>{initial}</div>

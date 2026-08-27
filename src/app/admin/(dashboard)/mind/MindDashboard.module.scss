@@ -2,6 +2,8 @@
 @use "../../../../styles/tokens" as *;
 
 .page { display: flex; flex-direction: column; gap: 18px; }
+.crumb { font: 11.5px "Geist Mono", monospace; color: $db-text-muted; a { color: $db-text-muted; } a:hover { color: $db-text-secondary; } }
+.knowledgeAction { display: flex; align-items: center; gap: 12px; padding: 0 16px 16px; flex-wrap: wrap; span { font: 11px "Geist Mono", monospace; color: $db-text-muted; } }
 .heading, .panelHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .title { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
 .subtitle, .panelHeader p, .note { margin: 5px 0 0; font: 11.5px "Geist Mono", monospace; color: $db-text-muted; }

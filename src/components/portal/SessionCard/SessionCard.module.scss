@@ -1,0 +1,78 @@
+@use "../../../styles/tokens" as *;
+
+.screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  background:
+    radial-gradient(520px 300px at 50% 8%, rgba(121, 229, 155, 0.14), transparent 70%),
+    $admin-bg;
+}
+
+.card {
+  width: 360px;
+  max-width: 100%;
+  padding: 30px 28px;
+  border-radius: 20px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(22px) saturate(1.4);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  text-align: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.wordmark {
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: $db-text-primary;
+}
+
+.body {
+  margin: 0 0 22px;
+  font: 12.5px/1.6 "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.cta {
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+  background: $db-green;
+  color: $admin-bg;
+  border-radius: 9px;
+  padding: 11px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.ctaGhost {
+  display: inline-block;
+  margin-top: 10px;
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  text-decoration: none;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}

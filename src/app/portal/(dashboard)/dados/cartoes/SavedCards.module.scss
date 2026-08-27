@@ -1,0 +1,178 @@
+@use "../../../../../styles/admin" as admin;
+@use "../../../../../styles/tokens" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.crumb {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+
+  a {
+    color: $db-text-muted;
+  }
+
+  a:hover {
+    color: $db-text-secondary;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.intro {
+  font: 12px/1.6 "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  @include admin.card;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardBrand {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.defaultBadge {
+  font: 500 9px "Geist Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $db-green;
+  border: 1px solid rgba(121, 229, 155, 0.4);
+  border-radius: 20px;
+  padding: 1px 7px;
+}
+
+.cardMeta {
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.removeBtn {
+  background: none;
+  border: 1px solid rgba(246, 76, 111, 0.45);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font: 500 11.5px "Geist Mono", monospace;
+  color: $db-pink;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $db-pink;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.empty,
+.feedback {
+  @include admin.card;
+  padding: 26px 16px;
+  text-align: center;
+  font: 12.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.error {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-pink;
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.addBtn {
+  @include admin.button-outline;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.addNote {
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 13, 0.66);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.modal {
+  width: min(400px, 100%);
+  background: $admin-panel;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.modalBody {
+  font: 12.5px/1.6 "Geist Mono", monospace;
+  color: $db-text-secondary;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.ghostBtn {
+  background: none;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font: 500 11.5px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  cursor: pointer;
+}

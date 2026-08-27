@@ -1,0 +1,116 @@
+@use "../../../../styles/admin" as admin;
+@use "../../../../styles/tokens" as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 5px 0 0;
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.privatePill {
+  border: 1px solid $admin-border-interactive;
+  border-radius: 20px;
+  padding: 4px 9px;
+  font: 500 10px "Geist Mono", monospace;
+  color: $db-text-secondary;
+  white-space: nowrap;
+}
+
+.notice {
+  @include admin.card;
+  padding: 12px 14px;
+  font: 12px/1.6 "Geist Mono", monospace;
+  color: $db-text-secondary;
+  border-color: rgba(121, 229, 155, 0.25);
+  background: rgba(121, 229, 155, 0.05);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.card {
+  @include admin.panel;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cardName {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cardMeta {
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font: 500 10px "Geist Mono", monospace;
+  border-radius: 20px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.badgeOk {
+  color: $db-green;
+  border-color: rgba(121, 229, 155, 0.4);
+}
+
+.badgeWarn {
+  color: $admin-amber;
+  border-color: rgba(229, 183, 90, 0.4);
+}
+
+.badgeError {
+  color: $db-pink;
+  background: rgba(246, 76, 111, 0.12);
+  border-color: rgba(246, 76, 111, 0.3);
+}
+
+.badgeIdle {
+  color: $db-text-secondary;
+  border-color: $admin-border-interactive;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
