@@ -1,0 +1,28 @@
+flowchart TD
+  V[Visitante] --> L[Landing / waitlist]
+  V --> Q[Concierge IA]
+  Q --> C[Conversa anônima ou autenticada]
+  C --> P[Preview e pendências]
+  P --> G[Gate de conta]
+  G --> D[Draft quote / confirmação]
+
+  U[Cliente] --> A[Portal login/signup/password setup]
+  A --> S[Proxy e cookies httpOnly]
+  S --> H[Dashboard portal]
+  H --> O[Orçamentos / projetos]
+  H --> F[Faturas]
+  H --> T[Dados / catálogo]
+  F --> Pay[Pix, boleto ou método salvo]
+
+  X[Administrador] --> AL[Admin login]
+  AL --> AS[Proxy e cookies httpOnly]
+  AS --> AD[Dashboard admin]
+  AD --> Ops[Quotes, orders, invoices, clients]
+  AD --> AI[Mind, knowledge, conversations]
+  AD --> Fin[Asaas, companies, webhooks]
+
+  D --> A
+  Pay --> B[devbutter_backend]
+  Ops --> B
+  AI --> B
+  Fin --> B

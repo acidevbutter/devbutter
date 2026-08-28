@@ -1,0 +1,19 @@
+flowchart LR
+  Admin[Administrador] --> Login[Admin login]
+  Login --> Gate{Cookie válido?}
+  Gate -- não --> Login
+  Gate -- sim --> Dashboard[AdminShell / dashboard]
+  Dashboard --> Review[Fila de quotes]
+  Dashboard --> Commercial[Clientes, empresas, catálogo]
+  Dashboard --> Financial[Orders, invoices, Asaas]
+  Dashboard --> AI[Mind, knowledge, conversations]
+  Dashboard --> Webhooks[Eventos e reprocessamento]
+
+  Financial --> Mutations[Ações server-side]
+  Webhooks --> Mutations
+  Mutations --> Backend[devbutter_backend]
+  Backend --> External[Relay / Asaas / Mind]
+
+  Public[Usuário público] --> Maintenance[Manutenção]
+  Public --> Waitlist[POST waitlist]
+  Waitlist --> Hook[Webhook configurado]

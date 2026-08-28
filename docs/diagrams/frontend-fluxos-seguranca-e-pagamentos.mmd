@@ -1,0 +1,25 @@
+sequenceDiagram
+  participant Browser
+  participant BFF as Next Route Handler
+  participant Backend as devbutter_backend
+  participant Provider as Relay / Asaas
+
+  Browser->>BFF: login ou chamada portal
+  BFF->>Backend: Bearer de cookie httpOnly
+  Backend-->>BFF: dados / tokens
+  BFF-->>Browser: resposta sem token exposto
+
+  Browser->>BFF: envelope opaco + invoice_id + operation
+  Note over BFF: body é encaminhado byte a byte; não parseia cartão
+  BFF->>Backend: POST /payment-methods
+  Backend->>Provider: tokenização / pagamento conforme contrato
+  Provider-->>Backend: resultado do provedor
+  Backend-->>BFF: método mascarado ou estado
+  BFF-->>Browser: resultado
+
+  Browser->>BFF: payment_method_id + idempotency_key
+  BFF->>Backend: POST /payments
+  Backend->>Provider: cobrança
+  Provider-->>Backend: aceito, falho ou pendente
+  Backend-->>BFF: estado do PaymentAttempt
+  BFF-->>Browser: estado apresentado pela UI

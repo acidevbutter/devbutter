@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+- Documentados os fluxos existentes do frontend em Markdown e Mermaid, com pontos fortes, falhas,
+  lacunas e limites da validação estática.
+
 - Adicionada composição Docker de desenvolvimento com autoreload, volume do código e conexão à
   rede externa `devbutter_shared`.
 
