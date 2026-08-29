@@ -326,7 +326,10 @@ function TokensTable({
       {rows.map((t) => (
         <div key={t.id} className={styles.row} style={{ gridTemplateColumns: cols }}>
           <span>{t.name ?? "—"}</span>
-          <span className={styles.mono}>{maskTail(t.apiKey ?? t.id, 6)}</span>
+          {/* t.apiKey already arrives masked from listAccessTokens() (server-side) --
+              see docs/prompts/nao-vazar-apikey-asaas-client.md. Only fall back to
+              masking t.id here, never re-mask apiKey. */}
+          <span className={styles.mono}>{t.apiKey ?? maskTail(t.id, 6)}</span>
           <span className={styles.badge}>{t.status ?? "ativa"}</span>
           <div className={styles.rowActions}>
             <button

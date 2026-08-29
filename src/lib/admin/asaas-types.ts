@@ -29,6 +29,7 @@ export interface AsaasAccessToken {
   name?: string;
   status?: string;
   createdAt?: string;
+  /** Já mascarada pelo servidor (ex: "••••ab12cd") -- nunca a chave crua. */
   apiKey?: string;
   [key: string]: unknown;
 }

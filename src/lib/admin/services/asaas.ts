@@ -1,5 +1,6 @@
 import "server-only";
 import { adminFetch } from "../api";
+import { maskTail } from "../asaas-types";
 import type {
   AsaasAccessToken,
   AsaasAuditLog,
@@ -46,10 +47,28 @@ export function resendActivationLink(accountId: string): Promise<unknown> {
 }
 
 // Real: GET /admin/subaccounts/{id}/access-tokens
-export function listAccessTokens(
+//
+// The backend returns the raw Asaas apiKey. That value must never reach a
+// client component -- it's masked here, server-side, before it leaves this
+// function. See docs/prompts/nao-vazar-apikey-asaas-client.md.
+export async function listAccessTokens(
   accountId: string
 ): Promise<AsaasListEnvelope<AsaasAccessToken> | AsaasAccessToken[]> {
-  return adminFetch(`/admin/subaccounts/${encodeURIComponent(accountId)}/access-tokens`);
+  const result = await adminFetch<AsaasListEnvelope<AsaasAccessToken> | AsaasAccessToken[]>(
+    `/admin/subaccounts/${encodeURIComponent(accountId)}/access-tokens`
+  );
+  return maskAccessTokens(result);
+}
+
+function maskAccessTokens<T extends AsaasListEnvelope<AsaasAccessToken> | AsaasAccessToken[]>(
+  result: T
+): T {
+  const mask = (token: AsaasAccessToken): AsaasAccessToken =>
+    token.apiKey ? { ...token, apiKey: maskTail(token.apiKey, 6) } : token;
+
+  return Array.isArray(result)
+    ? (result.map(mask) as T)
+    : ({ ...result, data: result.data.map(mask) } as T);
 }
 
 // Real: DELETE /admin/subaccounts/{id}/access-tokens/{tokenId}
