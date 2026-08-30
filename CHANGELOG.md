@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Tornada a imagem Docker apta a produção com `next build` e `next start`.
+
 - Documentados os fluxos existentes do frontend em Markdown e Mermaid, com pontos fortes, falhas,
   lacunas e limites da validação estática.
 
