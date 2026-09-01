@@ -1,22 +1,75 @@
+# Frontend DevButter (Next.js 16).
+#
+# Dev (autoreload, código montado por volume):
+#   docker network create devbutter_shared 2>/dev/null || true
+#   docker compose up --build
+#
+# Produção local (imagem do Dockerfile: yarn build + yarn start):
+#   docker compose --profile prod up --build web-prod
+#
+# A rede `devbutter_shared` é criada pelo stack de infra
+# (../infra/docker-compose.yml). Sem ele, crie-a manualmente com o comando acima.
+
+x-upstreams: &upstreams
+  # devbutter_backend (FastAPI). Server-only — consumido pelas rotas /admin e BFF.
+  # Dentro da rede compartilhada o serviço responde como platform-api:8000.
+  API_BASE_URL: ${API_BASE_URL:-http://platform-api:8000}
+  # Mesmo backend, mas precisa ser alcançável direto do navegador (socket.io do portal).
+  NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:8002}
+
 services:
   web:
     build: .
+    container_name: devbutter-frontend
     command: >-
       sh -c "yarn install --frozen-lockfile &&
       yarn dev --hostname 0.0.0.0 --port 3000"
     ports:
-      - "3000:3000"
+      - "${FRONTEND_HOST_PORT:-3000}:3000"
     env_file:
       - .env
     environment:
-      API_BASE_URL: http://platform-api:8000
-      NEXT_PUBLIC_SOCKET_URL: http://localhost:8002
+      <<: *upstreams
+      NODE_ENV: development
+      # Hot reload confiável sob volumes montados no Docker Desktop.
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
     volumes:
       - .:/app
       - frontend_node_modules:/app/node_modules
       - frontend_next:/app/.next
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      default:
+      devbutter_shared:
+        aliases:
+          - frontend
+
+  # Sobe a imagem de produção (sem volume de código, sem autoreload).
+  web-prod:
+    profiles: ["prod"]
+    build: .
+    container_name: devbutter-frontend-prod
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      <<: *upstreams
+      NODE_ENV: production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       default:
       devbutter_shared:

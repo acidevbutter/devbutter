@@ -23,6 +23,16 @@ const COOKIE_BASE = {
   path: "/",
 };
 
+/**
+ * Single login screen: the guard bounces unauthenticated admin traffic to
+ * /portal/login, tagging the requested path so it can return here after login.
+ */
+function adminLoginUrl(request: NextRequest) {
+  const url = new URL("/portal/login", request.url);
+  url.searchParams.set("next", request.nextUrl.pathname);
+  return url;
+}
+
 export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/portal")) {
     return portalProxy(request);
@@ -32,7 +42,7 @@ export async function proxy(request: NextRequest) {
   const refreshToken = request.cookies.get(ADMIN_REFRESH_COOKIE)?.value;
 
   if (!refreshToken) {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+    return NextResponse.redirect(adminLoginUrl(request));
   }
 
   if (accessToken && !isJwtExpiringSoon(accessToken)) {
@@ -41,7 +51,7 @@ export async function proxy(request: NextRequest) {
 
   const refreshed = await refreshTokenPair(refreshToken);
   if (!refreshed) {
-    const redirectRes = NextResponse.redirect(new URL("/admin/login", request.url));
+    const redirectRes = NextResponse.redirect(adminLoginUrl(request));
     redirectRes.cookies.delete(ADMIN_ACCESS_COOKIE);
     redirectRes.cookies.delete(ADMIN_REFRESH_COOKIE);
     return redirectRes;

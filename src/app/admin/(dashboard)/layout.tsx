@@ -15,7 +15,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     ]);
   } catch (err) {
     if (err instanceof AdminUnauthenticatedError) {
-      redirect("/admin/login");
+      redirect("/portal/login?next=/admin/dashboard");
     }
     throw err;
   }

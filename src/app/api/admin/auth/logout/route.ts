@@ -9,5 +9,5 @@ export async function POST(request: Request) {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_ACCESS_COOKIE);
   cookieStore.delete(ADMIN_REFRESH_COOKIE);
-  return NextResponse.redirect(new URL("/admin/login", request.url), { status: 303 });
+  return NextResponse.redirect(new URL("/portal/login", request.url), { status: 303 });
 }

@@ -27,6 +27,9 @@ export function portalErrorResponse(error: unknown): Response {
   if (error instanceof PortalApiError) {
     return Response.json({ error: error.detail ?? "portal_api_error" }, { status: error.status });
   }
+
+  console.log(error);
+  console.log("cu");
   return Response.json({ error: "upstream_failed" }, { status: 502 });
 }
 

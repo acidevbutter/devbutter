@@ -23,7 +23,20 @@ function PortalLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isQuoteIntent = searchParams.get("intent") === "quote";
-  const destination = isQuoteIntent ? "/portal/orcamentos?new=1" : "/portal";
+
+  const nextParam = searchParams.get("next");
+  const safeNext =
+    nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
+  const wantsAdmin = safeNext?.startsWith("/admin") ?? false;
+
+  // Non-admins never land on an /admin path; admins fall back to the dashboard.
+  const destination = wantsAdmin
+    ? isQuoteIntent
+      ? "/portal/orcamentos?new=1"
+      : "/portal"
+    : safeNext ?? (isQuoteIntent ? "/portal/orcamentos?new=1" : "/portal");
+  const adminDestination = wantsAdmin && safeNext ? safeNext : "/admin/dashboard";
+
   const [tab, setTab] = useState<"entrar" | "criar">(isQuoteIntent ? "criar" : "entrar");
 
   return (
@@ -60,7 +73,7 @@ function PortalLoginForm() {
         </div>
 
         {tab === "entrar" ? (
-          <LoginForm router={router} destination={destination} />
+          <LoginForm router={router} destination={destination} adminDestination={adminDestination} />
         ) : (
           <SignupForm router={router} destination={destination} />
         )}
@@ -72,9 +85,11 @@ function PortalLoginForm() {
 function LoginForm({
   router,
   destination,
+  adminDestination,
 }: {
   router: ReturnType<typeof useRouter>;
   destination: string;
+  adminDestination: string;
 }) {
   const [email, setEmail] = useState("ana@atelie-corvo.com");
   const [password, setPassword] = useState("");
@@ -99,7 +114,7 @@ function LoginForm({
         return;
       }
       const body = (await res.json().catch(() => null)) as { isAdmin?: boolean } | null;
-      router.push(body?.isAdmin ? "/admin/dashboard" : destination);
+      router.push(body?.isAdmin ? adminDestination : destination);
       router.refresh();
     } catch {
       setError("falha de conexão — tente novamente");

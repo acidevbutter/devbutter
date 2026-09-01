@@ -29,6 +29,13 @@
   justify-content: space-between;
   padding-bottom: 14px;
   border-bottom: 1px solid $admin-border;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .headMeta {
@@ -56,6 +63,12 @@
   flex-shrink: 0;
 }
 
+.headActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .close {
   background: none;
   border: none;
@@ -66,6 +79,47 @@
   &:hover {
     color: $db-text-primary;
   }
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: $db-text-muted;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 8px;
+  cursor: pointer;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}
+
+.launcher {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: $admin-panel;
+  border: 1px solid rgba(121, 229, 155, 0.28);
+  color: $db-text-primary;
+  font: 600 13px "Geist", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 24px rgba(0, 210, 106, 0.1);
+
+  &:hover {
+    border-color: rgba(121, 229, 155, 0.5);
+  }
+}
+
+.launcherHint {
+  font: 11px "Geist Mono", monospace;
+  color: $db-green;
 }
 
 .thread {
@@ -96,6 +150,47 @@
   background: rgba(121, 229, 155, 0.08);
   border: 1px solid rgba(121, 229, 155, 0.3);
   color: #cfeedc;
+}
+
+.msgFailed {
+  border-color: rgba(246, 76, 111, 0.55);
+  background: rgba(246, 76, 111, 0.08);
+}
+
+.failedRow {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 85%;
+
+  .msg {
+    max-width: 100%;
+  }
+}
+
+.retryBtn {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 1px solid rgba(246, 76, 111, 0.55);
+  color: $db-pink;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(246, 76, 111, 0.14);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 }
 
 .typing {

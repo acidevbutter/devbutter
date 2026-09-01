@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { io, type Socket } from "socket.io-client";
 import { PUBLIC_SOCKET_URL } from "@/lib/portal/config";
 import styles from "./NewQuoteModal.module.scss";
 
-type Message = { role: "ai" | "me"; content: string };
+type Message = { role: "ai" | "me"; content: string; status?: "sending" | "failed" };
 
 type JoinAck = { ok: boolean; detail?: string };
 
@@ -40,6 +41,8 @@ type ConversationRead = {
 
 const INITIAL_AI_MESSAGE = "Oi! Vi que você já tem projetos com a gente. Me conta o que você precisa agora.";
 
+const noopSubscribe = () => () => {};
+
 function appendToLastAi(current: Message[], delta: string): Message[] {
   const lastIndex = current.length - 1;
   if (lastIndex < 0 || current[lastIndex].role !== "ai") return current;
@@ -54,6 +57,13 @@ function dropTrailingEmptyAi(current: Message[]): Message[] {
     return current.slice(0, lastIndex);
   }
   return current;
+}
+
+function setStatusAt(current: Message[], index: number, status: Message["status"]): Message[] {
+  if (index < 0 || index >= current.length) return current;
+  const next = [...current];
+  next[index] = { ...next[index], status };
+  return next;
 }
 
 function transcriptToMessages(transcript: { role: string; content: string }[]): Message[] {
@@ -73,6 +83,14 @@ export default function NewQuoteModal({
   mode?: "public" | "portal";
 }) {
   const router = useRouter();
+  // Rendered through a portal on <body> so an ancestor with backdrop-filter (the
+  // sticky nav) can't become the containing block for the fixed-position overlay.
+  // false during SSR / first paint, true once hydrated — safe for createPortal.
+  const portalReady = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false
+  );
   const [hydrated, setHydrated] = useState(false);
   const [messages, setMessages] = useState<Message[]>([{ role: "ai", content: initialMessage }]);
   const [draft, setDraft] = useState("");
@@ -80,6 +98,7 @@ export default function NewQuoteModal({
   const [readyToSubmit, setReadyToSubmit] = useState(false);
   const [preview, setPreview] = useState<DiagnosisPreview | null>(null);
   const [forceComposer, setForceComposer] = useState(false);
+  const [minimized, setMinimized] = useState(false);
   const [sending, setSending] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [confirmedQuote, setConfirmedQuote] = useState<DraftQuoteResult | null>(null);
@@ -90,33 +109,109 @@ export default function NewQuoteModal({
   const socketRef = useRef<Socket | null>(null);
   const joinedConversationsRef = useRef<Set<string>>(new Set());
 
+  // Free-drag: the header acts as a grab handle and the card is offset from its
+  // centered resting position by this translation.
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef<{
+    px: number;
+    py: number;
+    ox: number;
+    oy: number;
+    layoutLeft: number;
+    layoutTop: number;
+    width: number;
+  } | null>(null);
+
+  function onHandlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if ((e.target as HTMLElement).closest("button")) return;
+    const card = e.currentTarget.parentElement;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    dragStartRef.current = {
+      px: e.clientX,
+      py: e.clientY,
+      ox: dragOffset.x,
+      oy: dragOffset.y,
+      // Card position with the current offset backed out — i.e. where it sits at translate(0,0).
+      layoutLeft: rect.left - dragOffset.x,
+      layoutTop: rect.top - dragOffset.y,
+      width: rect.width,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function onHandlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const start = dragStartRef.current;
+    if (!start) return;
+    // Keep at least a strip of the card on screen so the header stays grabbable.
+    const MARGIN = 12;
+    const MIN_VISIBLE_X = 140;
+    const HEADER_KEEP = 44;
+    let x = start.ox + (e.clientX - start.px);
+    let y = start.oy + (e.clientY - start.py);
+    x = Math.min(
+      Math.max(x, MARGIN - (start.width - MIN_VISIBLE_X) - start.layoutLeft),
+      window.innerWidth - MIN_VISIBLE_X - start.layoutLeft
+    );
+    y = Math.min(
+      Math.max(y, MARGIN - start.layoutTop),
+      window.innerHeight - HEADER_KEEP - start.layoutTop
+    );
+    setDragOffset({ x, y });
+  }
+
+  function onHandlePointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    dragStartRef.current = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* pointer already released */
+    }
+  }
+
   useEffect(() => {
     return () => {
       socketRef.current?.disconnect();
     };
   }, []);
 
+  // Resume-or-start on open. If this browser has a resumable conversation we
+  // rehydrate it; otherwise we create one right now so the first message goes
+  // out against a real diagnosis session (deliver() still creates one lazily
+  // as a fallback). The ref guards against React StrictMode's double-invoke
+  // creating two conversations.
+  const bootstrappedRef = useRef(false);
   useEffect(() => {
-    let cancelled = false;
-    fetch("/api/portal/conversations/current")
-      .then((res) => (res.ok ? res.json() : { conversation: null }))
-      .then((body: { conversation: ConversationRead | null }) => {
-        if (cancelled) return;
+    if (bootstrappedRef.current) return;
+    bootstrappedRef.current = true;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/portal/conversations/current");
+        const body: { conversation: ConversationRead | null } = res.ok
+          ? await res.json()
+          : { conversation: null };
+
         if (body.conversation) {
           setConversationId(body.conversation.id);
           const resumed = transcriptToMessages(body.conversation.transcript);
           setMessages(resumed.length ? resumed : [{ role: "ai", content: initialMessage }]);
           setReadyToSubmit(body.conversation.ready_to_submit);
           setPreview(body.conversation.draft_preview);
+        } else {
+          const created = await fetch("/api/portal/conversations", { method: "POST" });
+          if (created.ok) {
+            const conversation = (await created.json()) as { id: string };
+            setConversationId(conversation.id);
+          }
         }
+      } catch {
+        // Swallowed on purpose: deliver() creates a conversation lazily if we
+        // couldn't here.
+      } finally {
         setHydrated(true);
-      })
-      .catch(() => {
-        if (!cancelled) setHydrated(true);
-      });
-    return () => {
-      cancelled = true;
-    };
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -180,37 +275,59 @@ export default function NewQuoteModal({
     });
   }
 
-  async function send() {
-    const content = draft.trim();
-    if (!content || sending || !hydrated) return;
+  /** Runs the network round-trip for the `me` message at `meIndex`. On failure the
+   * message is left in the thread flagged `failed` (never re-appended) so the user
+   * can retry it in place instead of typing it again. */
+  async function deliver(content: string, meIndex: number) {
     setSending(true);
     setError(null);
-    setDraft("");
-    setForceComposer(false);
-    setMessages((current) => [...current, { role: "me", content }, { role: "ai", content: "" }]);
 
     try {
       let activeConversationId = conversationId;
+      console.log(conversationId, "atividade");
       if (!activeConversationId) {
         const conversationRes = await fetch("/api/portal/conversations", { method: "POST" });
         if (!conversationRes.ok) throw new Error("Não foi possível iniciar a conversa.");
         const conversation = (await conversationRes.json()) as { id: string };
         activeConversationId = conversation.id;
+        console.log(activeConversationId);
         setConversationId(activeConversationId);
       }
 
       const socket = await connectSocket();
       await joinConversation(socket, activeConversationId);
       const result = await streamReply(socket, activeConversationId, content);
+      setMessages((current) => setStatusAt(current, meIndex, undefined));
       setReadyToSubmit(result.ready_to_submit);
       setPreview(result.preview);
     } catch (err) {
-      setDraft(content);
-      setMessages((current) => dropTrailingEmptyAi(current));
+      setMessages((current) => dropTrailingEmptyAi(setStatusAt(current, meIndex, "failed")));
       setError(err instanceof Error ? err.message : "Não foi possível continuar a conversa.");
     } finally {
       setSending(false);
     }
+  }
+
+  async function send() {
+    const content = draft.trim();
+    if (!content || sending || !hydrated) return;
+    const meIndex = messages.length;
+    setDraft("");
+    setForceComposer(false);
+    setMessages((current) => [
+      ...current,
+      { role: "me", content, status: "sending" },
+      { role: "ai", content: "" },
+    ]);
+    await deliver(content, meIndex);
+  }
+
+  async function retry(index: number) {
+    if (sending || !hydrated) return;
+    const target = messages[index];
+    if (!target || target.role !== "me") return;
+    setMessages((current) => [...setStatusAt(current, index, "sending"), { role: "ai", content: "" }]);
+    await deliver(target.content, index);
   }
 
   async function handleConfirm(overrides?: { email?: string; phone?: string; password?: string }) {
@@ -282,8 +399,10 @@ export default function NewQuoteModal({
     );
   }
 
+  if (!portalReady) return null;
+
   if (confirmedQuote) {
-    return (
+    return createPortal(
       <div className={styles.scrim} onClick={onClose}>
         <div className={styles.card} onClick={(e) => e.stopPropagation()}>
           <div className={styles.confirmHead}>
@@ -318,14 +437,36 @@ export default function NewQuoteModal({
             Preciso pedir outra coisa
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
+  if (minimized) {
+    return createPortal(
+      <button type="button" className={styles.launcher} onClick={() => setMinimized(false)}>
+        <span className={styles.statusDot} />
+        DevButter IA
+        <span className={styles.launcherHint}>{sending ? "digitando…" : "toque para abrir"}</span>
+      </button>,
+      document.body
+    );
+  }
+
+  return createPortal(
     <div className={styles.scrim} onClick={onClose}>
-      <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.head}>
+      <div
+        className={styles.card}
+        style={{ transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)` }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className={styles.head}
+          onPointerDown={onHandlePointerDown}
+          onPointerMove={onHandlePointerMove}
+          onPointerUp={onHandlePointerUp}
+          onPointerCancel={onHandlePointerUp}
+        >
           <div className={styles.headMeta}>
             <span className={styles.statusDot} />
             <div>
@@ -333,19 +474,47 @@ export default function NewQuoteModal({
               <div className={styles.headStatus}>{sending ? "digitando…" : "online · novo orçamento"}</div>
             </div>
           </div>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="Fechar">
-            ✕
-          </button>
+          <div className={styles.headActions}>
+            <button
+              type="button"
+              className={styles.iconBtn}
+              onClick={() => setMinimized(true)}
+              aria-label="Minimizar"
+            >
+              –
+            </button>
+            <button type="button" className={styles.close} onClick={onClose} aria-label="Fechar">
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className={styles.thread}>
-          {messages.map((m, i) =>
-            m.content === "" ? null : (
+          {messages.map((m, i) => {
+            if (m.content === "") return null;
+            if (m.status === "failed") {
+              return (
+                <div key={i} className={styles.failedRow}>
+                  <button
+                    type="button"
+                    className={styles.retryBtn}
+                    onClick={() => retry(i)}
+                    disabled={sending}
+                    aria-label="Tentar enviar de novo"
+                    title="Tentar enviar de novo"
+                  >
+                    ↻
+                  </button>
+                  <div className={`${styles.msg} ${styles.msgMe} ${styles.msgFailed}`}>{m.content}</div>
+                </div>
+              );
+            }
+            return (
               <div key={i} className={`${styles.msg} ${m.role === "ai" ? styles.msgAi : styles.msgMe}`}>
                 {m.content}
               </div>
-            )
-          )}
+            );
+          })}
           {streamingEmpty && (
             <div className={styles.typing}>
               <span className={styles.typingDot} style={{ animationDelay: "0s" }} />
@@ -436,6 +605,7 @@ export default function NewQuoteModal({
 
         {error && <div className={styles.errorText}>{error}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

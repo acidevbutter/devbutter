@@ -15,7 +15,7 @@ export class AdminApiError extends Error {
 
 export class AdminUnauthenticatedError extends Error {
   constructor() {
-    super("No admin access token — redirect to /admin/login");
+    super("No admin access token — redirect to /portal/login");
   }
 }
 
@@ -23,7 +23,7 @@ export class AdminUnauthenticatedError extends Error {
  * Server-only fetch against devbutter_backend, authenticated as the current
  * admin from the httpOnly cookie proxy.ts keeps fresh. Callers (Server
  * Components, Server Actions, Route Handlers) should let AdminUnauthenticatedError
- * bubble up to a redirect('/admin/login') — proxy.ts already refreshes the
+ * bubble up to a redirect('/portal/login?next=…') — proxy.ts already refreshes the
  * token on the way in, so reaching this state mid-request means the refresh
  * token itself is gone or invalid.
  */

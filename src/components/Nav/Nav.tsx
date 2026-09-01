@@ -21,12 +21,12 @@ export default function Nav() {
 
   return (
     <header className={styles.header}>
-      <div className={styles.brand}>
+      <Link href="/" className={styles.brand} aria-label="DevButter — voltar para a home">
         <Logomark />
         <span className={styles.wordmark}>
           Dev<span className="gn">Butter</span>
         </span>
-      </div>
+      </Link>
 
       <nav className={styles.nav} aria-label="Navegação principal">
         {LINKS.map(({ label, href }) => (
