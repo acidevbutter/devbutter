@@ -42,7 +42,7 @@ export default async function AdminDashboardPage() {
       <div className={styles.tiles}>
         <div className={`${styles.tile} ${styles.tileWarn}`}>
           <div className={styles.tileLabelWarn}>p/ revisar</div>
-          <div className={styles.tileValueWarn}>{reviewQueue.length}</div>
+          <div className={`${styles.tileValue} ${styles.tileValuePink}`}>{reviewQueue.length}</div>
           <div className={styles.tileHint}>quotes em draft</div>
         </div>
         <div className={styles.tile}>
@@ -55,9 +55,11 @@ export default async function AdminDashboardPage() {
           <div className={styles.tileValue}>{formatCurrency(metrics.receivable_open_amount)}</div>
           <div className={styles.tileHint}>invoices em aberto</div>
         </div>
-        <div className={`${styles.tile} ${styles.tileWarn}`}>
-          <div className={styles.tileLabelWarn}>vencida</div>
-          <div className={styles.tileValueWarn}>{metrics.overdue_invoice_count}</div>
+        <div className={styles.tile}>
+          <div className={styles.tileLabel}>vencida</div>
+          <div className={`${styles.tileValue} ${styles.tileValuePink}`}>
+            {metrics.overdue_invoice_count}
+          </div>
           <div className={styles.tileHint}>
             {formatCurrency(metrics.overdue_amount)} · {metrics.overdue_client_name}
           </div>
@@ -80,16 +82,19 @@ export default async function AdminDashboardPage() {
               <span />
             </div>
             {reviewQueue.map((quote, i) => (
-              <Link key={quote.id} href={`/admin/quotes/${quote.id}`} className={styles.queueRow}>
-                <span style={{ fontWeight: 600 }}>{clientLabels[i]}</span>
-                <span style={{ color: "var(--db-text-secondary)" }}>{quote.scope_summary}</span>
-                <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12.5 }}>
-                  {quote.price_range ?? "—"}
-                </span>
-                <Badge tone={quote.source === "ai" ? "green" : "neutral"}>
+              <Link
+                key={quote.id}
+                href={`/admin/quotes/${quote.id}`}
+                className={styles.queueRow}
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                <span className={styles.queueClient}>{clientLabels[i]}</span>
+                <span className={styles.queueScope}>{quote.scope_summary}</span>
+                <span className={styles.queueRange}>{quote.price_range ?? "—"}</span>
+                <Badge tone={quote.source === "ai" ? "green" : "neutral"} style={{ justifySelf: "start" }}>
                   {quote.source === "ai" ? "IA" : "manual"}
                 </Badge>
-                <Button variant="solid" style={{ justifySelf: "end", padding: "6px 14px" }}>
+                <Button variant="solid" size="row" style={{ justifySelf: "end" }}>
                   Revisar
                 </Button>
               </Link>
@@ -107,51 +112,33 @@ export default async function AdminDashboardPage() {
 
       <div className={styles.lowerGrid}>
         <div>
-          <div style={{ marginBottom: 12 }}>
-            <span
-              style={{
-                font: "500 10px 'Geist Mono', monospace",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "var(--db-text-muted)",
-              }}
-            >
-              atividade recente
-            </span>
-          </div>
+          <div className={styles.sectionLabel}>atividade recente</div>
           <div className={styles.activityList}>
             {metrics.recent_activity.map((activity, i) => (
               <div key={i} className={styles.activityItem}>
-                <span style={{ color: "var(--db-green)" }}>●</span> {activity.message} ·{" "}
-                {formatRelative(activity.at)}
+                <span className={i < 2 ? styles.dotRecent : styles.dotOld}>●</span> {activity.message}{" "}
+                · {formatRelative(activity.at)}
               </div>
             ))}
           </div>
         </div>
         <div className={styles.shortcuts}>
-          <div
-            style={{
-              font: "500 10px 'Geist Mono', monospace",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--db-text-muted)",
-            }}
-          >
+          <div className={styles.sectionLabel} style={{ marginBottom: 0 }}>
             atalhos
           </div>
           <div className={styles.shortcutsList}>
-            <Button variant="outline" href="/admin/quotes/new">
+            <Link href="/admin/quotes/new" className={`${styles.shortcut} ${styles.shortcutPrimary}`}>
               + Novo quote manual
-            </Button>
-            <Button variant="outline" href="/admin/knowledge">
+            </Link>
+            <Link href="/admin/knowledge" className={styles.shortcut}>
               Nova entrada de precificação
-            </Button>
-            <Button variant="outline" href="/admin/conversations?has_quote=false">
+            </Link>
+            <Link href="/admin/conversations?has_quote=false" className={styles.shortcut}>
               Ver conversas sem quote
-            </Button>
-            <Button variant="outline" href="/admin/mind">
+            </Link>
+            <Link href="/admin/mind" className={styles.shortcut}>
               Abrir métricas da IA
-            </Button>
+            </Link>
           </div>
         </div>
       </div>

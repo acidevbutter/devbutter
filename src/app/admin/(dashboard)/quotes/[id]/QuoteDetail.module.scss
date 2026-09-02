@@ -6,20 +6,13 @@
 }
 
 .breadcrumb {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 18px;
-  border-bottom: 1px solid $admin-border;
-  background: rgba(255, 255, 255, 0.02);
-  font: 11.5px "Geist Mono", monospace;
-  color: $db-text-muted;
+  @include admin.panel-subheader;
 }
 
 .split {
   display: flex;
   align-items: stretch;
-  min-height: 480px;
+  min-height: 600px;
 }
 
 .main {
@@ -27,9 +20,6 @@
   min-width: 0;
   padding: 24px 26px;
   border-right: 1px solid $admin-border;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .titleRow {
@@ -45,8 +35,30 @@
   font-weight: 600;
 }
 
-.field {
-  margin-top: 20px;
+.convBar {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: $admin-card;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  padding: 11px 14px;
+  font: 12.5px "Geist Mono", monospace;
+  color: $admin-text-2;
+  text-decoration: none;
+}
+
+.convOpen {
+  font: 500 12px "Geist", sans-serif;
+  color: $db-green;
+}
+
+.sectionLabel {
+  @include admin.mono-label;
+  letter-spacing: 0.12em;
+  margin-bottom: 7px;
 }
 
 .textarea {
@@ -59,7 +71,7 @@
   line-height: 1.55;
   color: $db-text-primary;
   resize: vertical;
-  min-height: 90px;
+  min-height: 84px;
 }
 
 .input {
@@ -70,6 +82,71 @@
   padding: 11px 13px;
   font: 13.5px "Geist Mono", monospace;
   color: $db-text-primary;
+
+  &:disabled {
+    opacity: 0.7;
+  }
+}
+
+.deliverables {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.deliverableRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 4px 8px 4px 13px;
+  font-size: 13.5px;
+}
+
+.deliverableInput {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: $db-text-primary;
+  font: 13.5px "Geist", sans-serif;
+  padding: 7px 0;
+
+  &:disabled {
+    opacity: 0.8;
+  }
+}
+
+.deliverableRemove {
+  background: none;
+  border: none;
+  color: $db-text-muted;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 6px;
+
+  &:hover {
+    color: $db-pink;
+  }
+}
+
+.deliverableAdd {
+  width: 100%;
+  text-align: left;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  padding: 11px 13px;
+  font: 12.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+  background: none;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
 }
 
 .row2 {
@@ -79,10 +156,41 @@
   margin-top: 22px;
 }
 
-.readonlyNote {
-  font: 11.5px "Geist Mono", monospace;
+.rangeRow {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+
+.rangeDash {
   color: $db-text-muted;
-  margin-top: 10px;
+}
+
+.notesBox {
+  width: 100%;
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 10px;
+  padding: 13px 14px;
+  font: 13.5px "Geist", sans-serif;
+  color: $db-text-primary;
+  min-height: 56px;
+  resize: vertical;
+
+  &::placeholder {
+    color: $admin-text-2;
+  }
+
+  &:disabled {
+    color: $admin-text-2;
+    opacity: 0.9;
+  }
+}
+
+.history {
+  margin-top: 18px;
+  font: 11.5px/1.6 "Geist Mono", monospace;
+  color: $db-text-muted;
 }
 
 .side {
@@ -94,10 +202,74 @@
   gap: 20px;
 }
 
+.linkedCard {
+  @include admin.card;
+  padding: 14px;
+}
+
+.linkedName {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.linkedMeta {
+  font: 11.5px/1.6 "Geist Mono", monospace;
+  color: $admin-text-2;
+  margin-top: 6px;
+}
+
+.linkedPill {
+  margin-top: 10px;
+  display: inline-block;
+  font: 500 10px "Geist Mono", monospace;
+  border-radius: 20px;
+  padding: 3px 9px;
+}
+
+.linkedPillOk {
+  color: $db-green;
+  border: 1px solid rgba(121, 229, 155, 0.4);
+}
+
+.linkedPillPending {
+  color: $admin-amber;
+  border: 1px solid rgba(229, 183, 90, 0.4);
+}
+
 .actions {
   display: flex;
   flex-direction: column;
   gap: 9px;
+}
+
+.approveForm {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.btnSolid {
+  @include admin.button-solid;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.btnGhost {
+  @include admin.button-outline;
+  border-radius: 10px;
+  padding: 11px;
+}
+
+.btnDanger {
+  @include admin.button-danger;
+  border-radius: 10px;
+  padding: 11px;
+}
+
+.readonlyNote {
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
 }
 
 .outcome {
@@ -105,6 +277,24 @@
   border: 1px solid rgba(121, 229, 155, 0.3);
   border-radius: 12px;
   padding: 14px;
+}
+
+.outcomeLabel {
+  @include admin.mono-label;
+  letter-spacing: 0.12em;
+  color: $db-green;
+}
+
+.outcomeTitle {
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 7px;
+}
+
+.outcomeMeta {
+  font: 11.5px/1.6 "Geist Mono", monospace;
+  color: $admin-text-2;
+  margin-top: 5px;
 }
 
 .error {

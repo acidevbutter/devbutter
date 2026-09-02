@@ -1,13 +1,10 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
+import ConciergeCta from "@/components/ConciergeCta/ConciergeCta";
 import Logomark from "@/components/icons/Logomark";
-import NewQuoteModal from "@/components/portal/NewQuoteModal/NewQuoteModal";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 import styles from "./ChatSimulation.module.scss";
-
-const VISITOR_GREETING =
-  "Oi! Sou a IA da DevButter. Me conta o que você precisa e eu já vou organizando o diagnóstico com você — sem formulário, só conversa.";
 
 type Role = "user" | "ai" | "result";
 
@@ -80,7 +77,6 @@ export default function ChatSimulation() {
   const reduceMotion = usePrefersReducedMotion();
   const [typingIndex, setTypingIndex] = useState<number | null>(null);
   const [typingShown, setTypingShown] = useState(false);
-  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     // Both refs outlive the effect, so a re-run — StrictMode's double mount, Fast
@@ -200,15 +196,11 @@ export default function ChatSimulation() {
           <a href="#solucoes" className={`${styles.chip} ${styles.chipGreen}`}>
             Ver como funciona
           </a>
-          <button type="button" className={`${styles.chip} ${styles.chipPink}`} onClick={() => setShowChat(true)}>
+          <ConciergeCta className={`${styles.chip} ${styles.chipPink}`}>
             Solicitar diagnóstico
-          </button>
+          </ConciergeCta>
         </div>
       </div>
-
-      {showChat && (
-        <NewQuoteModal onClose={() => setShowChat(false)} initialMessage={VISITOR_GREETING} mode="public" />
-      )}
     </section>
   );
 }

@@ -52,17 +52,13 @@
   letter-spacing: -0.02em;
 }
 
-.tileValueWarn {
-  font-size: 30px;
-  font-weight: 600;
-  margin-top: 6px;
-  letter-spacing: -0.02em;
+.tileValuePink {
   color: $db-pink;
 }
 
 .tileHint {
   font: 11.5px "Geist Mono", monospace;
-  color: $db-text-muted;
+  color: $admin-text-2;
 }
 
 .queuePanel {
@@ -91,14 +87,51 @@
   padding: 4px 16px 14px;
 }
 
+.queueHeaderRow,
+.queueRow {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 0.8fr 0.6fr 0.7fr;
+  gap: 12px;
+  align-items: center;
+}
+
 .queueHeaderRow {
-  @include admin.table-header(1.2fr 2fr 0.8fr 0.6fr 0.7fr);
+  padding: 10px 0;
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+  border-bottom: 1px solid $admin-border;
 }
 
 .queueRow {
-  @include admin.table-row(1.2fr 2fr 0.8fr 0.6fr 0.7fr);
+  padding: 13px 0;
+  font-size: 13.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   text-decoration: none;
   color: inherit;
+  animation: dbRise 0.26s ease-out both;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
+.queueClient {
+  font-weight: 600;
+}
+
+.queueScope {
+  color: $admin-text-2;
+}
+
+.queueRange {
+  font-family: "Geist Mono", monospace;
+  font-size: 12.5px;
 }
 
 .queueEmpty {
@@ -124,17 +157,31 @@
   gap: 16px;
 }
 
+.sectionLabel {
+  @include admin.mono-label;
+  letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
+
 .activityList {
   display: flex;
   flex-direction: column;
   gap: 11px;
   padding-left: 14px;
-  border-left: 1px solid $admin-border-interactive;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .activityItem {
-  font: 12.5px "Geist Mono", monospace;
-  color: $db-text-secondary;
+  font: 12.5px/1.4 "Geist Mono", monospace;
+  color: $admin-text-2;
+}
+
+.dotRecent {
+  color: $db-green;
+}
+
+.dotOld {
+  color: $db-text-muted;
 }
 
 .shortcuts {
@@ -147,4 +194,30 @@
   flex-direction: column;
   gap: 8px;
   margin-top: 12px;
+}
+
+.shortcut {
+  border: 1px solid $admin-border-interactive;
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: $admin-text-2;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: $db-text-primary;
+  }
+}
+
+.shortcutPrimary {
+  border-color: rgba(121, 229, 155, 0.35);
+  color: $db-green;
+  font-weight: 500;
+
+  &:hover {
+    border-color: rgba(121, 229, 155, 0.6);
+    color: $db-green;
+  }
 }

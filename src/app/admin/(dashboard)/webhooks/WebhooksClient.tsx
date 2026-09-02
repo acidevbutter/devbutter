@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Badge from "@/components/admin/ui/Badge/Badge";
-import { reprocessWebhookEventAction } from "@/lib/admin/actions/webhooks";
+import {
+  getWebhookEventDetailAction,
+  reprocessWebhookEventAction,
+} from "@/lib/admin/actions/webhooks";
 import { formatDateTime } from "@/lib/admin/format";
-import type { AdminWebhookEvent } from "@/lib/admin/types";
+import type { AdminWebhookEvent, AdminWebhookEventDetail } from "@/lib/admin/types";
 import listStyles from "@/styles/AdminList.module.scss";
 import styles from "./Webhooks.module.scss";
 
@@ -19,8 +22,26 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
   const [eventType, setEventType] = useState<string | null>(null);
   const [onlyErrors, setOnlyErrors] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [detailById, setDetailById] = useState<Record<string, AdminWebhookEventDetail>>({});
   const [confirming, setConfirming] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const detail = openId ? (detailById[openId] ?? null) : null;
+
+  useEffect(() => {
+    if (!openId || detailById[openId]) return;
+    let live = true;
+    getWebhookEventDetailAction(openId)
+      .then((d) => {
+        if (live) setDetailById((prev) => ({ ...prev, [d.id]: d }));
+      })
+      .catch(() => {
+        /* drawer falls back to the list-row data */
+      });
+    return () => {
+      live = false;
+    };
+  }, [openId, detailById]);
 
   const errorCount = useMemo(() => events.filter((e) => !e.processed_ok).length, [events]);
 
@@ -40,7 +61,8 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
 
   function copyPayload() {
     if (!open) return;
-    navigator.clipboard?.writeText(JSON.stringify(open.payload, null, 2)).then(
+    const payload = detail?.payload ?? open.payload;
+    navigator.clipboard?.writeText(JSON.stringify(payload, null, 2)).then(
       () => {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
@@ -60,13 +82,15 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
 
   return (
     <div className={listStyles.page}>
+      <div className={listStyles.countBar}>
+        <span>Webhooks / asaas</span>
+        <span style={{ color: errorCount > 0 ? "var(--db-pink)" : "var(--admin-text-2)" }}>
+          {errorCount > 0 ? `${errorCount} eventos com erro` : "log técnico para debug"}
+        </span>
+      </div>
+
       <div className={listStyles.header}>
         <h1 className={listStyles.title}>Webhooks</h1>
-        {errorCount > 0 && (
-          <span style={{ font: "11.5px 'Geist Mono', monospace", color: "var(--db-pink)" }}>
-            {errorCount} eventos com erro
-          </span>
-        )}
       </div>
 
       <div className={listStyles.chips}>
@@ -114,14 +138,22 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
               </span>
               <span
                 style={{
-                  color: "var(--db-text-secondary)",
+                  color: "var(--admin-text-2)",
                   fontFamily: "'Geist Mono', monospace",
                   fontSize: 12,
                 }}
               >
                 {e.related_label}
               </span>
-              <Badge tone={e.processed_ok ? "green" : "pink"}>{e.processed_ok ? "ok" : "erro"}</Badge>
+              <span
+                style={{
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: 12.5,
+                  color: e.processed_ok ? "var(--db-green)" : "var(--db-pink)",
+                }}
+              >
+                {e.processed_ok ? "ok" : "erro"}
+              </span>
               <span
                 style={{
                   fontFamily: "'Geist Mono', monospace",
@@ -131,7 +163,14 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
               >
                 {formatDateTime(e.received_at)}
               </span>
-              <span style={{ justifySelf: "end", color: "var(--db-text-muted)" }}>▸</span>
+              <span
+                style={{
+                  justifySelf: "end",
+                  color: e.processed_ok ? "var(--db-text-muted)" : "var(--db-pink)",
+                }}
+              >
+                {e.processed_ok ? "▸" : "↻"}
+              </span>
             </div>
           </button>
         ))}
@@ -170,9 +209,48 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
                 </div>
               )}
 
+              {detail && detail.attempts.length > 0 && (
+                <div>
+                  <div className={styles.sectionLabel}>tentativas</div>
+                  <div className={styles.attempts}>
+                    {detail.attempts.map((a, i) => (
+                      <div key={i} className={styles.attemptRow}>
+                        <span
+                          style={{
+                            color:
+                              a.result === "erro"
+                                ? "var(--db-pink)"
+                                : a.result === "ok"
+                                  ? "var(--db-green)"
+                                  : "var(--db-text-muted)",
+                          }}
+                        >
+                          ●
+                        </span>{" "}
+                        {formatDateTime(a.at)} · {a.result}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div>
-                <div className={styles.sectionLabel}>relacionado</div>
-                {open.related_invoice_id ? (
+                <div className={styles.sectionLabel}>correlação</div>
+                {detail && detail.correlation.length > 0 ? (
+                  <div className={styles.corrChips}>
+                    {detail.correlation.map((c, i) =>
+                      c.href ? (
+                        <Link key={i} href={c.href} className={styles.relChip}>
+                          {c.label}
+                        </Link>
+                      ) : (
+                        <span key={i} className={styles.relChip}>
+                          {c.label}
+                        </span>
+                      )
+                    )}
+                  </div>
+                ) : open.related_invoice_id ? (
                   <Link href="/admin/invoices" className={styles.relChip}>
                     invoice {open.related_invoice_id.slice(0, 8)} →
                   </Link>
@@ -182,8 +260,10 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
               </div>
 
               <div>
-                <div className={styles.sectionLabel}>payload</div>
-                <pre className={styles.payload}>{JSON.stringify(open.payload, null, 2)}</pre>
+                <div className={styles.sectionLabel}>payload (redigido)</div>
+                <pre className={styles.payload}>
+                  {JSON.stringify(detail?.payload ?? open.payload, null, 2)}
+                </pre>
                 <button type="button" className={styles.copyBtn} onClick={copyPayload}>
                   {copied ? "copiado" : "copiar"}
                 </button>

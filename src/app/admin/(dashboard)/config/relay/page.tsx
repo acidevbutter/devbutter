@@ -64,10 +64,14 @@ export default function AdminRelayConfigPage() {
             <h2>Eventos habilitados</h2>
           </div>
           <div className={styles.panelBody}>
-            {EVENTS.map((label) => (
+            {EVENTS.map((label, i) => (
               <div className={styles.toggleRow} key={label}>
                 <span>{label}</span>
-                <span className={styles.switch} />
+                <span
+                  className={`${styles.switch} ${
+                    i < EVENTS.length - 2 ? styles.switchOn : ""
+                  }`}
+                />
               </div>
             ))}
           </div>

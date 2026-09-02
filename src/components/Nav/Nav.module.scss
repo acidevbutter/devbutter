@@ -75,6 +75,9 @@
 }
 
 .ghostBtn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   padding: 9px 16px;
   border-radius: 10px;
   font: 600 13px var(--font-geist-sans);
@@ -95,6 +98,9 @@
 }
 
 .solidBtn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   padding: 9px 17px;
   border-radius: 10px;
   font: 600 13px var(--font-geist-sans);

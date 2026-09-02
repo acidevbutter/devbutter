@@ -5,9 +5,16 @@
   align-items: center;
   font: 500 10px "Geist Mono", monospace;
   border-radius: 20px;
-  padding: 2px 8px;
   border: 1px solid transparent;
   white-space: nowrap;
+}
+
+.sm {
+  padding: 2px 8px;
+}
+
+.md {
+  padding: 3px 9px;
 }
 
 .green {

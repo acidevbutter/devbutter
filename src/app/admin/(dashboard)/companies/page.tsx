@@ -15,6 +15,11 @@ export default async function AdminCompaniesPage({
 
   return (
     <div className={styles.page}>
+      <div className={styles.countBar}>
+        <span>Empresas</span>
+        <span className={styles.countBarValue}>{companies.length} registros</span>
+      </div>
+
       <div className={styles.header}>
         <h1 className={styles.title}>Empresas</h1>
         <form className={styles.headerActions}>
@@ -48,7 +53,7 @@ export default async function AdminCompaniesPage({
             <span style={{ fontWeight: 600 }}>{c.name}</span>
             <span
               style={{
-                color: "var(--db-text-secondary)",
+                color: "var(--admin-text-2)",
                 fontFamily: "'Geist Mono', monospace",
                 fontSize: 12,
               }}

@@ -2,12 +2,12 @@
 @use "../../../../styles/tokens" as *;
 
 .page { display: flex; flex-direction: column; gap: 18px; }
-.crumb { font: 11.5px "Geist Mono", monospace; color: $db-text-muted; a { color: $db-text-muted; } a:hover { color: $db-text-secondary; } }
+.crumb { font: 11.5px "Geist Mono", monospace; color: $db-text-muted; a { color: $db-text-muted; } a:hover { color: $admin-text-2; } }
 .knowledgeAction { display: flex; align-items: center; gap: 12px; padding: 0 16px 16px; flex-wrap: wrap; span { font: 11px "Geist Mono", monospace; color: $db-text-muted; } }
 .heading, .panelHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .title { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
 .subtitle, .panelHeader p, .note { margin: 5px 0 0; font: 11.5px "Geist Mono", monospace; color: $db-text-muted; }
-.privatePill, .override, .deploy { border: 1px solid $admin-border-interactive; border-radius: 20px; padding: 4px 9px; font: 500 10px "Geist Mono", monospace; color: $db-text-secondary; white-space: nowrap; }
+.privatePill, .override, .deploy { border: 1px solid $admin-border-interactive; border-radius: 20px; padding: 4px 9px; font: 500 10px "Geist Mono", monospace; color: $admin-text-2; white-space: nowrap; }
 .override { color: $db-green; border-color: rgba(121, 229, 155, 0.4); background: rgba(121, 229, 155, 0.08); }
 .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .tile { @include admin.card; padding: 14px; display: flex; flex-direction: column; gap: 5px; }
@@ -24,7 +24,7 @@
 .tableHead, .tableRow { display: grid; grid-template-columns: 1.6fr repeat(4, .7fr); gap: 10px; align-items: center; }
 .tableHead { @include admin.mono-label; padding: 10px 0 7px; }
 .tableRow { padding: 10px 0; border-top: 1px solid $admin-border; font-size: 12.5px; }
-.tableRow span:not(:first-child) { font-family: "Geist Mono", monospace; color: $db-text-secondary; }
+.tableRow span:not(:first-child) { font-family: "Geist Mono", monospace; color: $admin-text-2; }
 .empty { padding: 32px 16px; color: $db-text-muted; font-size: 13px; }
 .note { padding: 0 16px 14px; }
 .knowledgeStats { display: grid; grid-template-columns: repeat(2, 1fr); padding: 18px 16px 12px; gap: 12px; }
@@ -40,7 +40,7 @@
 .budgetHead, .budgetRow { display: grid; grid-template-columns: 1.4fr repeat(2, .8fr) 1.5fr; gap: 10px; align-items: center; }
 .budgetHead { @include admin.mono-label; padding: 10px 0 7px; }
 .budgetRow { padding: 10px 0; border-top: 1px solid $admin-border; font: 12px "Geist Mono", monospace; }
-.budgetRow > span:not(:first-child) { color: $db-text-secondary; }
+.budgetRow > span:not(:first-child) { color: $admin-text-2; }
 .budgetRow label { display: flex; gap: 8px; align-items: center; }
 .budgetRow input { min-width: 0; width: 100%; box-sizing: border-box; border: 1px solid $admin-border-interactive; border-radius: 8px; background: $admin-card; color: $db-text-primary; padding: 7px 8px; font: inherit; }
 @media (max-width: 700px) { .budgetHead { display: none; } .budgetRow { grid-template-columns: 1fr; gap: 7px; } }

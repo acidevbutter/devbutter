@@ -62,6 +62,10 @@ $db-section-pad-x: 4vw;
   --admin-border: rgba(255, 255, 255, 0.08);
   --admin-border-interactive: rgba(255, 255, 255, 0.14);
   --admin-amber: #e5b75a;
+  // The admin canvas ("Admin Platform.dc.html") uses a cooler secondary grey
+  // (#8b93a3) than the marketing token (--db-text-secondary #9ca6b5). Admin
+  // screens use this one; the rest of the app is untouched.
+  --admin-text-2: #8b93a3;
 }
 
 $admin-bg: #05070d;
@@ -70,3 +74,4 @@ $admin-card: #10151f;
 $admin-border: rgba(255, 255, 255, 0.08);
 $admin-border-interactive: rgba(255, 255, 255, 0.14);
 $admin-amber: #e5b75a;
+$admin-text-2: #8b93a3;

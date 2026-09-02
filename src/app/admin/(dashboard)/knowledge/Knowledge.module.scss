@@ -12,7 +12,7 @@
   width: 260px;
   flex: none;
   border-right: 1px solid $admin-border;
-  padding: 14px;
+  padding: 18px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -39,12 +39,12 @@
 }
 
 .entryButtonActive {
-  background: rgba(121, 229, 155, 0.1);
-  border-color: rgba(121, 229, 155, 0.4);
+  background: rgba(121, 229, 155, 0.08);
+  border-color: rgba(121, 229, 155, 0.35);
 }
 
 .entryName {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
 }
 
@@ -62,7 +62,7 @@
   color: $db-text-muted;
   background: none;
   cursor: pointer;
-  text-align: left;
+  text-align: center;
 }
 
 .editor {

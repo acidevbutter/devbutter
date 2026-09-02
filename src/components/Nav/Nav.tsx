@@ -4,6 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import Logomark from "@/components/icons/Logomark";
 import NewQuoteModal from "@/components/portal/NewQuoteModal/NewQuoteModal";
+import {
+  CONCIERGE_GREETING,
+  CONCIERGE_INTENTS,
+} from "@/components/ConciergeCta/ConciergeCta";
 import styles from "./Nav.module.scss";
 
 const LINKS = [
@@ -13,10 +17,9 @@ const LINKS = [
   { label: "Insights", href: "#insights" },
 ];
 
-const VISITOR_GREETING =
-  "Oi! Sou a IA da DevButter. Me conta o que você precisa e eu já vou organizando o diagnóstico com você — sem formulário, só conversa.";
-
 export default function Nav() {
+  // Both "Falar com a IA" and "Solicitar diagnóstico" open the same right-anchored
+  // concierge panel (canvas 1b) -- there is no dedicated /cotacao route anymore.
   const [showChat, setShowChat] = useState(false);
 
   return (
@@ -49,7 +52,13 @@ export default function Nav() {
       </div>
 
       {showChat && (
-        <NewQuoteModal onClose={() => setShowChat(false)} initialMessage={VISITOR_GREETING} mode="public" />
+        <NewQuoteModal
+          onClose={() => setShowChat(false)}
+          mode="public"
+          surface="panel"
+          initialMessage={CONCIERGE_GREETING}
+          openingIntents={CONCIERGE_INTENTS}
+        />
       )}
     </header>
   );

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { getQuote } from "@/lib/admin/services/quotes";
-import { resolveClientLabel } from "@/lib/admin/services/clients";
-import QuoteDetailClient from "./QuoteDetailClient";
+import { getClient, resolveClientLabel } from "@/lib/admin/services/clients";
+import { getConversation } from "@/lib/admin/services/conversations";
+import QuoteDetailClient, { type LinkedClient } from "./QuoteDetailClient";
 
 export default async function AdminQuoteDetailPage({
   params,
@@ -17,7 +18,31 @@ export default async function AdminQuoteDetailPage({
     notFound();
   }
 
-  const clientLabel = await resolveClientLabel(quote.account_id);
+  const [clientLabel, client, conversation] = await Promise.all([
+    resolveClientLabel(quote.account_id),
+    getClient(quote.account_id).catch(() => null),
+    quote.conversation_id
+      ? getConversation(quote.conversation_id).catch(() => null)
+      : Promise.resolve(null),
+  ]);
 
-  return <QuoteDetailClient quote={quote} clientLabel={clientLabel} readOnly={false} />;
+  const linkedClient: LinkedClient | null = client
+    ? {
+        business_name: client.business_name,
+        name: client.name,
+        email: client.email,
+        cnpj: client.cnpj,
+        asaas_customer_id: client.asaas_customer_id,
+      }
+    : null;
+
+  return (
+    <QuoteDetailClient
+      quote={quote}
+      clientLabel={clientLabel}
+      linkedClient={linkedClient}
+      conversationMessageCount={conversation?.message_count ?? null}
+      readOnly={false}
+    />
+  );
 }

@@ -19,6 +19,21 @@ const TABS = [
   { key: "conversations", label: "Conversas" },
 ] as const;
 
+// The Layer B subaccount card ("subconta (layer b)" in artboard 1f).
+function subaccountLabel(onboarding: string | null, approval: string | null) {
+  const raw = (approval ?? onboarding ?? "").toUpperCase();
+  if (!raw) return <span style={{ color: "var(--db-text-muted)" }}>sem subconta</span>;
+  const ok = raw === "APPROVED" || raw === "ACTIVE";
+  const failed = raw === "REJECTED" || raw === "DENIED";
+  const color = ok ? "var(--db-green)" : failed ? "var(--db-pink)" : "var(--admin-amber)";
+  const text = ok ? "aprovado" : failed ? "recusado" : "em análise";
+  return (
+    <>
+      onboarding <span style={{ color }}>● {text}</span>
+    </>
+  );
+}
+
 export default async function AdminClientDetailPage({
   params,
   searchParams,
@@ -54,31 +69,40 @@ export default async function AdminClientDetailPage({
       </div>
 
       <div className={styles.header}>
-        <div className={styles.headerTop}>
-          <div>
-            <h1 className={styles.name}>{client.business_name ?? client.name}</h1>
-            <div className={styles.meta}>
-              {client.email}
-              {client.cnpj ? ` · CNPJ ${client.cnpj}` : ""} · cliente desde{" "}
-              {formatDate(client.created_at)}
-            </div>
+        <div>
+          <h1 className={styles.name}>{client.business_name ?? client.name}</h1>
+          <div className={styles.meta}>
+            {client.email}
+            {client.cnpj ? ` · CNPJ ${client.cnpj}` : ""} · cliente desde{" "}
+            {formatDate(client.created_at)}
           </div>
-          <div className={styles.headerActions}>
-            <Button href="/admin/quotes/new">+ Novo quote</Button>
-            <Button variant="outline">Editar dados</Button>
+
+          <div className={styles.infoCards}>
+            <div className={styles.infoCard}>
+              <div className={styles.infoLabel}>asaas customer</div>
+              <div className={styles.infoValue}>
+                {client.asaas_customer_id ?? "—"}{" "}
+                <span className={client.asaas_customer_id ? styles.dotOk : styles.dotPending}>
+                  ● {client.asaas_customer_id ? "vinculado" : "não vinculado"}
+                </span>
+              </div>
+            </div>
+            <div className={styles.infoCard}>
+              <div className={styles.infoLabel}>subconta (layer b)</div>
+              <div className={styles.infoValue}>
+                {subaccountLabel(client.subaccount_onboarding, client.subaccount_approval)}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className={styles.infoCards}>
-          <div className={styles.infoCard}>
-            <div className={styles.infoLabel}>asaas customer</div>
-            <div className={styles.infoValue}>{client.asaas_customer_id ?? "—"}</div>
-            <div style={{ marginTop: 8 }}>
-              <Badge tone={client.asaas_status === "vinculado" ? "green" : "amber"}>
-                ● {client.asaas_status === "vinculado" ? "vinculado" : "não vinculado"}
-              </Badge>
-            </div>
-          </div>
+        <div className={styles.headerActions}>
+          <Button href="/admin/quotes/new" size="sm">
+            + Novo quote
+          </Button>
+          <Button variant="outline" size="sm">
+            Editar dados
+          </Button>
         </div>
       </div>
 
