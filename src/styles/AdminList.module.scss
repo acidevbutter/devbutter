@@ -72,6 +72,12 @@
   border-color: rgba(246, 76, 111, 0.3);
 }
 
+.chipAmber {
+  background: rgba(229, 183, 90, 0.1);
+  color: $admin-amber;
+  border-color: rgba(229, 183, 90, 0.35);
+}
+
 .chipSep {
   width: 1px;
   height: 16px;
@@ -115,11 +121,18 @@
 }
 
 .pagination {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-  font: 11.5px "Geist Mono", monospace;
-  color: $db-text-muted;
+  @include admin.pagination;
+}
+
+// The 12px 18px card-top bar every list artboard has ("quotes · 24 registros",
+// "31 registros", "● 7 ativas"). Rendered as a standalone rounded bar since the
+// shell chrome is factored out of the page.
+.countBar {
+  @include admin.panel-subheader;
+  border: 1px solid $admin-border;
+  border-radius: 12px;
+}
+
+.countBarValue {
+  color: $admin-text-2;
 }

@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+- Fluxo Cotação IA turno 2 (ADR-0004): o `NewQuoteModal` renderiza os estados
+  `stage` — `choosing` mostra 2-3 cards de opção (título, resumo, faixa/prazo,
+  badge "recomendado", botão "Confirmar «título»"); `collecting` mostra um
+  mini-form dos `missing_fields` do negócio + "pular por agora"; o composer
+  continua disponível. Novos proxies BFF
+  `api/portal/conversations/[id]/select-option` e `.../business-profile`.
+- Fluxo Cotação IA reconciliado com o canvas `Fluxo Cotacao IA.dc.html`
+  (ADR-0003): **rota `/cotacao` removida**. O `NewQuoteModal` agora tem duas
+  superfícies — `panel` (público, painel de coluna única ancorado à direita
+  sobre o site, canvas 1b, minimizável, sem arrastar) e `workspace` (portal,
+  overlay de duas colunas com o **dossiê ao vivo** à esquerda + chat à direita,
+  canvas 2a, com a spec de movimento 2c: `rowIn`/`sweep`/`fly`/`tick`/`shimmer`
+  + anel de completude, respeitando `prefers-reduced-motion`). Novo
+  `ConciergeCta` client component; Nav, Hero, ChatSimulation, Concierge e
+  ClosingCta abrem o painel público em vez de linkar `/cotacao`. Chip row 1c
+  ganha `cidade` e os `business_metrics` do contrato estendido.
 - Tornada a imagem Docker apta a produção com `next build` e `next start`.
 
 - Documentados os fluxos existentes do frontend em Markdown e Mermaid, com pontos fortes, falhas,

@@ -1,3 +1,4 @@
+import ConciergeCta from "@/components/ConciergeCta/ConciergeCta";
 import styles from "./ClosingCta.module.scss";
 
 export default function ClosingCta() {
@@ -11,7 +12,7 @@ export default function ClosingCta() {
         <p className={styles.subtext}>
           O diagnóstico é o ponto de partida — não uma tecnologia decidida de antemão.
         </p>
-        <button className={styles.cta}>Solicitar diagnóstico</button>
+        <ConciergeCta className={styles.cta}>Solicitar diagnóstico</ConciergeCta>
       </div>
     </section>
   );

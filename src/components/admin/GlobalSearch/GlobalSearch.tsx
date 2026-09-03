@@ -117,6 +117,7 @@ export default function GlobalSearch() {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onInputKey}
               />
+              <span className={styles.escKey}>esc</span>
             </div>
 
             {phase === "idle" && (
@@ -161,7 +162,7 @@ export default function GlobalSearch() {
             <div className={styles.footer}>
               <span>↑↓ navegar</span>
               <span>↵ abrir</span>
-              <span>esc fechar</span>
+              <span>⌘K fechar</span>
             </div>
           </div>
         </div>

@@ -70,7 +70,7 @@ function Editor({ entry }: { entry: KnowledgeEntry | null }) {
 
       <div className={styles.row2}>
         <div>
-          <div style={{ font: "500 10px 'Geist Mono', monospace", color: "var(--db-text-secondary)", marginBottom: 6 }}>
+          <div style={{ font: "500 10px 'Geist Mono', monospace", color: "var(--admin-text-2)", marginBottom: 6 }}>
             faixa sugerida (R$)
           </div>
           <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
@@ -80,7 +80,7 @@ function Editor({ entry }: { entry: KnowledgeEntry | null }) {
           </div>
         </div>
         <div>
-          <div style={{ font: "500 10px 'Geist Mono', monospace", color: "var(--db-text-secondary)", marginBottom: 6 }}>
+          <div style={{ font: "500 10px 'Geist Mono', monospace", color: "var(--admin-text-2)", marginBottom: 6 }}>
             prazo típico
           </div>
           <input className={styles.input} name="typical_duration" defaultValue={entry?.typical_duration} />

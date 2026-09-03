@@ -150,6 +150,80 @@
   }
 }
 
+// --- Admin ("Admin Platform.dc.html") keyframes, ported 1:1 from the design.
+// The canvas file names them dbPulse/dbRing/… so the admin screens use those
+// names verbatim; the db-* set above stays for the marketing site.
+
+@keyframes dbPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes dbRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(121, 229, 155, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 9px rgba(121, 229, 155, 0);
+  }
+}
+
+@keyframes dbSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dbRise {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dbSlide {
+  from {
+    opacity: 0;
+    transform: translateX(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dbPop {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dbFill {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes dbShimmer {
+  to {
+    background-position: 220% 0;
+  }
+}
+
 .fu {
   opacity: 0;
   animation: db-fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;

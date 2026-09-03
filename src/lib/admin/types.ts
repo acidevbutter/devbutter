@@ -36,11 +36,15 @@ export type QuoteStatus = "draft" | "approved" | "edited" | "rejected";
 
 export interface QuoteRead {
   id: string;
+  /** Human-readable "COT-1000" id assigned at creation. */
+  reference: string;
   account_id: string;
   conversation_id: string | null;
   source: QuoteSource;
   status: QuoteStatus;
   scope_summary: string;
+  deliverables: string[];
+  internal_notes: string | null;
   price_range: string | null;
   timeline: string | null;
   reviewed_by: string | null;
@@ -57,6 +61,8 @@ export interface QuoteManualCreate {
 
 export interface QuoteEdit {
   scope_summary?: string;
+  deliverables?: string[];
+  internal_notes?: string | null;
   price_range?: string | null;
   timeline?: string | null;
 }
@@ -142,6 +148,9 @@ export interface AdminClientDetail {
   created_at: string;
   asaas_customer_id: string | null;
   asaas_status: AsaasLinkStatus;
+  /** Layer B merchant subaccount (asaas_subaccount_links) — null when unlinked. */
+  subaccount_onboarding: string | null;
+  subaccount_approval: string | null;
   counts: {
     quotes: number;
     orders: number;
@@ -161,6 +170,9 @@ export interface AdminOrderListItem {
   status: OrderStatus;
   amount: string;
   created_at: string;
+  invoices_total: number;
+  invoices_paid: number;
+  invoices_overdue: number;
 }
 
 export interface AdminInvoiceListItem {
@@ -311,6 +323,23 @@ export interface AdminWebhookEvent {
   error_message: string | null;
   payload: Record<string, unknown>;
   received_at: string;
+}
+
+export interface WebhookAttempt {
+  at: string;
+  result: "recebido" | "ok" | "erro";
+}
+
+export interface WebhookCorrelation {
+  kind: "client" | "invoice" | "order";
+  label: string;
+  href: string | null;
+}
+
+export interface AdminWebhookEventDetail extends AdminWebhookEvent {
+  processed_at: string | null;
+  attempts: WebhookAttempt[];
+  correlation: WebhookCorrelation[];
 }
 
 // ---- companies / split quota / features (real — GET /admin/companies, see

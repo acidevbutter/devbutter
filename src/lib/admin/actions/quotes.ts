@@ -24,10 +24,27 @@ export async function editQuoteAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  // The detail screen edits price as split min/max fields (matching the
+  // "faixa de preço (R$)" design); fall back to a single price_range input.
+  const priceMin = String(formData.get("price_min") ?? "").trim();
+  const priceMax = String(formData.get("price_max") ?? "").trim();
+  const priceRange =
+    priceMin || priceMax
+      ? [priceMin, priceMax].filter(Boolean).join("–")
+      : String(formData.get("price_range") ?? "").trim();
+
+  // deliverables arrive as repeated `deliverable` fields; blank lines dropped.
+  const deliverables = formData
+    .getAll("deliverable")
+    .map((d) => String(d).trim())
+    .filter(Boolean);
+
   try {
     await quotesService.editQuote(quoteId, {
       scope_summary: String(formData.get("scope_summary") ?? ""),
-      price_range: String(formData.get("price_range") ?? "") || null,
+      deliverables,
+      internal_notes: String(formData.get("internal_notes") ?? "") || null,
+      price_range: priceRange || null,
       timeline: String(formData.get("timeline") ?? "") || null,
     });
   } catch (err) {

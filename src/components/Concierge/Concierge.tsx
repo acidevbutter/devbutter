@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ConciergeCta from "@/components/ConciergeCta/ConciergeCta";
 import useRevealOnce from "@/hooks/useRevealOnce";
 import styles from "./Concierge.module.scss";
 
@@ -95,7 +96,9 @@ export default function Concierge() {
             </svg>
             Explorar integrações
           </button>
-          <button className={`${styles.chip} ${styles.chipNeutral}`}>Estimar escopo</button>
+          <ConciergeCta className={`${styles.chip} ${styles.chipNeutral}`}>
+            Estimar escopo
+          </ConciergeCta>
         </div>
       </div>
     </section>

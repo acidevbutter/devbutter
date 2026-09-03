@@ -1,3 +1,4 @@
+import ConciergeCta from "@/components/ConciergeCta/ConciergeCta";
 import Flask3D from "@/components/Flask3D/Flask3D";
 import styles from "./Hero.module.scss";
 import HeroFlaskSvg from "./HeroFlaskSvg";
@@ -139,8 +140,10 @@ export default function Hero() {
             os sistemas por trás deles. A tecnologia certa depende do problema, não o contrário.
           </p>
           <div className={`fu ${styles.ctas}`}>
-            <button className={styles.ctaPrimary}>Solicitar diagnóstico</button>
-            <button className={styles.ctaSecondary}>Ver cases</button>
+            <ConciergeCta className={styles.ctaPrimary}>Solicitar diagnóstico</ConciergeCta>
+            <a href="#cases" className={styles.ctaSecondary}>
+              Ver cases
+            </a>
           </div>
         </div>
 

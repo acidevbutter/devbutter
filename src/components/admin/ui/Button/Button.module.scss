@@ -11,3 +11,16 @@
 .danger {
   @include admin.button-danger;
 }
+
+// Size overrides — layered on top of any variant.
+.sm {
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.row {
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+}

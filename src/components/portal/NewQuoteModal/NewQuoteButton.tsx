@@ -18,7 +18,9 @@ export default function NewQuoteButton({
       <Button variant="solid" type="button" onClick={() => setOpen(true)}>
         {label}
       </Button>
-      {open && <NewQuoteModal onClose={() => setOpen(false)} mode="portal" />}
+      {open && (
+        <NewQuoteModal onClose={() => setOpen(false)} mode="portal" surface="workspace" />
+      )}
     </>
   );
 }

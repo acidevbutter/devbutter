@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listConversations, getConversation } from "@/lib/admin/services/conversations";
 import { getMindTurnMetrics } from "@/lib/admin/services/mind";
 import { formatDate } from "@/lib/admin/format";
+import listStyles from "@/styles/AdminList.module.scss";
 import styles from "./Conversations.module.scss";
 
 export default async function AdminConversationsPage({
@@ -23,7 +24,17 @@ export default async function AdminConversationsPage({
   }
 
   return (
-    <div className={styles.layout}>
+    <div className={listStyles.page}>
+      <div className={listStyles.countBar}>
+        <span>
+          Conversas
+          {selected ? ` / ${selected.account_name ?? "visitante anônimo"}` : ""}
+        </span>
+        <span className={listStyles.countBarValue}>
+          {selected ? `${formatDate(selected.started_at)} · ${selected.message_count} msgs` : `${conversations.length} conversas`}
+        </span>
+      </div>
+      <div className={styles.layout}>
       <div className={styles.side}>
         <div className={styles.filters}>
           <Link href={filterHref(true)} className={`${styles.filterChip} ${hasQuote === true ? styles.filterChipActive : ""}`}>
@@ -65,7 +76,7 @@ export default async function AdminConversationsPage({
                   draft gerado pela IA
                 </div>
                 <div style={{ marginTop: 8, fontSize: 13.5 }}>escopo: {selected.draft.scope_summary}</div>
-                <div style={{ marginTop: 4, fontSize: 13.5, color: "var(--db-text-secondary)" }}>
+                <div style={{ marginTop: 4, fontSize: 13.5, color: "var(--admin-text-2)" }}>
                   faixa: {selected.draft.price_range} · prazo: {selected.draft.timeline}
                 </div>
                 {selected.resulting_quote_id && (
@@ -94,6 +105,7 @@ export default async function AdminConversationsPage({
         ) : (
           <div style={{ color: "var(--db-text-muted)", fontSize: 13 }}>Nenhuma conversa encontrada.</div>
         )}
+      </div>
       </div>
     </div>
   );

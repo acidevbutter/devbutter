@@ -3,39 +3,75 @@
 .scrim {
   position: fixed;
   inset: 0;
-  background: rgba(5, 7, 13, 0.72);
+  background: rgba(5, 7, 13, 0.66);
   display: grid;
   place-items: center;
   padding: 20px;
   z-index: 50;
 }
 
-.card {
-  width: 520px;
-  max-width: 100%;
-  max-height: 86vh;
+// Canvas 1b: the public panel is pinned to the right edge, full height, and the
+// dimmed site shows through behind it.
+.scrimPanel {
+  place-items: stretch end;
+  padding: 0;
+}
+
+// Public surface (canvas 1b): single-column chat panel anchored right.
+.panel {
+  width: min(520px, 100vw);
+  height: 100%;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: $admin-panel;
-  border: 1px solid rgba(121, 229, 155, 0.28);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 20px 20px;
+  overflow-y: auto;
+  box-shadow: -30px 0 70px rgba(0, 0, 0, 0.5);
+}
+
+// Portal surface (canvas 2a): two columns -- live dossiê + chat.
+.workspace {
+  width: min(1180px, calc(100vw - 32px));
+  height: min(860px, calc(100dvh - 32px));
+  display: grid;
+  grid-template-columns: minmax(0, 600px) minmax(0, 1fr);
+  background: #0b0f18;
+  border: 1px solid rgba(121, 229, 155, 0.24);
   border-radius: 18px;
-  padding: 18px;
+  overflow: hidden;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 210, 106, 0.08);
 }
 
+.chatCol {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #0b0f18;
+  padding: 0 18px 18px;
+  overflow-y: auto;
+}
+
+.dossier {
+  min-width: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  background: #0b0f18;
+  overflow-y: auto;
+  padding: 4px;
+}
+
 .head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 14px;
+  padding: 16px 0 14px;
   border-bottom: 1px solid $admin-border;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-
-  &:active {
-    cursor: grabbing;
-  }
+  background: inherit;
+  flex: none;
 }
 
 .headMeta {
@@ -49,9 +85,12 @@
 }
 
 .headStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font: 11px "Geist Mono", monospace;
   color: $db-green;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .statusDot {
@@ -61,6 +100,21 @@
   background: $db-green-glow;
   box-shadow: 0 0 8px $db-green-glow;
   flex-shrink: 0;
+  // Canvas 1b/1c/2a: the "online" dot breathes.
+  animation: db-dot 2.4s ease-in-out infinite;
+}
+
+@keyframes db-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
 }
 
 .headActions {
@@ -123,11 +177,11 @@
 }
 
 .thread {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 14px;
-  overflow-y: auto;
+  margin-top: 12px;
 }
 
 .msg {
@@ -135,6 +189,8 @@
   border-radius: 14px 14px 14px 4px;
   padding: 11px 14px;
   font: 13px/1.55 "Geist", sans-serif;
+  // Canvas 2c "rowIn": each bubble arrives 10px low + blurred, then settles.
+  animation: db-rowin 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
 .msgAi {
@@ -276,11 +332,11 @@
 .previewCard {
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  padding: 12px;
-  border: 1px solid rgba(121, 229, 155, 0.28);
-  border-radius: 12px;
-  background: rgba(121, 229, 155, 0.06);
+  gap: 0;
+  padding: 17px 18px;
+  border: 1px solid rgba(121, 229, 155, 0.3);
+  border-radius: 16px;
+  background: rgba(121, 229, 155, 0.05);
 }
 
 .previewTitle {
@@ -316,6 +372,10 @@
 .previewWarning,
 .previewMissing {
   color: #f6c85f;
+}
+
+.previewMissing {
+  margin-top: 9px;
 }
 
 // ---- contact/password step (canvas screen 1e) ----
@@ -384,14 +444,33 @@
 // ---- confirmation state ----
 
 .confirmHead {
+  position: relative;
   text-align: center;
-  padding: 10px 6px 18px;
+  padding: 20px 6px 22px;
   border-bottom: 1px solid $admin-border;
+  overflow: hidden;
+
+  // Canvas 1f: radial glow behind the check.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at 50% -10%,
+      rgba(0, 210, 106, 0.16),
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+  }
 }
 
 .confirmCheck {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   margin: 0 auto;
   border-radius: 50%;
   border: 1.5px solid rgba(121, 229, 155, 0.5);
@@ -463,10 +542,999 @@
   color: $db-text-muted;
 }
 
-.card > .submit {
+.panel > .submit,
+.chatCol > .submit {
   margin-top: 16px;
 }
 
-.card > .altContact {
+.panel > .altContact,
+.chatCol > .altContact {
   margin-top: 12px;
+}
+
+/* ---- Fluxo Cotação IA: opções selecionáveis (canvas telas 3 e 1d-1e) ---- */
+
+.optionsBlock {
+  margin-top: 12px;
+  padding: 12px;
+  background: $db-surface-inset;
+  border: 1px solid $admin-border;
+  border-radius: 14px;
+}
+
+.optionsPrompt {
+  font: 500 13px "Geist", sans-serif;
+  color: $db-chat-text-strong;
+  margin-bottom: 10px;
+}
+
+.optionsPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.optionsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.optionPill {
+  font: 500 12.5px "Geist", sans-serif;
+  color: $db-chat-text;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $db-border-interactive;
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+
+  &:hover:not(:disabled) {
+    border-color: rgba(121, 229, 155, 0.5);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.optionPillOn {
+  color: $db-text-primary;
+  border-color: $db-green;
+  box-shadow: 0 0 22px rgba(0, 210, 106, 0.18);
+}
+
+.optionCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 12.5px "Geist", sans-serif;
+  color: $db-chat-text;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $db-border-interactive;
+  border-radius: 10px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+
+  input {
+    accent-color: $db-green-glow;
+    width: 15px;
+    height: 15px;
+  }
+
+  &:hover {
+    border-color: rgba(121, 229, 155, 0.5);
+  }
+}
+
+.optionCheckOn {
+  color: $db-text-primary;
+  border-color: $db-green;
+  box-shadow: 0 0 22px rgba(0, 210, 106, 0.16);
+}
+
+.optionsConfirm {
+  margin-top: 12px;
+  width: 100%;
+  font: 600 13px "Geist", sans-serif;
+  color: $db-bg;
+  background: $db-green;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(0, 210, 106, 0.35);
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+    box-shadow: none;
+  }
+}
+
+.reviewFields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.reviewGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewGroupLabel {
+  font: 11px "Geist Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: $db-text-secondary;
+}
+
+/* ---- ADR-0004: product option cards (choosing) + collecting mini-form ---- */
+
+.optionCards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.optionCard {
+  border: 1px solid $admin-border;
+  border-radius: 14px;
+  padding: 14px 15px;
+  background: rgba(255, 255, 255, 0.02);
+  animation: db-rowin 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.optionCardRec {
+  border-color: rgba(121, 229, 155, 0.4);
+  background: rgba(121, 229, 155, 0.05);
+  box-shadow: 0 0 24px rgba(0, 210, 106, 0.08);
+}
+
+.optionCardHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.optionCardTitle {
+  font: 700 14.5px "Geist", sans-serif;
+  letter-spacing: -0.01em;
+  color: $db-text-primary;
+}
+
+.optionCardBadge {
+  font: 500 9.5px "Geist Mono", monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $db-green;
+  border: 1px solid rgba(121, 229, 155, 0.4);
+  border-radius: 20px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.optionCardSummary {
+  margin: 8px 0 0;
+  font: 12.5px/1.55 "Geist", sans-serif;
+  color: $db-text-secondary;
+}
+
+.optionCardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 10px;
+  font: 12px "Geist Mono", monospace;
+  color: $db-green;
+}
+
+.optionCardBtn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: $db-green;
+  color: $admin-bg;
+  font: 600 13px "Geist", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 0 22px rgba(0, 210, 106, 0.28);
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .optionCard:not(.optionCardRec) & {
+    background: rgba(255, 255, 255, 0.06);
+    color: $db-text-primary;
+    box-shadow: none;
+  }
+}
+
+.collectingForm {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-top: 12px;
+  padding: 13px;
+  border: 1px solid $admin-border;
+  border-radius: 14px;
+  background: $db-surface-inset;
+}
+
+.collectingHint {
+  font: 500 10.5px "Geist Mono", monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .optionPill,
+  .optionCheck {
+    transition: none;
+  }
+
+  .optionPillOn,
+  .optionCheckOn,
+  .optionsConfirm {
+    box-shadow: none;
+  }
+
+  // Canvas 2c rule: reduced motion cuts every animation and keeps the end state.
+  .msg,
+  .statusDot,
+  .panelEnter,
+  .workspaceEnter,
+  .scrimEnter,
+  .typingDot,
+  .dossierBlock,
+  .dossierChipNew,
+  .dossierStatSweep,
+  .dossierRingArc,
+  .dossierUnlockValue,
+  .dossierUnlockValueGreen,
+  .dossierSkeleton,
+  .dossierSkeletonChip,
+  .dossierSkeletonLine,
+  .landedPill,
+  .landedDot,
+  .flyDot {
+    animation: none !important;
+  }
+
+  .dossierRingArc {
+    transition: none;
+  }
+}
+
+/* ---- Fluxo Cotação IA: canvas fidelity (1b entrance, 1c chips, 1d card, 1e/1f) ---- */
+
+@keyframes db-rowin {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes db-panel-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes db-workspace-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes db-scrim-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+// Canvas 1b: "painel entra da direita 240ms".
+.panelEnter {
+  animation: db-panel-in 0.24s cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+}
+
+.workspaceEnter {
+  animation: db-workspace-in 0.28s cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+}
+
+.scrimEnter {
+  animation: db-scrim-in 0.2s ease backwards;
+}
+
+.headProgress {
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+  white-space: nowrap;
+  margin-right: 6px;
+}
+
+// Canvas 1c: captured-info chips under the thread.
+.captureChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.captureChip,
+.captureChipMissing {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 11.5px "Geist Mono", monospace;
+  border-radius: 20px;
+  padding: 6px 11px;
+}
+
+.captureChip {
+  color: #cfeedc;
+  border: 1px solid rgba(121, 229, 155, 0.3);
+  background: rgba(121, 229, 155, 0.06);
+}
+
+.captureChipMissing {
+  color: $db-text-muted;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+.captureEdit {
+  color: $db-text-muted;
+}
+
+// Canvas 1d: the "diagnóstico · rascunho" card.
+.previewCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.previewCardKicker {
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $db-green;
+}
+
+.previewCardSource {
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.previewCardTitle {
+  margin: 12px 0 0;
+  font: 700 18px/1.25 "Geist", sans-serif;
+  letter-spacing: -0.015em;
+  color: $db-text-primary;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.previewCardDesc {
+  margin: 8px 0 0;
+  font: 13px/1.55 "Geist", sans-serif;
+  color: $db-text-secondary;
+}
+
+.previewCardGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+  margin-top: 14px;
+}
+
+.previewStat {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 13px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.previewStatLabel {
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+}
+
+.previewStatGreen,
+.previewStatPlain {
+  margin-top: 7px;
+  font: 600 17px "Geist Mono", monospace;
+}
+
+.previewStatGreen {
+  color: $db-green;
+}
+
+.previewStatPlain {
+  color: $db-text-primary;
+}
+
+.previewCardWarn {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 14px;
+  font: 11.5px/1.5 "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.previewDiamond {
+  color: $db-pink;
+  flex-shrink: 0;
+}
+
+// Canvas 1e: detected-in-chat marker + opt-out toggle + consent row.
+.detected {
+  color: $db-green;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.contactInputDetected {
+  border-color: rgba(121, 229, 155, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 210, 106, 0.09);
+}
+
+.contactToggle {
+  align-self: flex-start;
+  margin-top: 2px;
+  background: none;
+  border: none;
+  padding: 0;
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+  cursor: pointer;
+
+  &:hover {
+    color: $db-green;
+  }
+}
+
+.consentRow {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin-top: 4px;
+  font: 11.5px/1.5 "Geist", sans-serif;
+  color: $db-text-secondary;
+  cursor: pointer;
+
+  input {
+    margin-top: 1px;
+    width: 16px;
+    height: 16px;
+    flex: none;
+    accent-color: $db-green-glow;
+  }
+}
+
+// Canvas 1f: the attached-conversation note under the confirmation card.
+.confirmCardNote {
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid $admin-border;
+  font: 11.5px/1.5 "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+/* ---- thread / composer trimmings shared by both surfaces ---- */
+
+.dateDivider {
+  align-self: center;
+  margin: 2px 0 6px;
+  font: 11px "Geist Mono", monospace;
+  letter-spacing: 0.08em;
+  color: $db-text-muted;
+}
+
+.msgP {
+  margin: 0;
+
+  & + & {
+    margin-top: 8px;
+  }
+}
+
+.composerHint {
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+  letter-spacing: 0.02em;
+}
+
+/* ========= Canvas screen 2a: the live dossiê (portal workspace) ========= */
+
+.dossierInner {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: #0b0f18;
+  border: 1px solid rgba(121, 229, 155, 0.24);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.dossierHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 19px 20px 17px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.dossierKicker {
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: $db-green;
+}
+
+.dossierTitle {
+  margin: 9px 0 0;
+  font: 700 22px/1.2 "Geist", sans-serif;
+  letter-spacing: -0.02em;
+  color: $db-text-primary;
+}
+
+.dossierSub {
+  margin-top: 5px;
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.dossierRing {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  flex: none;
+}
+
+// Canvas 2c "ring": completeness animates from its previous value, 900ms ease-out.
+.dossierRingArc {
+  transition: stroke-dashoffset 0.9s ease-out;
+  filter: drop-shadow(0 0 6px rgba(0, 210, 106, 0.55));
+}
+
+.dossierRingLabel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.dossierRingPct {
+  font: 600 15px "Geist Mono", monospace;
+  color: $db-text-primary;
+
+  span {
+    font-size: 10px;
+  }
+}
+
+.dossierRingFrac {
+  font: 9px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.dossierBody {
+  flex: 1;
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+// Canvas 2c "rowIn": each block arrives 10px low + blur 5px, 500ms.
+.dossierBlock {
+  animation: db-rowin 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.dossierBlockLocked {
+  opacity: 0.96;
+}
+
+.dossierBlockHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.dossierTick,
+.dossierTickMissing {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font: 9px "Geist Mono", monospace;
+}
+
+.dossierTick {
+  background: rgba(121, 229, 155, 0.16);
+  color: $db-green;
+}
+
+.dossierTickMissing {
+  border: 1px dashed rgba(246, 76, 111, 0.5);
+  color: $db-pink;
+}
+
+.dossierBlockLabel {
+  font: 500 10px "Geist Mono", monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+}
+
+.dossierRule {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.dossierStamp,
+.dossierCount {
+  font: 10px "Geist Mono", monospace;
+  color: $db-text-muted;
+  white-space: nowrap;
+}
+
+.dossierProblem {
+  margin: 0;
+  font: 13.5px/1.6 "Geist", sans-serif;
+  color: $db-chat-text-strong;
+}
+
+.dossierStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.dossierStat,
+.dossierStatLive {
+  position: relative;
+  overflow: hidden;
+  border-radius: 11px;
+  padding: 11px 12px;
+}
+
+.dossierStat {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+// Canvas 2c: the one "ao vivo" card is the single looping element -- sweep + glow.
+.dossierStatLive {
+  border: 1px solid rgba(121, 229, 155, 0.38);
+  background: rgba(121, 229, 155, 0.06);
+  animation: db-glow 2.8s ease-in-out infinite;
+}
+
+.dossierStatSweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(121, 229, 155, 0.22),
+    transparent
+  );
+  animation: db-sweep 3s ease-in-out infinite;
+}
+
+.dossierStatValue {
+  position: relative;
+  font: 600 19px "Geist Mono", monospace;
+  color: $db-text-primary;
+
+  .dossierStatLive & {
+    color: $db-green;
+  }
+}
+
+.dossierStatLabel {
+  position: relative;
+  margin-top: 4px;
+  font: 10px "Geist Mono", monospace;
+  color: $db-text-muted;
+
+  .dossierStatLive & {
+    color: $db-green;
+  }
+}
+
+.dossierStatCaption {
+  margin-top: 8px;
+  font: 10.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.dossierChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.dossierChip,
+.dossierChipNew {
+  font: 12px "Geist", sans-serif;
+  border-radius: 9px;
+  padding: 8px 12px;
+}
+
+.dossierChip {
+  color: #cfeedc;
+  border: 1px solid rgba(121, 229, 155, 0.32);
+  background: rgba(121, 229, 155, 0.06);
+}
+
+// Canvas 2c "tick": light overshoot, only on a freshly captured chip.
+.dossierChipNew {
+  color: $admin-bg;
+  background: $db-green;
+  font-weight: 600;
+  animation: db-tick 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.dossierLocked {
+  opacity: 0.9;
+}
+
+.dossierUnlockGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dossierUnlockStat,
+.dossierLockBox {
+  border-radius: 11px;
+  padding: 12px 13px;
+}
+
+.dossierUnlockStat {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dossierLockBox {
+  border: 1px dashed rgba(255, 255, 255, 0.13);
+}
+
+.dossierUnlockValue,
+.dossierUnlockValueGreen {
+  margin-top: 9px;
+  font: 600 18px "Geist Mono", monospace;
+  animation: db-tick 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.dossierUnlockValue {
+  color: $db-text-primary;
+}
+
+.dossierUnlockValueGreen {
+  color: $db-green;
+}
+
+.dossierLockHint {
+  margin-top: 9px;
+  font: 11px/1.5 "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.dossierFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+  font: 11px "Geist Mono", monospace;
+  color: $db-text-muted;
+}
+
+.dossierFootEdit {
+  color: $db-text-secondary;
+}
+
+// Skeletons -- canvas 2c "shimmer": a waiting state, not a loading state.
+.dossierSkeleton,
+.dossierSkeletonChip,
+.dossierSkeletonLine {
+  display: block;
+  border-radius: 5px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.13),
+    rgba(255, 255, 255, 0.05)
+  );
+  background-size: 200% 100%;
+  animation: db-shimmer 1.8s linear infinite;
+}
+
+.dossierSkeleton {
+  height: 52px;
+}
+
+.dossierSkeletonChip {
+  width: 120px;
+  height: 30px;
+  border-radius: 9px;
+}
+
+.dossierSkeletonLine {
+  height: 15px;
+  margin-top: 9px;
+}
+
+/* ---- canvas 2a chat column: the "N blocos foram pro dossiê" causality pill ---- */
+
+.landedPill {
+  position: relative;
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 10px "Geist Mono", monospace;
+  color: $db-green;
+  border: 1px solid rgba(121, 229, 155, 0.3);
+  border-radius: 20px;
+  padding: 4px 10px;
+  animation: db-glow 3s ease-in-out infinite;
+}
+
+.landedDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: $db-green;
+}
+
+// Canvas 2c "fly": particle leaves the chat bubble and crosses to the dossiê.
+.flyDot {
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $db-green;
+  box-shadow: 0 0 10px $db-green-glow;
+  animation: db-fly 2.6s ease-in-out infinite;
+}
+
+@keyframes db-sweep {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  55%,
+  100% {
+    transform: translateX(240%);
+  }
+}
+
+@keyframes db-shimmer {
+  0% {
+    background-position: -180% 0;
+  }
+
+  100% {
+    background-position: 180% 0;
+  }
+}
+
+@keyframes db-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(0, 210, 106, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 24px rgba(0, 210, 106, 0.32);
+  }
+}
+
+@keyframes db-tick {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes db-fly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.9);
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-190px, -38px) scale(0.75);
+  }
+}
+
+@media (max-width: 900px) {
+  // Canvas 2a open question (a): on narrow screens the dossiê becomes a drawer
+  // above the chat instead of a side column.
+  .workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 42dvh) minmax(0, 1fr);
+    width: 100vw;
+    height: 100dvh;
+    border: none;
+    border-radius: 0;
+  }
+
+  .dossier {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .panel {
+    width: 100vw;
+  }
 }

@@ -10,6 +10,11 @@ export default async function AdminCatalogPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.countBar}>
+        <span>Catálogo</span>
+        <span className={styles.countBarValue}>{entries.length} registros</span>
+      </div>
+
       <div className={styles.header}>
         <h1 className={styles.title}>Catálogo</h1>
       </div>
@@ -30,8 +35,8 @@ export default async function AdminCatalogPage() {
             style={{ ["--cols" as string]: COLUMNS }}
           >
             <span style={{ fontWeight: 600 }}>{entry.account_name}</span>
-            <span style={{ color: "var(--db-text-secondary)" }}>{entry.type}</span>
-            <span style={{ color: "var(--db-text-secondary)" }}>{entry.description}</span>
+            <span style={{ color: "var(--admin-text-2)" }}>{entry.type}</span>
+            <span style={{ color: "var(--admin-text-2)" }}>{entry.description}</span>
             <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12, color: "var(--db-text-muted)" }}>
               {formatDate(entry.created_at)}
             </span>

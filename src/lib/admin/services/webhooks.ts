@@ -1,6 +1,6 @@
 import "server-only";
 import { adminFetch } from "../api";
-import type { AdminWebhookEvent } from "../types";
+import type { AdminWebhookEvent, AdminWebhookEventDetail } from "../types";
 
 interface BackendWebhookEvent {
   id: string;
@@ -31,6 +31,19 @@ function toFrontendEvent(event: BackendWebhookEvent): AdminWebhookEvent {
 export async function listWebhookEvents(): Promise<AdminWebhookEvent[]> {
   const page = await adminFetch<AdminWebhookEventListPage>("/admin/webhooks/events?page_size=100");
   return page.items.map(toFrontendEvent);
+}
+
+// Real: GET /admin/webhooks/events/{id} — drawer detail (attempts + correlation).
+export async function getWebhookEvent(id: string): Promise<AdminWebhookEventDetail> {
+  const event = await adminFetch<
+    BackendWebhookEvent & Pick<AdminWebhookEventDetail, "processed_at" | "attempts" | "correlation">
+  >(`/admin/webhooks/events/${id}`);
+  return {
+    ...toFrontendEvent(event),
+    processed_at: event.processed_at,
+    attempts: event.attempts,
+    correlation: event.correlation,
+  };
 }
 
 // Real: POST /admin/webhooks/events/{id}/reprocess.
