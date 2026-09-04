@@ -91,12 +91,16 @@ type DiagnosisPreview = {
   options?: ProductOption[];
   selected_option_key?: string | null;
   missing_fields?: string[];
+  /** butter_mind's _OPTION_CATALOG for the review step's editable fields
+   * (canvas 1d-1e). Keys: "services_of_interest", "budget_range", "timeline".
+   * The review checkbox/pill groups render from this; the *_OPTIONS consts
+   * below are only the fallback for a preview from an older butter_mind. */
+  field_options?: Record<string, NextStepOption[]>;
 };
 
-/** Mirrors butter_mind's _OPTION_CATALOG for the review step (canvas 1d-1e):
- * the "pronto para enviar" summary turns services into an editable checkbox
- * group and budget/timeline into radios. Keep ids/labels in sync with
- * butter_mind/app/diagnosis/service.py::_OPTION_CATALOG. */
+/** Fallback only — the live option lists come from `preview.field_options`
+ * (butter_mind's _OPTION_CATALOG). Kept so the review step still renders if a
+ * resumed/old preview omits `field_options`. */
 const SERVICE_OPTIONS = [
   "Agente de IA",
   "Automação de processos",
@@ -351,7 +355,9 @@ export default function NewQuoteModal({
     if (!readyToSubmit || reviewSeededRef.current) return;
     reviewSeededRef.current = true;
     const fromPreview = preview?.services_of_interest ?? [];
-    const merged = [...SERVICE_OPTIONS];
+    const catalog =
+      preview?.field_options?.services_of_interest?.map((o) => o.label) ?? SERVICE_OPTIONS;
+    const merged = [...catalog];
     for (const s of fromPreview) {
       if (!merged.some((o) => o.toLowerCase() === s.toLowerCase())) merged.push(s);
     }
@@ -370,21 +376,31 @@ export default function NewQuoteModal({
     setReviewTimeline(preview?.timeline ?? null);
   }, [readyToSubmit, preview]);
 
+  // Live option lists from butter_mind's _OPTION_CATALOG (preview.field_options);
+  // the *_OPTIONS consts are the fallback for an older/omitted preview.
+  const catalogFor = (field: string, fallback: string[]): string[] => {
+    const fromServer = preview?.field_options?.[field];
+    return fromServer && fromServer.length ? fromServer.map((o) => o.label) : fallback;
+  };
+  const serviceCatalog = catalogFor("services_of_interest", SERVICE_OPTIONS);
+  const budgetCatalog = catalogFor("budget_range", BUDGET_OPTIONS);
+  const timelineCatalog = catalogFor("timeline", TIMELINE_OPTIONS);
+
   const reviewServiceChoices = (() => {
-    const base = [...SERVICE_OPTIONS];
+    const base = [...serviceCatalog];
     for (const s of [...(preview?.services_of_interest ?? []), ...reviewServices]) {
       if (!base.some((o) => o.toLowerCase() === s.toLowerCase())) base.push(s);
     }
     return base;
   })();
   const budgetChoices =
-    reviewBudget && !BUDGET_OPTIONS.includes(reviewBudget)
-      ? [reviewBudget, ...BUDGET_OPTIONS]
-      : BUDGET_OPTIONS;
+    reviewBudget && !budgetCatalog.includes(reviewBudget)
+      ? [reviewBudget, ...budgetCatalog]
+      : budgetCatalog;
   const timelineChoices =
-    reviewTimeline && !TIMELINE_OPTIONS.includes(reviewTimeline)
-      ? [reviewTimeline, ...TIMELINE_OPTIONS]
-      : TIMELINE_OPTIONS;
+    reviewTimeline && !timelineCatalog.includes(reviewTimeline)
+      ? [reviewTimeline, ...timelineCatalog]
+      : timelineCatalog;
 
   const showContactStep = readyToSubmit && !forceComposer && mode === "public";
   const showReadyPanel = readyToSubmit && !forceComposer && mode === "portal";
