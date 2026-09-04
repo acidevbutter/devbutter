@@ -24,10 +24,13 @@
   max-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: $admin-panel;
+  background: $db-surface;
+  --composer-fade: #{$db-surface};
   border-left: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0 20px 20px;
-  overflow-y: auto;
+  padding: 0 20px;
+  // The panel itself doesn't scroll -- .scrollRegion does, so the thread can
+  // slide *behind* the sticky composer.
+  overflow: hidden;
   box-shadow: -30px 0 70px rgba(0, 0, 0, 0.5);
 }
 
@@ -49,8 +52,27 @@
   display: flex;
   flex-direction: column;
   background: #0b0f18;
-  padding: 0 18px 18px;
+  --composer-fade: #0b0f18;
+  padding: 0 18px;
+  overflow: hidden;
+}
+
+// The one scrolling region of the chat column: thread + option blocks + the
+// contact/ready forms. The composer inside it is sticky, so messages scroll
+// visibly behind it.
+.scrollRegion {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  // Slack so the last message can scroll clear of the sticky composer.
+  padding-bottom: 20px;
+}
+
+// Item 4: while tappable options are up, the thread is frozen in place.
+.scrollFrozen {
+  overflow: hidden;
 }
 
 .dossier {
@@ -68,10 +90,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 0 14px;
-  border-bottom: 1px solid $admin-border;
-  background: inherit;
+  // Canvas: padding 15px 20px; the fill + border must reach the panel edges, so
+  // bleed past the panel's 20px inner padding.
+  padding: 15px 20px;
+  margin: 0 -20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: $db-surface-inset;
   flex: none;
+}
+
+// The workspace chat column has 18px side padding, not the panel's 20px.
+.chatCol > .head {
+  margin-left: -18px;
+  margin-right: -18px;
 }
 
 .headMeta {
@@ -104,19 +135,6 @@
   animation: db-dot 2.4s ease-in-out infinite;
 }
 
-@keyframes db-dot {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.35;
-    transform: scale(0.85);
-  }
-}
-
 .headActions {
   display: flex;
   align-items: center;
@@ -127,7 +145,7 @@
   background: none;
   border: none;
   color: $db-text-muted;
-  font-size: 13px;
+  font: 14px "Geist Mono", monospace;
   cursor: pointer;
 
   &:hover {
@@ -177,7 +195,7 @@
 }
 
 .thread {
-  flex: 1 0 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -185,16 +203,23 @@
 }
 
 .msg {
-  max-width: 85%;
   border-radius: 14px 14px 14px 4px;
-  padding: 11px 14px;
-  font: 13px/1.55 "Geist", sans-serif;
-  // Canvas 2c "rowIn": each bubble arrives 10px low + blurred, then settles.
-  animation: db-rowin 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  padding: 12px 15px;
+  font: 13.5px/1.55 "Geist", sans-serif;
+  // Canvas 2c "rowIn": each bubble arrives 10px low + blurred, then settles,
+  // 500ms cubic-bezier(.2,.7,.3,1).
+  animation: db-rowIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+// Canvas 1b: the very first AI bubble is a touch taller (13px vs 12px vertical).
+.dateDivider + .msg {
+  padding-top: 13px;
+  padding-bottom: 13px;
 }
 
 .msgAi {
   align-self: flex-start;
+  max-width: 88%;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: $db-chat-text-strong;
@@ -202,10 +227,11 @@
 
 .msgMe {
   align-self: flex-end;
+  max-width: 86%;
   border-radius: 14px 14px 4px 14px;
   background: rgba(121, 229, 155, 0.08);
   border: 1px solid rgba(121, 229, 155, 0.3);
-  color: #cfeedc;
+  color: $db-chat-user-text;
 }
 
 .msgFailed {
@@ -218,7 +244,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: 85%;
+  max-width: 86%;
 
   .msg {
     max-width: 100%;
@@ -254,7 +280,8 @@
   align-items: center;
   gap: 5px;
   align-self: flex-start;
-  padding: 12px 15px;
+  width: fit-content;
+  padding: 13px 16px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -268,7 +295,24 @@
   animation: db-typed 1.2s infinite;
 }
 
-.composer,
+.composer {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  // Sit at the bottom when the thread is short; sticky takes over once it fills.
+  margin-top: auto;
+  padding: 16px 0 12px;
+  // The thread scrolls behind the composer -- opaque at the input, fading up.
+  background: linear-gradient(
+    to top,
+    var(--composer-fade, #{$db-surface}) 62%,
+    transparent
+  );
+}
+
 .readyPanel {
   display: flex;
   flex-direction: column;
@@ -276,34 +320,80 @@
   margin-top: 14px;
 }
 
+// Canvas 1b: textarea + send button side by side, bottom-aligned.
+.composerRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
 .textarea {
-  min-height: 64px;
-  background: rgba(5, 7, 13, 0.35);
-  border: 1.5px solid rgba(121, 229, 155, 0.5);
+  flex: 1;
+  min-height: 74px;
+  // JS autosize (COMPOSER_MAX_H) grows the box with its content; past that it
+  // scrolls. `resize: none` -- the drag handle fought the autosize.
+  max-height: 160px;
+  overflow-y: auto;
+  background: $db-bg;
+  // Canvas 1c (rest): plain hairline border, no glow.
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
-  padding: 11px 13px;
-  font: 13px "Geist", sans-serif;
+  padding: 13px 15px;
+  font: 13.5px/1.5 "Geist", sans-serif;
   color: $db-text-primary;
-  resize: vertical;
-  box-shadow: 0 0 0 3px rgba(0, 210, 106, 0.09);
+  resize: none;
+
+  &::placeholder {
+    color: $db-text-muted;
+  }
+
+  // Canvas 1b (focused, the default open state): green border + soft glow.
+  &:focus {
+    outline: none;
+    border: 1.5px solid rgba(121, 229, 155, 0.55);
+    box-shadow: 0 0 0 3px rgba(0, 210, 106, 0.1);
+  }
 
   &:disabled {
     opacity: 0.6;
   }
 }
 
+// Canvas 1b: 46x46 icon button; active tint when there is text, muted when empty.
+.send {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: $db-text-muted;
+  font: 16px "Geist Mono", monospace;
+  cursor: pointer;
+
+  &:not(:disabled) {
+    background: rgba(121, 229, 155, 0.14);
+    color: $db-green;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
 .submit {
   width: 100%;
   background: $db-green;
-  color: $admin-bg;
+  color: $db-bg;
   border: none;
   border-radius: 12px;
-  padding: 13px;
+  padding: 14px;
   text-align: center;
-  font-weight: 700;
-  font-size: 14.5px;
+  font: 700 15px "Geist", sans-serif;
   cursor: pointer;
-  box-shadow: 0 0 26px rgba(0, 210, 106, 0.3);
+  box-shadow: 0 0 30px rgba(0, 210, 106, 0.32);
 
   &:disabled {
     opacity: 0.5;
@@ -314,13 +404,65 @@
 
 .altContact {
   text-align: center;
-  font: 12px "Geist", sans-serif;
+  font: 12.5px "Geist", sans-serif;
   color: $db-text-secondary;
   cursor: pointer;
 
   &:hover {
     color: $db-text-primary;
   }
+}
+
+// Canvas 1d/1g: the escape links sit as one line -- "Quero ajustar algo · Continuar conversando".
+.altContactRow {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  font: 12.5px "Geist", sans-serif;
+  color: $db-text-secondary;
+
+  span {
+    cursor: pointer;
+
+    &:hover {
+      color: $db-text-primary;
+    }
+  }
+}
+
+.altContactSep {
+  color: $db-text-muted;
+  cursor: default;
+}
+
+// Canvas 1d/1g: the ready-panel CTA + escapes sit in an inset footer bar that
+// bleeds to the panel edges (like .head).
+.actionFooter {
+  margin: 14px -20px -20px;
+  padding: 16px 20px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: $db-surface-inset;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.chatCol .actionFooter {
+  margin-left: -18px;
+  margin-right: -18px;
+}
+
+// Canvas 1e: the "conversa fica salva" reassurance under the contact form.
+.contactFootnote {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font: 11px/1.5 "Geist Mono", monospace;
+  color: $db-text-muted;
 }
 
 .errorText {
@@ -333,7 +475,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 17px 18px;
+  padding: 18px 19px;
   border: 1px solid rgba(121, 229, 155, 0.3);
   border-radius: 16px;
   background: rgba(121, 229, 155, 0.05);
@@ -404,13 +546,13 @@
   align-items: baseline;
   justify-content: space-between;
   font: 500 10.5px "Geist Mono", monospace;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: $db-text-muted;
 }
 
 .required {
-  color: $db-pink;
+  color: $db-pink-glow;
   text-transform: none;
   letter-spacing: normal;
 }
@@ -422,11 +564,11 @@
 }
 
 .contactInput {
-  background: rgba(5, 7, 13, 0.35);
+  background: $db-bg;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 11px;
-  padding: 11px 13px;
-  font: 13px "Geist", sans-serif;
+  padding: 12px 14px;
+  font: 13.5px "Geist", sans-serif;
   color: $db-text-primary;
 
   &:focus {
@@ -477,20 +619,20 @@
   display: grid;
   place-items: center;
   color: $db-green;
-  font: 18px "Geist Mono", monospace;
+  font: 19px "Geist Mono", monospace;
   box-shadow: 0 0 26px rgba(0, 210, 106, 0.25);
 }
 
 .confirmTitle {
   margin: 14px 0 0;
-  font: 700 20px "Geist", sans-serif;
+  font: 700 22px/1.25 "Geist", sans-serif;
   letter-spacing: -0.02em;
 }
 
 .confirmText {
   margin: 8px auto 0;
-  max-width: 340px;
-  font: 13px/1.55 "Geist", sans-serif;
+  max-width: 360px;
+  font: 13.5px/1.55 "Geist", sans-serif;
   color: $db-text-secondary;
 }
 
@@ -498,7 +640,7 @@
   margin-top: 16px;
   border: 1px solid $admin-border;
   border-radius: 14px;
-  padding: 15px 16px;
+  padding: 17px 18px;
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -515,8 +657,8 @@
 }
 
 .awaitingBadge {
-  font: 500 10.5px "Geist Mono", monospace;
-  color: $db-pink;
+  font: 500 11px "Geist Mono", monospace;
+  color: $db-pink-glow;
   border: 1px solid rgba(246, 76, 111, 0.45);
   border-radius: 20px;
   padding: 3px 10px;
@@ -525,7 +667,7 @@
 
 .confirmCardTitle {
   margin-top: 10px;
-  font: 600 15.5px "Geist", sans-serif;
+  font: 600 16.5px "Geist", sans-serif;
   letter-spacing: -0.01em;
 }
 
@@ -542,53 +684,40 @@
   color: $db-text-muted;
 }
 
-.panel > .submit,
-.chatCol > .submit {
+// Confirmation screen: the standalone CTA / escape link, direct children of the
+// scroll region.
+.scrollRegion > .submit {
   margin-top: 16px;
 }
 
-.panel > .altContact,
-.chatCol > .altContact {
+.scrollRegion > .altContact,
+.scrollRegion > .altContactRow {
   margin-top: 12px;
 }
 
-/* ---- Fluxo Cotação IA: opções selecionáveis (canvas telas 3 e 1d-1e) ---- */
+/* ---- Fluxo Cotação IA: opções selecionáveis (canvas 1b/1c telas 3 e 1d-1e) ---- */
 
-.optionsBlock {
-  margin-top: 12px;
-  padding: 12px;
-  background: $db-surface-inset;
-  border: 1px solid $admin-border;
-  border-radius: 14px;
-}
-
-.optionsPrompt {
-  font: 500 13px "Geist", sans-serif;
-  color: $db-chat-text-strong;
-  margin-bottom: 10px;
-}
-
-.optionsPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
+// Canvas: pills sit bare in a wrap row directly under the last AI bubble -- no
+// card, no separate prompt label (the AI message text IS the prompt).
+.optionsPills,
 .optionsGrid {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 10px;
 }
 
+// Canvas 1b/1c unselected pill: mint text, green hairline, transparent fill.
 .optionPill {
-  font: 500 12.5px "Geist", sans-serif;
-  color: $db-chat-text;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid $db-border-interactive;
-  border-radius: 999px;
-  padding: 7px 14px;
+  font: 400 12px "Geist", sans-serif;
+  color: $db-chat-user-text;
+  background: transparent;
+  border: 1px solid rgba(121, 229, 155, 0.35);
+  border-radius: 20px;
+  padding: 7px 13px;
   cursor: pointer;
-  transition: border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+  transition: border-color 160ms ease, box-shadow 160ms ease, color 160ms ease,
+    background-color 160ms ease;
 
   &:hover:not(:disabled) {
     border-color: rgba(121, 229, 155, 0.5);
@@ -600,29 +729,33 @@
   }
 }
 
+// Canvas 1c selected pill: solid green fill, no border, no glow.
 .optionPillOn {
-  color: $db-text-primary;
-  border-color: $db-green;
-  box-shadow: 0 0 22px rgba(0, 210, 106, 0.18);
+  background: $db-green;
+  color: $db-bg;
+  border-color: transparent;
+  font-weight: 600;
 }
 
 .optionCheck {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font: 500 12.5px "Geist", sans-serif;
-  color: $db-chat-text;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid $db-border-interactive;
-  border-radius: 10px;
-  padding: 7px 12px;
+  font: 400 12px "Geist", sans-serif;
+  color: $db-chat-user-text;
+  background: transparent;
+  border: 1px solid rgba(121, 229, 155, 0.35);
+  border-radius: 20px;
+  padding: 7px 13px;
   cursor: pointer;
-  transition: border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+  transition: border-color 160ms ease, color 160ms ease;
 
+  // Native input is kept for a11y/state but visually replaced by .optionCheckBox.
   input {
-    accent-color: $db-green-glow;
-    width: 15px;
-    height: 15px;
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
   }
 
   &:hover {
@@ -630,10 +763,23 @@
   }
 }
 
+// Canvas §3: the 16px square that stands in for the native checkbox.
+.optionCheckBox {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 4px;
+  border: 1.5px solid $db-green;
+  background: rgba(121, 229, 155, 0.14);
+  display: grid;
+  place-items: center;
+  font: 10px "Geist Mono", monospace;
+  color: $db-green;
+}
+
+// Canvas §3: multi-select "on" keeps the outlined pill; only the box fills.
 .optionCheckOn {
-  color: $db-text-primary;
   border-color: $db-green;
-  box-shadow: 0 0 22px rgba(0, 210, 106, 0.16);
 }
 
 .optionsConfirm {
@@ -689,7 +835,7 @@
   border-radius: 14px;
   padding: 14px 15px;
   background: rgba(255, 255, 255, 0.02);
-  animation: db-rowin 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation: db-rowIn 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
 .optionCardRec {
@@ -819,18 +965,105 @@
 }
 
 /* ---- Fluxo Cotação IA: canvas fidelity (1b entrance, 1c chips, 1d card, 1e/1f) ---- */
+// Transcribed 1:1 from the canvas <helmet><style>. These are declared here (not
+// in _animations.scss) because this project's CSS modules scope `animation-name`
+// references, so the @keyframes must sit in the same module to resolve.
 
-@keyframes db-rowin {
+@keyframes db-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+// 3-dot typing indicator (canvas 1c). Local copy: the shared one in
+// _animations.scss can't be referenced from a scoped module.
+@keyframes db-typed {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes db-rowIn {
   from {
     opacity: 0;
     transform: translateY(10px);
     filter: blur(5px);
   }
-
   to {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+}
+
+@keyframes db-sweep {
+  0% {
+    transform: translateX(-110%);
+  }
+  55%,
+  100% {
+    transform: translateX(240%);
+  }
+}
+
+@keyframes db-shimmer {
+  0% {
+    background-position: -180% 0;
+  }
+  100% {
+    background-position: 180% 0;
+  }
+}
+
+@keyframes db-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(0, 210, 106, 0);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(0, 210, 106, 0.32);
+  }
+}
+
+@keyframes db-tick {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes db-fly {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.9);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-190px, -38px) scale(0.75);
   }
 }
 
@@ -886,6 +1119,11 @@
   margin-right: 6px;
 }
 
+// Canvas 1d: once the diagnosis is ready the counter turns green.
+.headProgressReady {
+  color: $db-green;
+}
+
 // Canvas 1c: captured-info chips under the thread.
 .captureChips {
   display: flex;
@@ -905,7 +1143,7 @@
 }
 
 .captureChip {
-  color: #cfeedc;
+  color: $db-chat-user-text;
   border: 1px solid rgba(121, 229, 155, 0.3);
   background: rgba(121, 229, 155, 0.06);
 }
@@ -950,7 +1188,7 @@
 }
 
 .previewCardDesc {
-  margin: 8px 0 0;
+  margin: 9px 0 0;
   font: 13px/1.55 "Geist", sans-serif;
   color: $db-text-secondary;
 }
@@ -959,7 +1197,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 11px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .previewStat {
@@ -979,7 +1217,7 @@
 .previewStatGreen,
 .previewStatPlain {
   margin-top: 7px;
-  font: 600 17px "Geist Mono", monospace;
+  font: 600 19px "Geist Mono", monospace;
 }
 
 .previewStatGreen {
@@ -1000,7 +1238,7 @@
 }
 
 .previewDiamond {
-  color: $db-pink;
+  color: $db-pink-glow;
   flex-shrink: 0;
 }
 
@@ -1040,13 +1278,28 @@
   color: $db-text-secondary;
   cursor: pointer;
 
+  // Native input kept for state; visually replaced by .consentBox.
   input {
-    margin-top: 1px;
-    width: 16px;
-    height: 16px;
-    flex: none;
-    accent-color: $db-green-glow;
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
   }
+}
+
+// Canvas 1e: same 16px square as the multi-select checkbox.
+.consentBox {
+  margin-top: 1px;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 4px;
+  border: 1.5px solid $db-green;
+  background: rgba(121, 229, 155, 0.14);
+  display: grid;
+  place-items: center;
+  font: 10px "Geist Mono", monospace;
+  color: $db-green;
 }
 
 // Canvas 1f: the attached-conversation note under the confirmation card.
@@ -1054,7 +1307,7 @@
   margin-top: 14px;
   padding-top: 13px;
   border-top: 1px solid $admin-border;
-  font: 11.5px/1.5 "Geist Mono", monospace;
+  font: 12px/1.5 "Geist Mono", monospace;
   color: $db-text-muted;
 }
 
@@ -1064,22 +1317,42 @@
   align-self: center;
   margin: 2px 0 6px;
   font: 11px "Geist Mono", monospace;
-  letter-spacing: 0.08em;
   color: $db-text-muted;
 }
 
 .msgP {
   margin: 0;
 
+  // Canvas 1b/1c: the follow-up line inside an AI bubble is the secondary tint,
+  // 9px below the lead paragraph.
   & + & {
-    margin-top: 8px;
+    margin-top: 9px;
+    color: $db-text-secondary;
   }
 }
 
 .composerHint {
-  font: 11px "Geist Mono", monospace;
+  font: 10.5px "Geist Mono", monospace;
   color: $db-text-muted;
-  letter-spacing: 0.02em;
+}
+
+// Item 4: shown in place of the composer while options are up -- reveals the
+// composer on demand (next_step.allow_free_text).
+.writeInsteadLink {
+  align-self: center;
+  margin-top: 12px;
+  padding: 4px;
+  background: none;
+  border: 0;
+  font: 12px "Geist", sans-serif;
+  color: $db-text-secondary;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+
+  &:hover {
+    color: $db-text-primary;
+  }
 }
 
 /* ========= Canvas screen 2a: the live dossiê (portal workspace) ========= */
@@ -1168,7 +1441,7 @@
 
 // Canvas 2c "rowIn": each block arrives 10px low + blur 5px, 500ms.
 .dossierBlock {
-  animation: db-rowin 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation: db-rowIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
 .dossierBlockLocked {
@@ -1452,70 +1725,8 @@
   animation: db-fly 2.6s ease-in-out infinite;
 }
 
-@keyframes db-sweep {
-  0% {
-    transform: translateX(-110%);
-  }
-
-  55%,
-  100% {
-    transform: translateX(240%);
-  }
-}
-
-@keyframes db-shimmer {
-  0% {
-    background-position: -180% 0;
-  }
-
-  100% {
-    background-position: 180% 0;
-  }
-}
-
-@keyframes db-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 rgba(0, 210, 106, 0);
-  }
-
-  50% {
-    box-shadow: 0 0 24px rgba(0, 210, 106, 0.32);
-  }
-}
-
-@keyframes db-tick {
-  0% {
-    transform: scale(0.3);
-    opacity: 0;
-  }
-
-  60% {
-    transform: scale(1.18);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes db-fly {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0) scale(0.9);
-  }
-
-  25% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate(-190px, -38px) scale(0.75);
-  }
-}
+// db-sweep / db-shimmer / db-glow / db-tick / db-fly now live in
+// src/styles/_animations.scss (transcribed 1:1 from the canvas helmet).
 
 @media (max-width: 900px) {
   // Canvas 2a open question (a): on narrow screens the dossiê becomes a drawer
