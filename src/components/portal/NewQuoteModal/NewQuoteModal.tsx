@@ -77,6 +77,10 @@ type BusinessProfile = {
 
 type QualificationProgress = { answered: number; total: number };
 
+// Mirrors butter_mind `app/diagnosis/schemas.py::DiagnosisPreview` (canonical
+// shape; snapshot in butter_mind `contracts/conversation_state.schema.json`).
+// devbutter_backend relays it verbatim -- it no longer re-declares it (ADR-0005).
+// Keep this hand-written type in step with that schema until codegen lands.
 type DiagnosisPreview = {
   problem_summary: string;
   services_of_interest: string[];
