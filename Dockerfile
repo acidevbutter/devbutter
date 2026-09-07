@@ -8,6 +8,7 @@ COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY . .
+RUN mkdir -p public
 RUN yarn build
 
 FROM node:22-alpine AS runtime
