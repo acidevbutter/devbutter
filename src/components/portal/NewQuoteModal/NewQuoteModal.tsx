@@ -83,7 +83,10 @@ type QualificationProgress = { answered: number; total: number };
 // Keep this hand-written type in step with that schema until codegen lands.
 type DiagnosisPreview = {
   problem_summary: string;
-  services_of_interest: string[];
+  // ADR-0007: renamed from services_of_interest -- a light label taxonomy;
+  // the real cost drivers live server-side in the (not yet rendered here)
+  // scoping_vector.
+  solution_kinds: string[];
   budget_range: string | null;
   timeline: string | null;
   missing_information: string[];
@@ -95,17 +98,18 @@ type DiagnosisPreview = {
   options?: ProductOption[];
   selected_option_key?: string | null;
   missing_fields?: string[];
-  /** butter_mind's _OPTION_CATALOG for the review step's editable fields
-   * (canvas 1d-1e). Keys: "services_of_interest", "budget_range", "timeline".
-   * The review checkbox/pill groups render from this; the *_OPTIONS consts
-   * below are only the fallback for a preview from an older butter_mind. */
+  /** butter_mind's _SCOPING_CATALOG for the review step's editable fields
+   * (canvas 1d-1e) and next_step pills. Keys match ScopingVector's field
+   * names (solution_kinds, rush, ...). The review groups render from this;
+   * the *_FALLBACK consts below are only the fallback for a preview from an
+   * older butter_mind. */
   field_options?: Record<string, NextStepOption[]>;
 };
 
 /** Fallback only — the live option lists come from `preview.field_options`
- * (butter_mind's _OPTION_CATALOG). Kept so the review step still renders if a
+ * (butter_mind's _SCOPING_CATALOG). Kept so the review step still renders if a
  * resumed/old preview omits `field_options`. */
-const SERVICE_OPTIONS = [
+const SOLUTION_KINDS_FALLBACK = [
   "Agente de IA",
   "Automação de processos",
   "Plataforma web / SaaS",
@@ -113,14 +117,7 @@ const SERVICE_OPTIONS = [
   "Site institucional",
   "Dados / analytics",
 ];
-const BUDGET_OPTIONS = [
-  "Até R$ 10 mil",
-  "R$ 10–30 mil",
-  "R$ 30–80 mil",
-  "Acima de R$ 80 mil",
-  "Ainda não sei",
-];
-const TIMELINE_OPTIONS = ["O quanto antes", "1–3 meses", "3–6 meses", "Sem prazo fixo"];
+const RUSH_FALLBACK = ["O quanto antes", "1–3 meses", "3–6 meses", "Sem prazo fixo"];
 
 /** Composer textarea auto-grows with its content up to this height (px), then
  * scrolls internally. Single knob for the "input acompanha o texto" behavior
@@ -181,7 +178,7 @@ function dossierChecks(preview: DiagnosisPreview | null): boolean[] {
   const metrics = bp?.metrics ?? [];
   const modules = bp?.scope_modules?.length
     ? bp.scope_modules
-    : preview?.services_of_interest ?? [];
+    : preview?.solution_kinds ?? [];
   const problem = (bp?.pain_points?.length ?? 0) > 0 || !!preview?.problem_summary?.trim();
   return [
     problem,
@@ -273,7 +270,6 @@ export default function NewQuoteModal({
   const [skipCollecting, setSkipCollecting] = useState(false);
   // Editable review step (canvas 1d-1e), seeded once from the preview.
   const [reviewServices, setReviewServices] = useState<string[]>([]);
-  const [reviewBudget, setReviewBudget] = useState<string | null>(null);
   const [reviewTimeline, setReviewTimeline] = useState<string | null>(null);
   const reviewSeededRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -358,9 +354,9 @@ export default function NewQuoteModal({
   useEffect(() => {
     if (!readyToSubmit || reviewSeededRef.current) return;
     reviewSeededRef.current = true;
-    const fromPreview = preview?.services_of_interest ?? [];
+    const fromPreview = preview?.solution_kinds ?? [];
     const catalog =
-      preview?.field_options?.services_of_interest?.map((o) => o.label) ?? SERVICE_OPTIONS;
+      preview?.field_options?.solution_kinds?.map((o) => o.label) ?? SOLUTION_KINDS_FALLBACK;
     const merged = [...catalog];
     for (const s of fromPreview) {
       if (!merged.some((o) => o.toLowerCase() === s.toLowerCase())) merged.push(s);
@@ -376,31 +372,25 @@ export default function NewQuoteModal({
           )
       )
     );
-    setReviewBudget(preview?.budget_range ?? null);
     setReviewTimeline(preview?.timeline ?? null);
   }, [readyToSubmit, preview]);
 
-  // Live option lists from butter_mind's _OPTION_CATALOG (preview.field_options);
-  // the *_OPTIONS consts are the fallback for an older/omitted preview.
+  // Live option lists from butter_mind's _SCOPING_CATALOG (preview.field_options);
+  // the *_FALLBACK consts are the fallback for an older/omitted preview.
   const catalogFor = (field: string, fallback: string[]): string[] => {
     const fromServer = preview?.field_options?.[field];
     return fromServer && fromServer.length ? fromServer.map((o) => o.label) : fallback;
   };
-  const serviceCatalog = catalogFor("services_of_interest", SERVICE_OPTIONS);
-  const budgetCatalog = catalogFor("budget_range", BUDGET_OPTIONS);
-  const timelineCatalog = catalogFor("timeline", TIMELINE_OPTIONS);
+  const serviceCatalog = catalogFor("solution_kinds", SOLUTION_KINDS_FALLBACK);
+  const timelineCatalog = catalogFor("rush", RUSH_FALLBACK);
 
   const reviewServiceChoices = (() => {
     const base = [...serviceCatalog];
-    for (const s of [...(preview?.services_of_interest ?? []), ...reviewServices]) {
+    for (const s of [...(preview?.solution_kinds ?? []), ...reviewServices]) {
       if (!base.some((o) => o.toLowerCase() === s.toLowerCase())) base.push(s);
     }
     return base;
   })();
-  const budgetChoices =
-    reviewBudget && !budgetCatalog.includes(reviewBudget)
-      ? [reviewBudget, ...budgetCatalog]
-      : budgetCatalog;
   const timelineChoices =
     reviewTimeline && !timelineCatalog.includes(reviewTimeline)
       ? [reviewTimeline, ...timelineCatalog]
@@ -688,12 +678,10 @@ export default function NewQuoteModal({
    * conversational extraction. */
   function reviewOverrides() {
     const out: {
-      services_of_interest?: string[];
-      budget_range?: string;
+      solution_kinds?: string[];
       timeline?: string;
     } = {};
-    if (reviewServices.length) out.services_of_interest = reviewServices;
-    if (reviewBudget) out.budget_range = reviewBudget;
+    if (reviewServices.length) out.solution_kinds = reviewServices;
     if (reviewTimeline) out.timeline = reviewTimeline;
     return out;
   }
@@ -953,13 +941,15 @@ export default function NewQuoteModal({
     );
   }
 
-  /** Canvas 1d-1e: editable checkbox group of services + budget/timeline
-   * radios shown on the review/contact step, seeded from the preview. */
+  /** Canvas 1d-1e: editable checkbox group of solution kinds + timeline
+   * radios shown on the review/contact step, seeded from the preview.
+   * Budget is no longer an editable review field (ADR-0007: budget_ceiling
+   * is an optional constraint, never a question posed to the visitor). */
   function renderReviewFields() {
     return (
       <div className={styles.reviewFields}>
-        <div className={styles.reviewGroup} role="group" aria-label="Serviços de interesse">
-          <div className={styles.reviewGroupLabel}>serviços de interesse</div>
+        <div className={styles.reviewGroup} role="group" aria-label="Tipo de solução">
+          <div className={styles.reviewGroupLabel}>tipo de solução</div>
           <div className={styles.optionsGrid}>
             {reviewServiceChoices.map((label) => {
               const on = reviewServices.includes(label);
@@ -981,22 +971,6 @@ export default function NewQuoteModal({
                 </label>
               );
             })}
-          </div>
-        </div>
-        <div className={styles.reviewGroup} role="radiogroup" aria-label="Faixa de investimento">
-          <div className={styles.reviewGroupLabel}>faixa de investimento</div>
-          <div className={styles.optionsPills}>
-            {budgetChoices.map((label) => (
-              <button
-                key={label}
-                type="button"
-                className={`${styles.optionPill} ${reviewBudget === label ? styles.optionPillOn : ""}`}
-                aria-pressed={reviewBudget === label}
-                onClick={() => setReviewBudget(reviewBudget === label ? null : label)}
-              >
-                {label}
-              </button>
-            ))}
           </div>
         </div>
         <div className={styles.reviewGroup} role="radiogroup" aria-label="Prazo">
@@ -1027,7 +1001,7 @@ export default function NewQuoteModal({
     const grounded = preview.grounding_status === "grounded";
     const modules = preview.business_profile?.scope_modules?.length
       ? preview.business_profile.scope_modules
-      : preview.services_of_interest;
+      : preview.solution_kinds;
     // Canvas 1d: the card headlines the solution, not the pain. Once a product
     // option is chosen (ADR-0004), use its title/summary; else fall back to the
     // problem summary and the module list.
@@ -1140,7 +1114,7 @@ export default function NewQuoteModal({
     const metrics = bp?.metrics ?? [];
     const modules = bp?.scope_modules?.length
       ? bp.scope_modules
-      : preview?.services_of_interest ?? [];
+      : preview?.solution_kinds ?? [];
     const pains = bp?.pain_points ?? [];
     const problemText = pains.length
       ? pains.join(". ")
