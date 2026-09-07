@@ -10,17 +10,31 @@ const NAV_ITEMS = [
   { label: "Meus projetos", href: "/portal/projetos" },
   { label: "Orçamentos", href: "/portal/orcamentos" },
   { label: "Faturas", href: "/portal/faturas" },
+  { label: "Recebimentos", href: "/portal/recebimentos" },
   { label: "Meu negócio", href: "/portal/negocio" },
   { label: "Meus dados", href: "/portal/dados" },
 ];
 
+const RECEBIMENTOS_HREF = "/portal/recebimentos";
+
+function LockIcon() {
+  return (
+    <svg width="9" height="11" viewBox="0 0 10 12" fill="none" aria-hidden="true">
+      <rect x="1" y="5" width="8" height="6.4" rx="1.4" fill="currentColor" />
+      <path d="M2.7 5V3.4a2.3 2.3 0 0 1 4.6 0V5" stroke="currentColor" strokeWidth="1.2" />
+    </svg>
+  );
+}
+
 export default function PortalShell({
   accountName,
   businessName,
+  onboardingRequired = false,
   children,
 }: {
   accountName: string;
   businessName: string | null;
+  onboardingRequired?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -50,8 +64,24 @@ export default function PortalShell({
       <div className={styles.body}>
         <nav className={styles.sidebar} aria-label="Navegação da conta">
           {NAV_ITEMS.map((item) => {
+            const locked = onboardingRequired && item.href !== RECEBIMENTOS_HREF;
             const active =
               item.href === "/portal" ? pathname === item.href : pathname.startsWith(item.href);
+
+            if (locked) {
+              return (
+                <span
+                  key={item.href}
+                  className={`${styles.navItem} ${styles.navItemLocked}`}
+                  aria-disabled="true"
+                  title="Disponível após a verificação da conta de recebimentos"
+                >
+                  {item.label}
+                  <LockIcon />
+                </span>
+              );
+            }
+
             return (
               <Link
                 key={item.href}

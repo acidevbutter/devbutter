@@ -121,6 +121,21 @@
   }
 }
 
+.navItemLocked {
+  color: $db-text-muted;
+  cursor: not-allowed;
+
+  svg {
+    color: $db-text-muted;
+    flex: none;
+  }
+
+  &:hover {
+    color: $db-text-muted;
+    background: none;
+  }
+}
+
 .content {
   flex: 1;
   min-width: 0;

@@ -35,6 +35,8 @@ export async function getPortalAccount(): Promise<PortalAccount> {
     document: account.cnpj || account.cpf || null,
     phone: account.phone,
     address: null,
+    onboardingRequired: account.onboarding_required ?? false,
+    subaccount: account.subaccount_status ?? null,
   };
 }
 

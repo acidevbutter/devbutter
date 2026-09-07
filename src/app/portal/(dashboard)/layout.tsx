@@ -14,7 +14,11 @@ export default async function PortalDashboardLayout({ children }: { children: Re
   }
 
   return (
-    <PortalShell accountName={account.name} businessName={account.businessName}>
+    <PortalShell
+      accountName={account.name}
+      businessName={account.businessName}
+      onboardingRequired={account.onboardingRequired}
+    >
       {children}
     </PortalShell>
   );
