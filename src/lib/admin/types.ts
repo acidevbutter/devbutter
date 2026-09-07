@@ -18,6 +18,26 @@ export interface AccountRead {
   is_active: boolean;
   created_at: string;
   accounts: AccountSelectionRead[];
+  /**
+   * Asaas subaccount onboarding gate (see
+   * docs/design/portal-recebimentos-onboarding.md §3). Optional so existing
+   * mocked payloads keep type-checking; the portal treats an absent flag as
+   * "no gate".
+   */
+  onboarding_required?: boolean;
+  subaccount_status?: SubaccountStatusRead | null;
+}
+
+/** GET /accounts/me → `subaccount_status`. Mirrors the BaaS subaccount link. */
+export interface SubaccountStatusRead {
+  provisioning_status: "NONE" | "PROVISIONED" | "CREATION_FAILED" | "CLOSED" | "RESTRICTED" | string;
+  onboarding_status: string | null;
+  approval_status: "PENDING" | "AWAITING_APPROVAL" | "APPROVED" | "REJECTED" | string | null;
+  commercial_info_status: string | null;
+  bank_account_info_status: string | null;
+  documentation_status: string | null;
+  commercial_info_expires_at: string | null;
+  last_error: string | null;
 }
 
 export interface AccountSelectionRead {

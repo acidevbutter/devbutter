@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+- Fluxo Cotação IA — ajustes de UX no `NewQuoteModal`:
+  - textarea do composer com autosize até `COMPOSER_MAX_H` (160px), aí rola
+    (`resize: none`);
+  - painel para de rolar; `.scrollRegion` rola e o thread passa por trás do
+    header e do composer `position: sticky` (com gradiente);
+  - quando aparecem opções tocáveis: o composer some, o thread congela
+    estacionado no fim; link "escrever resposta" traz o composer de volta
+    (respeita `allow_free_text`);
+  - "Continuar conversando" na tela de confirmação volta ao mesmo thread sem
+    abrir conversa nova;
+  - textos não citam mais nomes de pessoas ("o time da DevButter").
+- Etapa de review lê as opções de `preview.field_options` (catálogo do
+  butter_mind); `SERVICE_OPTIONS`/`BUDGET_OPTIONS`/`TIMELINE_OPTIONS` viram
+  fallback para preview antigo. Tipo `DiagnosisPreview` aponta para o schema
+  canônico do butter_mind (ADR-0005).
 - Fluxo Cotação IA turno 2 (ADR-0004): o `NewQuoteModal` renderiza os estados
   `stage` — `choosing` mostra 2-3 cards de opção (título, resumo, faixa/prazo,
   badge "recomendado", botão "Confirmar «título»"); `collecting` mostra um

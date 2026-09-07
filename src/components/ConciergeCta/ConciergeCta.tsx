@@ -6,7 +6,7 @@ import NewQuoteModal from "@/components/portal/NewQuoteModal/NewQuoteModal";
 /** Canvas screen 1b: opening bubble the concierge shows before the first turn. */
 export const CONCIERGE_GREETING =
   "Oi! Sou a IA da DevButter. Eu entendo o que você precisa, monto um diagnóstico com " +
-  "escopo, faixa de investimento e prazo — e o Marcos revisa antes de qualquer contato.\n\n" +
+  "escopo, faixa de investimento e prazo — e o time da DevButter revisa antes de qualquer contato.\n\n" +
   "Pra começar: o que está te incomodando hoje no seu negócio?";
 
 /** Canvas 1b: the three quick-start chips under the first message. */

@@ -77,9 +77,16 @@ type BusinessProfile = {
 
 type QualificationProgress = { answered: number; total: number };
 
+// Mirrors butter_mind `app/diagnosis/schemas.py::DiagnosisPreview` (canonical
+// shape; snapshot in butter_mind `contracts/conversation_state.schema.json`).
+// devbutter_backend relays it verbatim -- it no longer re-declares it (ADR-0005).
+// Keep this hand-written type in step with that schema until codegen lands.
 type DiagnosisPreview = {
   problem_summary: string;
-  services_of_interest: string[];
+  // ADR-0007: renamed from services_of_interest -- a light label taxonomy;
+  // the real cost drivers live server-side in the (not yet rendered here)
+  // scoping_vector.
+  solution_kinds: string[];
   budget_range: string | null;
   timeline: string | null;
   missing_information: string[];
@@ -91,13 +98,18 @@ type DiagnosisPreview = {
   options?: ProductOption[];
   selected_option_key?: string | null;
   missing_fields?: string[];
+  /** butter_mind's _SCOPING_CATALOG for the review step's editable fields
+   * (canvas 1d-1e) and next_step pills. Keys match ScopingVector's field
+   * names (solution_kinds, rush, ...). The review groups render from this;
+   * the *_FALLBACK consts below are only the fallback for a preview from an
+   * older butter_mind. */
+  field_options?: Record<string, NextStepOption[]>;
 };
 
-/** Mirrors butter_mind's _OPTION_CATALOG for the review step (canvas 1d-1e):
- * the "pronto para enviar" summary turns services into an editable checkbox
- * group and budget/timeline into radios. Keep ids/labels in sync with
- * butter_mind/app/diagnosis/service.py::_OPTION_CATALOG. */
-const SERVICE_OPTIONS = [
+/** Fallback only — the live option lists come from `preview.field_options`
+ * (butter_mind's _SCOPING_CATALOG). Kept so the review step still renders if a
+ * resumed/old preview omits `field_options`. */
+const SOLUTION_KINDS_FALLBACK = [
   "Agente de IA",
   "Automação de processos",
   "Plataforma web / SaaS",
@@ -105,14 +117,13 @@ const SERVICE_OPTIONS = [
   "Site institucional",
   "Dados / analytics",
 ];
-const BUDGET_OPTIONS = [
-  "Até R$ 10 mil",
-  "R$ 10–30 mil",
-  "R$ 30–80 mil",
-  "Acima de R$ 80 mil",
-  "Ainda não sei",
-];
-const TIMELINE_OPTIONS = ["O quanto antes", "1–3 meses", "3–6 meses", "Sem prazo fixo"];
+const RUSH_FALLBACK = ["O quanto antes", "1–3 meses", "3–6 meses", "Sem prazo fixo"];
+
+/** Composer textarea auto-grows with its content up to this height (px), then
+ * scrolls internally. Single knob for the "input acompanha o texto" behavior
+ * (see docs plan §1 / §7). Keep in sync with `.textarea { max-height }` in the
+ * module stylesheet. */
+const COMPOSER_MAX_H = 160;
 
 type ConversationRead = {
   id: string;
@@ -167,7 +178,7 @@ function dossierChecks(preview: DiagnosisPreview | null): boolean[] {
   const metrics = bp?.metrics ?? [];
   const modules = bp?.scope_modules?.length
     ? bp.scope_modules
-    : preview?.services_of_interest ?? [];
+    : preview?.solution_kinds ?? [];
   const problem = (bp?.pain_points?.length ?? 0) > 0 || !!preview?.problem_summary?.trim();
   return [
     problem,
@@ -248,15 +259,21 @@ export default function NewQuoteModal({
   // Checkbox state for a multi-select in-chat next_step (canvas screen 3),
   // reset every turn.
   const [checkedOptionIds, setCheckedOptionIds] = useState<string[]>([]);
+  // While selectable options are on screen the composer is hidden and the
+  // thread is frozen; "escrever resposta" flips this to bring the composer
+  // back for a free-text answer (honours next_step.allow_free_text). Reset
+  // each turn by the effect below.
+  const [writeInstead, setWriteInstead] = useState(false);
   // ADR-0004 collecting-step mini-form (missing business-profile fields) +
   // a "pular por agora" flag that drops back to the free composer.
   const [collectingDraft, setCollectingDraft] = useState<Record<string, string>>({});
   const [skipCollecting, setSkipCollecting] = useState(false);
   // Editable review step (canvas 1d-1e), seeded once from the preview.
   const [reviewServices, setReviewServices] = useState<string[]>([]);
-  const [reviewBudget, setReviewBudget] = useState<string | null>(null);
   const [reviewTimeline, setReviewTimeline] = useState<string | null>(null);
   const reviewSeededRef = useRef(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const scrollRegionRef = useRef<HTMLDivElement | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const joinedConversationsRef = useRef<Set<string>>(new Set());
   // Canvas 2a: each dossiê block keeps the "aterrissou às HH:MM" stamp from the
@@ -337,8 +354,10 @@ export default function NewQuoteModal({
   useEffect(() => {
     if (!readyToSubmit || reviewSeededRef.current) return;
     reviewSeededRef.current = true;
-    const fromPreview = preview?.services_of_interest ?? [];
-    const merged = [...SERVICE_OPTIONS];
+    const fromPreview = preview?.solution_kinds ?? [];
+    const catalog =
+      preview?.field_options?.solution_kinds?.map((o) => o.label) ?? SOLUTION_KINDS_FALLBACK;
+    const merged = [...catalog];
     for (const s of fromPreview) {
       if (!merged.some((o) => o.toLowerCase() === s.toLowerCase())) merged.push(s);
     }
@@ -353,33 +372,79 @@ export default function NewQuoteModal({
           )
       )
     );
-    setReviewBudget(preview?.budget_range ?? null);
     setReviewTimeline(preview?.timeline ?? null);
   }, [readyToSubmit, preview]);
 
+  // Live option lists from butter_mind's _SCOPING_CATALOG (preview.field_options);
+  // the *_FALLBACK consts are the fallback for an older/omitted preview.
+  const catalogFor = (field: string, fallback: string[]): string[] => {
+    const fromServer = preview?.field_options?.[field];
+    return fromServer && fromServer.length ? fromServer.map((o) => o.label) : fallback;
+  };
+  const serviceCatalog = catalogFor("solution_kinds", SOLUTION_KINDS_FALLBACK);
+  const timelineCatalog = catalogFor("rush", RUSH_FALLBACK);
+
   const reviewServiceChoices = (() => {
-    const base = [...SERVICE_OPTIONS];
-    for (const s of [...(preview?.services_of_interest ?? []), ...reviewServices]) {
+    const base = [...serviceCatalog];
+    for (const s of [...(preview?.solution_kinds ?? []), ...reviewServices]) {
       if (!base.some((o) => o.toLowerCase() === s.toLowerCase())) base.push(s);
     }
     return base;
   })();
-  const budgetChoices =
-    reviewBudget && !BUDGET_OPTIONS.includes(reviewBudget)
-      ? [reviewBudget, ...BUDGET_OPTIONS]
-      : BUDGET_OPTIONS;
   const timelineChoices =
-    reviewTimeline && !TIMELINE_OPTIONS.includes(reviewTimeline)
-      ? [reviewTimeline, ...TIMELINE_OPTIONS]
-      : TIMELINE_OPTIONS;
+    reviewTimeline && !timelineCatalog.includes(reviewTimeline)
+      ? [reviewTimeline, ...timelineCatalog]
+      : timelineCatalog;
 
   const showContactStep = readyToSubmit && !forceComposer && mode === "public";
   const showReadyPanel = readyToSubmit && !forceComposer && mode === "portal";
   const showComposer = !readyToSubmit || forceComposer;
+
+  // True when a tappable-options block is up (next_step pills, ADR-0004 option
+  // cards, or the collecting mini-form) -- mirrors the render guards in
+  // renderOptions / renderOptionCards / renderCollectingForm.
+  const optionsStep = preview?.next_step ?? null;
+  const optionsShowing =
+    !sending &&
+    ((!!optionsStep && optionsStep.options.length >= 2) ||
+      (preview?.stage === "choosing" && (preview?.options?.length ?? 0) >= 2) ||
+      (preview?.stage === "collecting" &&
+        (preview?.missing_fields?.length ?? 0) > 0 &&
+        !skipCollecting));
+  // Hide the composer + freeze the thread while options are up, unless the
+  // visitor asked to type instead. `writeInstead` is reset by the turn
+  // handlers (send / sendOption / selectOption / submitBusinessProfile).
+  const composerHidden = showComposer && optionsShowing && !writeInstead;
   const streamingEmpty =
     sending &&
     messages[messages.length - 1]?.role === "ai" &&
     messages[messages.length - 1]?.content === "";
+
+  // Canvas 1b: "foco automático no textarea" once the panel has finished entering.
+  useEffect(() => {
+    if (showComposer && !entering && !minimized) textareaRef.current?.focus();
+  }, [showComposer, entering, minimized]);
+
+  // The composer textarea grows with its content up to COMPOSER_MAX_H, then
+  // scrolls. Runs on every `draft` change (covers typing, the reset to "" after
+  // send(), and a resumed conversation seeding the box).
+  function autosizeComposer() {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, COMPOSER_MAX_H)}px`;
+  }
+  useEffect(() => {
+    autosizeComposer();
+  }, [draft, showComposer]);
+
+  // When options take over and the thread freezes, park it at the bottom so the
+  // options block is in view even after a long AI reply (item 4).
+  useEffect(() => {
+    if (!composerHidden) return;
+    const el = scrollRegionRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [composerHidden, messages.length]);
 
   async function connectSocket(): Promise<Socket> {
     if (!socketRef.current) {
@@ -492,6 +557,7 @@ export default function NewQuoteModal({
     if (explicitContent === undefined) setDraft("");
     setForceComposer(false);
     setCheckedOptionIds([]);
+    setWriteInstead(false);
     setMessages((current) => [
       ...current,
       { role: "me", content, status: "sending" },
@@ -516,6 +582,7 @@ export default function NewQuoteModal({
     const meIndex = messages.length;
     setForceComposer(false);
     setCheckedOptionIds([]);
+    setWriteInstead(false);
     setMessages((current) => [
       ...current,
       { role: "me", content, status: "sending" },
@@ -539,6 +606,7 @@ export default function NewQuoteModal({
     setSending(true);
     setError(null);
     setSkipCollecting(false);
+    setWriteInstead(false);
     try {
       const res = await fetch(
         `/api/portal/conversations/${conversationId}/select-option`,
@@ -580,6 +648,7 @@ export default function NewQuoteModal({
     if (Object.keys(body).length === 0) return;
     setSending(true);
     setError(null);
+    setWriteInstead(false);
     try {
       const res = await fetch(
         `/api/portal/conversations/${conversationId}/business-profile`,
@@ -609,12 +678,10 @@ export default function NewQuoteModal({
    * conversational extraction. */
   function reviewOverrides() {
     const out: {
-      services_of_interest?: string[];
-      budget_range?: string;
+      solution_kinds?: string[];
       timeline?: string;
     } = {};
-    if (reviewServices.length) out.services_of_interest = reviewServices;
-    if (reviewBudget) out.budget_range = reviewBudget;
+    if (reviewServices.length) out.solution_kinds = reviewServices;
     if (reviewTimeline) out.timeline = reviewTimeline;
     return out;
   }
@@ -694,6 +761,17 @@ export default function NewQuoteModal({
     else router.push("/");
   }
 
+  /** From the confirmation card: drop back into the same thread (same
+   * conversationId, same messages) with the composer open, without starting a
+   * new conversation. The draft-quote already cleared the db_conversation_id
+   * cookie and completed the butter_mind session, so a further message may be
+   * rejected server-side -- that path surfaces as a normal failed-message
+   * retry, and reopening the session is a separate follow-up. */
+  function keepChatting() {
+    setConfirmedQuote(null);
+    setForceComposer(true);
+  }
+
   /** Canvas 1b: quick-start pills under the first AI message, before any turn. */
   function renderOpeningIntents() {
     if (
@@ -707,20 +785,18 @@ export default function NewQuoteModal({
       return null;
     }
     return (
-      <div className={styles.optionsBlock} role="group" aria-label="Sugestões para começar">
-        <div className={styles.optionsPills}>
-          {openingIntents.map((intent) => (
-            <button
-              key={intent}
-              type="button"
-              className={styles.optionPill}
-              disabled={sending || !hydrated}
-              onClick={() => send(intent)}
-            >
-              {intent}
-            </button>
-          ))}
-        </div>
+      <div className={styles.optionsPills} role="group" aria-label="Sugestões para começar">
+        {openingIntents.map((intent) => (
+          <button
+            key={intent}
+            type="button"
+            className={styles.optionPill}
+            disabled={sending || !hydrated}
+            onClick={() => send(intent)}
+          >
+            {intent}
+          </button>
+        ))}
       </div>
     );
   }
@@ -734,8 +810,7 @@ export default function NewQuoteModal({
     if (!step || step.options.length < 2 || sending) return null;
     if (step.selection_mode === "multi") {
       return (
-        <div className={styles.optionsBlock} role="group" aria-label={step.prompt}>
-          <div className={styles.optionsPrompt}>{step.prompt}</div>
+        <div role="group" aria-label={step.prompt}>
           <div className={styles.optionsGrid}>
             {step.options.map((o) => {
               const on = checkedOptionIds.includes(o.id);
@@ -750,6 +825,9 @@ export default function NewQuoteModal({
                       )
                     }
                   />
+                  <span className={styles.optionCheckBox} aria-hidden>
+                    {on ? "✓" : ""}
+                  </span>
                   <span>{o.label}</span>
                 </label>
               );
@@ -767,21 +845,18 @@ export default function NewQuoteModal({
       );
     }
     return (
-      <div className={styles.optionsBlock} role="group" aria-label={step.prompt}>
-        <div className={styles.optionsPrompt}>{step.prompt}</div>
-        <div className={styles.optionsPills}>
-          {step.options.map((o) => (
-            <button
-              key={o.id}
-              type="button"
-              className={styles.optionPill}
-              disabled={sending}
-              onClick={() => sendOption(step, [o.id])}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
+      <div className={styles.optionsPills} role="group" aria-label={step.prompt}>
+        {step.options.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            className={styles.optionPill}
+            disabled={sending}
+            onClick={() => sendOption(step, [o.id])}
+          >
+            {o.label}
+          </button>
+        ))}
       </div>
     );
   }
@@ -866,13 +941,15 @@ export default function NewQuoteModal({
     );
   }
 
-  /** Canvas 1d-1e: editable checkbox group of services + budget/timeline
-   * radios shown on the review/contact step, seeded from the preview. */
+  /** Canvas 1d-1e: editable checkbox group of solution kinds + timeline
+   * radios shown on the review/contact step, seeded from the preview.
+   * Budget is no longer an editable review field (ADR-0007: budget_ceiling
+   * is an optional constraint, never a question posed to the visitor). */
   function renderReviewFields() {
     return (
       <div className={styles.reviewFields}>
-        <div className={styles.reviewGroup} role="group" aria-label="Serviços de interesse">
-          <div className={styles.reviewGroupLabel}>serviços de interesse</div>
+        <div className={styles.reviewGroup} role="group" aria-label="Tipo de solução">
+          <div className={styles.reviewGroupLabel}>tipo de solução</div>
           <div className={styles.optionsGrid}>
             {reviewServiceChoices.map((label) => {
               const on = reviewServices.includes(label);
@@ -887,26 +964,13 @@ export default function NewQuoteModal({
                       )
                     }
                   />
+                  <span className={styles.optionCheckBox} aria-hidden>
+                    {on ? "✓" : ""}
+                  </span>
                   <span>{label}</span>
                 </label>
               );
             })}
-          </div>
-        </div>
-        <div className={styles.reviewGroup} role="radiogroup" aria-label="Faixa de investimento">
-          <div className={styles.reviewGroupLabel}>faixa de investimento</div>
-          <div className={styles.optionsPills}>
-            {budgetChoices.map((label) => (
-              <button
-                key={label}
-                type="button"
-                className={`${styles.optionPill} ${reviewBudget === label ? styles.optionPillOn : ""}`}
-                aria-pressed={reviewBudget === label}
-                onClick={() => setReviewBudget(reviewBudget === label ? null : label)}
-              >
-                {label}
-              </button>
-            ))}
           </div>
         </div>
         <div className={styles.reviewGroup} role="radiogroup" aria-label="Prazo">
@@ -937,8 +1001,14 @@ export default function NewQuoteModal({
     const grounded = preview.grounding_status === "grounded";
     const modules = preview.business_profile?.scope_modules?.length
       ? preview.business_profile.scope_modules
-      : preview.services_of_interest;
-    const title = preview.problem_summary?.trim() || "Diagnóstico em rascunho";
+      : preview.solution_kinds;
+    // Canvas 1d: the card headlines the solution, not the pain. Once a product
+    // option is chosen (ADR-0004), use its title/summary; else fall back to the
+    // problem summary and the module list.
+    const chosen = preview.options?.find((o) => o.key === preview.selected_option_key);
+    const title =
+      chosen?.title || preview.problem_summary?.trim() || "Diagnóstico em rascunho";
+    const desc = chosen?.summary || (modules.length > 0 ? modules.join(" · ") : null);
     return (
       <div className={styles.previewCard}>
         <div className={styles.previewCardHead}>
@@ -946,9 +1016,7 @@ export default function NewQuoteModal({
           <span className={styles.previewCardSource}>source: ai</span>
         </div>
         <h3 className={styles.previewCardTitle}>{title}</h3>
-        {modules.length > 0 && (
-          <p className={styles.previewCardDesc}>{modules.join(" · ")}</p>
-        )}
+        {desc && <p className={styles.previewCardDesc}>{desc}</p>}
         <div className={styles.previewCardGrid}>
           <div className={styles.previewStat}>
             <div className={styles.previewStatLabel}>faixa estimada</div>
@@ -961,7 +1029,8 @@ export default function NewQuoteModal({
         </div>
         <div className={styles.previewCardWarn}>
           <span className={styles.previewDiamond}>◆</span>
-          faixa e prazo são estimativas — sujeitas à revisão do Marcos antes de virar proposta.
+          faixa e prazo são estimativas — sujeitas à revisão do time da DevButter antes de virar
+          proposta.
         </div>
         {!grounded && (
           <div className={styles.previewMissing}>
@@ -1045,7 +1114,7 @@ export default function NewQuoteModal({
     const metrics = bp?.metrics ?? [];
     const modules = bp?.scope_modules?.length
       ? bp.scope_modules
-      : preview?.services_of_interest ?? [];
+      : preview?.solution_kinds ?? [];
     const pains = bp?.pain_points ?? [];
     const problemText = pains.length
       ? pains.join(". ")
@@ -1284,7 +1353,7 @@ export default function NewQuoteModal({
 
   if (confirmedQuote) {
     return shell(
-      <>
+      <div className={styles.scrollRegion}>
         <div className={styles.confirmHead}>
           <div className={styles.confirmCheck}>✓</div>
           <h3 className={styles.confirmTitle}>Cotação registrada</h3>
@@ -1295,7 +1364,7 @@ export default function NewQuoteModal({
                   contactEmail.trim()
                     ? `Confirmação enviada para ${contactEmail.trim()}. `
                     : ""
-                }O Marcos revisa o escopo e a faixa antes de virar proposta — normalmente em até 1 dia útil.`}
+                }O time da DevButter revisa o escopo e a faixa antes de virar proposta — normalmente em até 1 dia útil.`}
           </p>
         </div>
         <div className={styles.confirmCard}>
@@ -1312,7 +1381,7 @@ export default function NewQuoteModal({
             )}
           </div>
           <div className={styles.confirmCardNote}>
-            a conversa completa fica anexada ao pedido — você e o Marcos veem o mesmo histórico.
+            a conversa completa fica anexada ao pedido — você acompanha o mesmo histórico.
           </div>
         </div>
         {confirmedQuote.tokens ? (
@@ -1320,10 +1389,16 @@ export default function NewQuoteModal({
             Ir para meu painel
           </button>
         ) : null}
-        <div className={styles.altContact} onClick={closeOrHome}>
-          {mode === "portal" ? "Preciso pedir outra coisa" : "Voltar para a home"}
+        <div className={styles.altContactRow}>
+          <span onClick={keepChatting}>Continuar conversando</span>
+          <span className={styles.altContactSep} aria-hidden>
+            ·
+          </span>
+          <span onClick={closeOrHome}>
+            {mode === "portal" ? "Preciso pedir outra coisa" : "Voltar para a home"}
+          </span>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -1348,7 +1423,7 @@ export default function NewQuoteModal({
     <>
       <div className={styles.head}>
         <div className={styles.headMeta}>
-          <Logomark width={18} height={22} />
+          <Logomark width={21} height={25} />
           <div>
             <div className={styles.headTitle}>DevButter IA</div>
             <div className={styles.headStatus}>
@@ -1362,6 +1437,11 @@ export default function NewQuoteModal({
             <span className={styles.headProgress}>
               {Math.min(preview.progress.answered, preview.progress.total)} de{" "}
               {preview.progress.total} perguntas
+            </span>
+          )}
+          {!showComposer && readyToSubmit && (
+            <span className={`${styles.headProgress} ${styles.headProgressReady}`}>
+              diagnóstico pronto
             </span>
           )}
           <button
@@ -1383,6 +1463,10 @@ export default function NewQuoteModal({
         </div>
       </div>
 
+      <div
+        ref={scrollRegionRef}
+        className={`${styles.scrollRegion} ${composerHidden ? styles.scrollFrozen : ""}`}
+      >
       <div className={styles.thread}>
         {surface === "panel" && hydrated && (
           <div className={styles.dateDivider}>{startedAtLabel}</div>
@@ -1441,37 +1525,53 @@ export default function NewQuoteModal({
           {renderOptions()}
           {renderOptionCards()}
           {renderCollectingForm()}
-          <div className={styles.composer}>
-            <textarea
-              className={styles.textarea}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder={
-                preview?.next_step
-                  ? "…ou escreva a sua resposta"
-                  : "conta o que você precisa…"
-              }
-              disabled={sending || !hydrated}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  send();
-                }
-              }}
-            />
+          {composerHidden ? (
             <button
               type="button"
-              className={styles.submit}
-              onClick={() => send()}
-              disabled={!draft.trim() || sending || !hydrated}
+              className={styles.writeInsteadLink}
+              onClick={() => setWriteInstead(true)}
             >
-              {sending ? "Enviando…" : "Enviar"}
+              escrever resposta
             </button>
-          </div>
-          {surface === "panel" && (
-            <div className={styles.composerHint}>
-              enter envia · shift+enter quebra linha · sem cadastro pra conversar
-            </div>
+          ) : (
+            <>
+              <div className={styles.composer}>
+                <div className={styles.composerRow}>
+                  <textarea
+                    ref={textareaRef}
+                    className={styles.textarea}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    placeholder={
+                      preview?.next_step
+                        ? "…ou escreva a sua resposta"
+                        : "conta o que você precisa…"
+                    }
+                    disabled={sending || !hydrated}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        send();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className={styles.send}
+                    onClick={() => send()}
+                    disabled={!draft.trim() || sending || !hydrated}
+                    aria-label="Enviar"
+                  >
+                    {sending ? "…" : "↑"}
+                  </button>
+                </div>
+              </div>
+              {surface === "panel" && (
+                <div className={styles.composerHint}>
+                  enter envia · shift+enter quebra linha · sem cadastro pra conversar
+                </div>
+              )}
+            </>
           )}
         </>
       ) : showContactStep ? (
@@ -1578,6 +1678,9 @@ export default function NewQuoteModal({
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
             />
+            <span className={styles.consentBox} aria-hidden>
+              {consent ? "✓" : ""}
+            </span>
             <span>
               Autorizo a DevButter a me contatar sobre esta cotação. Posso apagar meus dados
               quando quiser.
@@ -1593,21 +1696,30 @@ export default function NewQuoteModal({
           <div className={styles.altContact} onClick={() => setForceComposer(true)}>
             Continuar conversando
           </div>
+          <div className={styles.contactFootnote}>
+            <span aria-hidden>↑</span>
+            a conversa fica salva mesmo se você fechar agora — o link volta pra este ponto.
+          </div>
         </form>
       ) : showReadyPanel ? (
         <div className={styles.readyPanel}>
           {renderPreview()}
           {renderReviewFields()}
-          <button type="button" className={styles.submit} onClick={() => handleConfirm()} disabled={confirming}>
-            {confirming ? "Registrando…" : "Confirmar e enviar"}
-          </button>
-          <div className={styles.altContact} onClick={() => setForceComposer(true)}>
-            Continuar conversando
+          <div className={styles.actionFooter}>
+            <button type="button" className={styles.submit} onClick={() => handleConfirm()} disabled={confirming}>
+              {confirming ? "Registrando…" : "Confirmar e enviar"}
+            </button>
+            <div className={styles.altContactRow}>
+              <span onClick={() => setForceComposer(true)}>Quero ajustar algo</span>
+              <span className={styles.altContactSep} aria-hidden>·</span>
+              <span onClick={() => setForceComposer(true)}>Continuar conversando</span>
+            </div>
           </div>
         </div>
       ) : null}
 
       {error && <div className={styles.errorText}>{error}</div>}
+      </div>
     </>
   );
 }

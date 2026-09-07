@@ -13,7 +13,10 @@
   --db-text-secondary: #9ca6b5;
   --db-text-muted: #5a6272;
   --db-chat-text: #c9cfd8;
-  --db-chat-text-strong: #e6e9ef;
+  // Fluxo Cotação IA canvas: AI bubble text is #e4e8ef, user bubble / quick-reply
+  // pill text is #cfeedc.
+  --db-chat-text-strong: #e4e8ef;
+  --db-chat-user-text: #cfeedc;
 
   // Accents
   --db-green: #79e59b;
@@ -40,7 +43,8 @@ $db-text-primary: #f5f7fb;
 $db-text-secondary: #9ca6b5;
 $db-text-muted: #5a6272;
 $db-chat-text: #c9cfd8;
-$db-chat-text-strong: #e6e9ef;
+$db-chat-text-strong: #e4e8ef;
+$db-chat-user-text: #cfeedc;
 
 $db-green: #79e59b;
 $db-green-glow: #00d26a;

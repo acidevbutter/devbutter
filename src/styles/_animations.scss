@@ -150,6 +150,11 @@
   }
 }
 
+// NB: the Fluxo Cotação IA chat-panel keyframes (db-dot, db-rowIn, db-sweep,
+// db-shimmer, db-glow, db-tick, db-fly) live INSIDE NewQuoteModal.module.scss —
+// this project's CSS-module setup scopes `animation-name` references, so a
+// module's keyframes must be declared in that same module to resolve.
+
 // --- Admin ("Admin Platform.dc.html") keyframes, ported 1:1 from the design.
 // The canvas file names them dbPulse/dbRing/… so the admin screens use those
 // names verbatim; the db-* set above stays for the marketing site.

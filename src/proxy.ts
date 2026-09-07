@@ -86,7 +86,36 @@ async function refreshTokenPair(
   }
 }
 
+const RECEBIMENTOS_PATH = "/portal/recebimentos";
+
+// Paths that stay reachable even while the onboarding gate is active. The
+// matcher already keeps login/signup/sessao-expirada/acesso-negado out; this
+// is the defensive list for anything the matcher still lets through.
+function isGateExemptPortalPath(pathname: string): boolean {
+  if (pathname === RECEBIMENTOS_PATH || pathname.startsWith(`${RECEBIMENTOS_PATH}/`)) return true;
+  return /^\/portal\/(login|signup|sessao-expirada|acesso-negado|senha)(\/|$)/.test(pathname);
+}
+
+// The onboarding gate (portal-recebimentos-onboarding.md §2): while
+// `onboarding_required` is true the whole dashboard is forced to
+// /portal/recebimentos. Fails open — a failed /accounts/me never blocks the
+// user, and the screen itself re-checks on load.
+async function portalOnboardingRequired(accessToken: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${PORTAL_API_BASE_URL}/accounts/me`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return false;
+    const data = (await res.json()) as { onboarding_required?: boolean };
+    return data.onboarding_required === true;
+  } catch {
+    return false;
+  }
+}
+
 async function portalProxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get(PORTAL_ACCESS_COOKIE)?.value;
   const refreshToken = request.cookies.get(PORTAL_REFRESH_COOKIE)?.value;
 
@@ -94,26 +123,40 @@ async function portalProxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/portal/login", request.url));
   }
 
-  if (accessToken && !isJwtExpiringSoon(accessToken)) return NextResponse.next();
+  let token = accessToken;
+  let refreshedPair: { access_token: string; refresh_token: string } | null = null;
 
-  const refreshed = await refreshPortalTokenPair(refreshToken);
-  if (!refreshed) {
-    const redirectRes = NextResponse.redirect(new URL("/portal/login", request.url));
-    redirectRes.cookies.delete(PORTAL_ACCESS_COOKIE);
-    redirectRes.cookies.delete(PORTAL_REFRESH_COOKIE);
-    return redirectRes;
+  if (!accessToken || isJwtExpiringSoon(accessToken)) {
+    const refreshed = await refreshPortalTokenPair(refreshToken);
+    if (!refreshed) {
+      const redirectRes = NextResponse.redirect(new URL("/portal/login", request.url));
+      redirectRes.cookies.delete(PORTAL_ACCESS_COOKIE);
+      redirectRes.cookies.delete(PORTAL_REFRESH_COOKIE);
+      return redirectRes;
+    }
+    token = refreshed.access_token;
+    refreshedPair = refreshed;
   }
 
-  const response = NextResponse.next();
-  response.cookies.set(PORTAL_ACCESS_COOKIE, refreshed.access_token, {
-    ...COOKIE_BASE,
-    maxAge: PORTAL_ACCESS_TOKEN_MAX_AGE_SECONDS,
-  });
-  response.cookies.set(PORTAL_REFRESH_COOKIE, refreshed.refresh_token, {
-    ...COOKIE_BASE,
-    maxAge: PORTAL_REFRESH_TOKEN_MAX_AGE_SECONDS,
-  });
-  return response;
+  const withRefreshedCookies = (res: NextResponse) => {
+    if (refreshedPair) {
+      res.cookies.set(PORTAL_ACCESS_COOKIE, refreshedPair.access_token, {
+        ...COOKIE_BASE,
+        maxAge: PORTAL_ACCESS_TOKEN_MAX_AGE_SECONDS,
+      });
+      res.cookies.set(PORTAL_REFRESH_COOKIE, refreshedPair.refresh_token, {
+        ...COOKIE_BASE,
+        maxAge: PORTAL_REFRESH_TOKEN_MAX_AGE_SECONDS,
+      });
+    }
+    return res;
+  };
+
+  if (token && !isGateExemptPortalPath(pathname) && (await portalOnboardingRequired(token))) {
+    return withRefreshedCookies(NextResponse.redirect(new URL(RECEBIMENTOS_PATH, request.url)));
+  }
+
+  return withRefreshedCookies(NextResponse.next());
 }
 
 async function refreshPortalTokenPair(

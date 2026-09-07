@@ -6,8 +6,9 @@ export async function POST(request: Request) {
   let name: unknown;
   let email: unknown;
   let password: unknown;
+  let billing_profile: unknown;
   try {
-    ({ name, email, password } = await request.json());
+    ({ name, email, password, billing_profile } = await request.json());
   } catch {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   }
@@ -23,10 +24,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_signup" }, { status: 400 });
   }
 
+  // billing_profile is validated by the backend (BillingProfileInput); pass it
+  // through verbatim when present so the portal PJ signup collects the Asaas
+  // subaccount inputs in one call.
+  const payload: Record<string, unknown> = {
+    name: name.trim(),
+    email: email.trim(),
+    password,
+  };
+  if (billing_profile && typeof billing_profile === "object") {
+    payload.billing_profile = billing_profile;
+  }
+
   const signupRes = await fetch(`${API_BASE_URL}/accounts/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: name.trim(), email: email.trim(), password }),
+    body: JSON.stringify(payload),
     cache: "no-store",
   });
 
