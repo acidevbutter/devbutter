@@ -1,0 +1,92 @@
+flowchart TB
+  classDef ui fill:#E8F7EE,stroke:#217A45,color:#102B1A
+  classDef bff fill:#EAF2FF,stroke:#2563EB,color:#122B5B
+  classDef api fill:#FDF0F3,stroke:#BE3658,color:#5C1424
+  classDef external fill:#FFF6DE,stroke:#A36A00,color:#563900
+
+  subgraph Public[Rotas públicas]
+    HOME["/"]:::ui
+    MAINT["/manutencao"]:::ui
+    PLOGIN["/portal/login"]:::ui
+    PSETUP["/portal/senha/:token"]:::ui
+    PEXPIRED["/portal/sessao-expirada"]:::ui
+    PDENIED["/portal/acesso-negado"]:::ui
+    AROOT["/admin"]:::ui
+    ALOGIN["/admin/login"]:::ui
+  end
+
+  subgraph Portal[Portal autenticado]
+    PORTAL["/portal"]:::ui
+    QUOTES["/portal/orcamentos"]:::ui
+    PROJECTS["/portal/projetos e /portal/projetos/:id"]:::ui
+    INVOICES["/portal/faturas"]:::ui
+    DATA["/portal/dados e /portal/dados/cartoes"]:::ui
+    BUSINESS["/portal/negocio"]:::ui
+    RECEIVABLES["/portal/recebimentos"]:::ui
+  end
+
+  subgraph Admin[Painel administrativo]
+    ADASH["/admin/dashboard"]:::ui
+    AQUOTE["/admin/quotes, /admin/quotes/new e /admin/quotes/:id"]:::ui
+    AORDER["/admin/orders e /admin/orders/:id"]:::ui
+    ACLIENT["/admin/clients e /admin/clients/:id"]:::ui
+    ACOMPANY["/admin/companies e /admin/companies/:id"]:::ui
+    AOPS["/admin/catalog, /admin/invoices, /admin/conversations, /admin/knowledge, /admin/mind, /admin/webhooks"]:::ui
+    ACONFIG["/admin/config, /admin/config/asaas e /admin/config/relay"]:::ui
+  end
+
+  subgraph BFF[Route Handlers: 26 métodos]
+    WLIST["POST /api/waitlist"]:::bff
+    ALOGOUT["POST /api/admin/auth/logout"]:::bff
+    ASEARCH["GET /api/admin/search"]:::bff
+    LOGIN["POST /api/portal/auth/login"]:::bff
+    LOGOUT["POST /api/portal/auth/logout"]:::bff
+    PSETUPGET["GET /api/portal/auth/password-setup/:token"]:::bff
+    PSETUPPOST["POST /api/portal/auth/password-setup"]:::bff
+    SIGNUP["POST /api/portal/auth/signup"]:::bff
+    CNEW["POST /api/portal/conversations"]:::bff
+    CCURRENT["GET /api/portal/conversations/current"]:::bff
+    CGET["GET /api/portal/conversations/:id"]:::bff
+    CMSG["POST /api/portal/conversations/:id/messages"]:::bff
+    CSELECT["POST /api/portal/conversations/:id/select-option"]:::bff
+    CPROFILE["PATCH /api/portal/conversations/:id/business-profile"]:::bff
+    CDRAFT["POST /api/portal/conversations/:id/draft-quote"]:::bff
+    PMGET["GET /api/portal/payment-methods"]:::bff
+    PMSESSION["POST /api/portal/payment-methods/session"]:::bff
+    PMSECURE["POST /api/portal/payment-methods/secure"]:::bff
+    PMPAY["POST /api/portal/payment-methods/pay"]:::bff
+    PMDELETE["DELETE /api/portal/payment-methods/:payment_method_id"]:::bff
+    RCOMMGET["GET /api/portal/recebimentos/commercial-info"]:::bff
+    RCOMMPOST["POST /api/portal/recebimentos/commercial-info"]:::bff
+    RDOC["POST /api/portal/recebimentos/documents/:group_id"]:::bff
+    RONBOARD["GET /api/portal/recebimentos/onboarding"]:::bff
+    RRESEND["POST /api/portal/recebimentos/resend-activation"]:::bff
+    RSTATUS["GET /api/portal/recebimentos/status"]:::bff
+  end
+
+  MAINT --> WLIST --> WAITLIST["Webhook de waitlist"]:::external
+  PLOGIN --> LOGIN --> ACCOUNTS["devbutter_backend /accounts/*"]:::api
+  PLOGIN --> SIGNUP --> ACCOUNTS
+  PSETUP --> PSETUPGET --> ACCOUNTS
+  PSETUP --> PSETUPPOST --> ACCOUNTS
+  PORTAL --> CNEW --> CONVERSATIONS["devbutter_backend /conversations/*"]:::api
+  QUOTES --> CCURRENT --> CONVERSATIONS
+  QUOTES --> CGET --> CONVERSATIONS
+  QUOTES --> CMSG --> CONVERSATIONS
+  QUOTES --> CSELECT --> CONVERSATIONS
+  QUOTES --> CPROFILE --> CONVERSATIONS
+  QUOTES --> CDRAFT --> CONVERSATIONS
+  DATA --> PMGET --> PAYMENTS["devbutter_backend /payment-methods e /payments"]:::api
+  DATA --> PMSESSION --> PAYMENTS
+  DATA --> PMSECURE --> PAYMENTS
+  INVOICES --> PMPAY --> PAYMENTS
+  DATA --> PMDELETE --> PAYMENTS
+  RECEIVABLES --> RCOMMGET --> SUBACCOUNT["devbutter_backend /accounts/subaccount/*"]:::api
+  RECEIVABLES --> RCOMMPOST --> SUBACCOUNT
+  RECEIVABLES --> RDOC --> SUBACCOUNT
+  RECEIVABLES --> RONBOARD --> SUBACCOUNT
+  RECEIVABLES --> RRESEND --> SUBACCOUNT
+  RECEIVABLES --> RSTATUS --> SUBACCOUNT
+  ADASH --> ASEARCH --> ADMINAPI["devbutter_backend /admin/*"]:::api
+  PAYMENTS --> ASAAS["Asaas"]:::external
+  CONVERSATIONS --> MIND["Butter Mind e Socket.IO"]:::external
