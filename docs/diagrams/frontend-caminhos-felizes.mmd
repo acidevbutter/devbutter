@@ -1,10 +1,13 @@
 flowchart TB
+  %% Mantém cada coluna em leitura de cima para baixo no preview Mermaid.
+  %% As ligações invisíveis evitam que o renderer compacte os nós em faixas horizontais.
   classDef ui fill:#E8F7EE,stroke:#217A45,color:#102B1A
   classDef bff fill:#EAF2FF,stroke:#2563EB,color:#122B5B
   classDef api fill:#FDF0F3,stroke:#BE3658,color:#5C1424
   classDef external fill:#FFF6DE,stroke:#A36A00,color:#563900
 
   subgraph Public[Rotas públicas]
+    direction TB
     HOME["/"]:::ui
     MAINT["/manutencao"]:::ui
     PLOGIN["/portal/login"]:::ui
@@ -13,9 +16,11 @@ flowchart TB
     PDENIED["/portal/acesso-negado"]:::ui
     AROOT["/admin"]:::ui
     ALOGIN["/admin/login"]:::ui
+    HOME ~~~ MAINT ~~~ PLOGIN ~~~ PSETUP ~~~ PEXPIRED ~~~ PDENIED ~~~ AROOT ~~~ ALOGIN
   end
 
   subgraph Portal[Portal autenticado]
+    direction TB
     PORTAL["/portal"]:::ui
     QUOTES["/portal/orcamentos"]:::ui
     PROJECTS["/portal/projetos e /portal/projetos/:id"]:::ui
@@ -23,9 +28,11 @@ flowchart TB
     DATA["/portal/dados e /portal/dados/cartoes"]:::ui
     BUSINESS["/portal/negocio"]:::ui
     RECEIVABLES["/portal/recebimentos"]:::ui
+    PORTAL ~~~ QUOTES ~~~ PROJECTS ~~~ INVOICES ~~~ DATA ~~~ BUSINESS ~~~ RECEIVABLES
   end
 
   subgraph Admin[Painel administrativo]
+    direction TB
     ADASH["/admin/dashboard"]:::ui
     AQUOTE["/admin/quotes, /admin/quotes/new e /admin/quotes/:id"]:::ui
     AORDER["/admin/orders e /admin/orders/:id"]:::ui
@@ -33,9 +40,11 @@ flowchart TB
     ACOMPANY["/admin/companies e /admin/companies/:id"]:::ui
     AOPS["/admin/catalog, /admin/invoices, /admin/conversations, /admin/knowledge, /admin/mind, /admin/webhooks"]:::ui
     ACONFIG["/admin/config, /admin/config/asaas e /admin/config/relay"]:::ui
+    ADASH ~~~ AQUOTE ~~~ AORDER ~~~ ACLIENT ~~~ ACOMPANY ~~~ AOPS ~~~ ACONFIG
   end
 
   subgraph BFF[Route Handlers: 26 métodos]
+    direction TB
     WLIST["POST /api/waitlist"]:::bff
     ALOGOUT["POST /api/admin/auth/logout"]:::bff
     ASEARCH["GET /api/admin/search"]:::bff
@@ -62,6 +71,7 @@ flowchart TB
     RONBOARD["GET /api/portal/recebimentos/onboarding"]:::bff
     RRESEND["POST /api/portal/recebimentos/resend-activation"]:::bff
     RSTATUS["GET /api/portal/recebimentos/status"]:::bff
+    WLIST ~~~ ALOGOUT ~~~ ASEARCH ~~~ LOGIN ~~~ LOGOUT ~~~ PSETUPGET ~~~ PSETUPPOST ~~~ SIGNUP ~~~ CNEW ~~~ CCURRENT ~~~ CGET ~~~ CMSG ~~~ CSELECT ~~~ CPROFILE ~~~ CDRAFT ~~~ PMGET ~~~ PMSESSION ~~~ PMSECURE ~~~ PMPAY ~~~ PMDELETE ~~~ RCOMMGET ~~~ RCOMMPOST ~~~ RDOC ~~~ RONBOARD ~~~ RRESEND ~~~ RSTATUS
   end
 
   MAINT --> WLIST --> WAITLIST["Webhook de waitlist"]:::external
