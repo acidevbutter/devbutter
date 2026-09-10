@@ -38,12 +38,16 @@ export default function AdminShell({
     <div className={styles.shell}>
       <header className={styles.topbar}>
         <div className={styles.brand}>
-          <Logomark width={18} height={21} />
+          <Logomark width={22} height={26} />
           <span className={styles.wordmark}>DevButter</span>
           <span className={styles.pill}>admin</span>
         </div>
         <div className={styles.topbarActions}>
           <GlobalSearch />
+          <span className={styles.sessionStatus}>
+            <span className={styles.sessionDot} aria-hidden="true" />
+            sessão ativa
+          </span>
           <div className={styles.identity}>
             <span className={styles.identityName}>{accountName}</span>
             <div className={styles.avatar}>{initial}</div>

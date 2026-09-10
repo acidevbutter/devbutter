@@ -65,6 +65,11 @@
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+
+  &:focus-visible {
+    outline: none;
+    color: $db-text-primary;
+  }
 }
 
 .tabActive {
@@ -92,6 +97,22 @@
   padding: 10px 12px;
   font: 13px "Geist Mono", monospace;
   color: $db-text-primary;
+  transition: border-color 0.18s, box-shadow 0.18s;
+
+  &:focus {
+    outline: none;
+    border-color: rgba(121, 229, 155, 0.38);
+    box-shadow: 0 0 0 3px rgba(121, 229, 155, 0.14);
+  }
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: $db-text-primary;
+    -webkit-box-shadow: 0 0 0 1000px rgba(5, 7, 13, 0.9) inset;
+    box-shadow: 0 0 0 1000px rgba(5, 7, 13, 0.9) inset;
+    caret-color: $db-text-primary;
+  }
 }
 
 .errorText {
@@ -111,6 +132,17 @@
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
+  transition: box-shadow 0.18s, transform 0.18s;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 0 24px rgba(0, 210, 106, 0.4);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(121, 229, 155, 0.3);
+  }
 
   &:disabled {
     opacity: 0.6;
@@ -118,9 +150,20 @@
   }
 }
 
+// Shared by an inert hint (LoginForm) and a real "Voltar" button (SignupForm
+// step 2) — the button reset below only affects rendering of the latter.
 .forgot {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
   text-align: center;
   font: 11.5px "Geist Mono", monospace;
   color: $db-text-secondary;
   margin-top: 2px;
+
+  &:focus-visible {
+    outline: none;
+    color: $db-text-primary;
+  }
 }

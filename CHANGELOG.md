@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+- Adicionado mapa Mermaid e teste HTTP integrado que percorre todos os Route
+  Handlers BFF com Next e upstream controlado; a imagem Docker e a pipeline
+  executam os testes antes do build.
+  O E2E usa `.next-e2e`, sem disputar o servidor de desenvolvimento local.
+
+- Painel Asaas: adicionada criação de chave de integração interna na aba
+  Tokens. O segredo continua cifrado no proxy e não é exibido no navegador.
+
 - Fluxo Cotação IA — ajustes de UX no `NewQuoteModal`:
   - textarea do composer com autosize até `COMPOSER_MAX_H` (160px), aí rola
     (`resize: none`);

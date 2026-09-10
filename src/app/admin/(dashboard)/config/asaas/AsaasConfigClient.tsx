@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   cancelPaymentAction,
+  createAccessTokenAction,
   refundPaymentAction,
   resendActivationLinkAction,
   revokeAccessTokenAction,
@@ -172,6 +173,13 @@ export default function AsaasConfigClient({
         <TokensTable
           rows={data.tokens}
           disabled={pending || !activeSub}
+          onCreate={(name) =>
+            setConfirm({
+              title: "Criar chave de API interna",
+              body: `Uma chave para \"${name}\" será criada no Asaas. O segredo ficará cifrado no proxy e não será exibido no navegador.`,
+              run: () => createAccessTokenAction(activeSub!, name),
+            })
+          }
           onRevoke={(tokenId) =>
             setConfirm({
               title: "Revogar chave de API",
@@ -307,15 +315,39 @@ function SubaccountsTable({
 function TokensTable({
   rows,
   disabled,
+  onCreate,
   onRevoke,
 }: {
   rows: AsaasAccessToken[];
   disabled: boolean;
+  onCreate: (name: string) => void;
   onRevoke: (tokenId: string) => void;
 }) {
   const cols = "1.2fr 1.4fr .9fr .8fr";
+  const [name, setName] = useState("");
   return (
     <div className={styles.panel}>
+      <div className={styles.rowActions} style={{ marginBottom: 14 }}>
+        <input
+          className={styles.input}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          placeholder="nome da integração interna"
+          aria-label="nome da nova chave de API"
+          disabled={disabled}
+        />
+        <button
+          type="button"
+          className={styles.linkBtn}
+          disabled={disabled || !name.trim()}
+          onClick={() => {
+            onCreate(name.trim());
+            setName("");
+          }}
+        >
+          criar chave interna
+        </button>
+      </div>
       <div className={styles.headRow} style={{ gridTemplateColumns: cols }}>
         <span>nome</span>
         <span>chave</span>

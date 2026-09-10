@@ -9,6 +9,7 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 RUN mkdir -p public
+RUN yarn test:e2e && yarn test
 RUN yarn build
 
 FROM node:22-alpine AS runtime

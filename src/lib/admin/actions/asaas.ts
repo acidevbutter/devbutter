@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { AdminApiError } from "../api";
 import {
   cancelPayment,
+  createAccessToken,
   refundPayment,
   resendActivationLink,
   revokeAccessToken,
@@ -21,6 +22,19 @@ function toState(err: unknown): AsaasActionState {
 }
 
 const CONFIG_PATH = "/admin/config/asaas";
+
+export async function createAccessTokenAction(
+  accountId: string,
+  name: string
+): Promise<AsaasActionState> {
+  try {
+    await createAccessToken(accountId, name);
+    revalidatePath(CONFIG_PATH);
+    return { ok: true };
+  } catch (err) {
+    return toState(err);
+  }
+}
 
 export async function revokeAccessTokenAction(
   accountId: string,

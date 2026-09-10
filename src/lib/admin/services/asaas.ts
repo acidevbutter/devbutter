@@ -46,6 +46,16 @@ export function resendActivationLink(accountId: string): Promise<unknown> {
   });
 }
 
+// Real: POST /admin/subaccounts/{id}/access-tokens. The proxy deliberately
+// strips the raw apiKey: it is retained only in its encrypted server-side
+// store and never crosses into the browser.
+export function createAccessToken(accountId: string, name: string): Promise<unknown> {
+  return adminFetch(`/admin/subaccounts/${encodeURIComponent(accountId)}/access-tokens`, {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+}
+
 // Real: GET /admin/subaccounts/{id}/access-tokens
 //
 // The backend returns the raw Asaas apiKey. That value must never reach a

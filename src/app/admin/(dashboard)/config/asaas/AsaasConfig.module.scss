@@ -94,6 +94,15 @@
   min-width: 260px;
 }
 
+.input {
+  background: $admin-card;
+  border: 1px solid $admin-border-interactive;
+  border-radius: 7px;
+  padding: 6px 9px;
+  color: $db-text-primary;
+  font-size: 12px;
+}
+
 .tabs {
   display: flex;
   gap: 24px;

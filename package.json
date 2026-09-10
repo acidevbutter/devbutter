@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:happy": "vitest run src/app/api/happy-path.test.ts",
+    "test:e2e": "node scripts/test-bff-e2e.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.7.0",
