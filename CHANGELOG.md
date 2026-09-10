@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Infraestrutura: imagens Docker do frontend atualizadas para Node 24 Alpine.
+
 - Adicionado mapa Mermaid e teste HTTP integrado que percorre todos os Route
   Handlers BFF com Next e upstream controlado; a imagem Docker e a pipeline
   executam os testes antes do build.

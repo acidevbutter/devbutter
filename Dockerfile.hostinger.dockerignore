@@ -1,0 +1,16 @@
+# Apenas para `docker build -f Dockerfile.hostinger .`; não afeta o Dockerfile local.
+.git
+.env
+.env.*
+!.env.example
+node_modules
+.next
+.next-e2e
+coverage
+*.log
+.DS_Store
+docs/
+scripts/
+README.md
+CHANGELOG.md
+tsconfig.tsbuildinfo
