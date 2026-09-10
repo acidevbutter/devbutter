@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Infraestrutura: imagens Docker do frontend atualizadas para Node 24 Alpine.
+- Infraestrutura: imagens Docker e pipeline do frontend atualizadas para Node 24.
 - Corrigido o lint dos testes de métodos de pagamento.
 
 - Adicionado mapa Mermaid e teste HTTP integrado que percorre todos os Route
