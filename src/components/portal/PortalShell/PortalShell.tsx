@@ -44,11 +44,15 @@ export default function PortalShell({
     <div className={styles.shell}>
       <header className={styles.topbar}>
         <div className={styles.brand}>
-          <Logomark width={18} height={21} />
+          <Logomark width={22} height={26} />
           <span className={styles.wordmark}>DevButter</span>
           <span className={styles.pill}>minha conta</span>
         </div>
         <div className={styles.topbarActions}>
+          <span className={styles.sessionStatus}>
+            <span className={styles.sessionDot} aria-hidden="true" />
+            sessão ativa
+          </span>
           <div className={styles.identity}>
             <span className={styles.identityName}>
               {businessName ?? accountName} · {accountName}

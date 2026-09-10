@@ -7,12 +7,16 @@
 }
 
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
+  padding: 13px 22px;
+  background: rgba(5, 7, 13, 0.8);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid $admin-border;
-  background: rgba(255, 255, 255, 0.02);
 }
 
 .brand {
@@ -22,8 +26,8 @@
 }
 
 .wordmark {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 15px;
 }
 
 .pill {
@@ -32,14 +36,35 @@
   text-transform: uppercase;
   color: $db-text-secondary;
   border: 1px solid $admin-border-interactive;
-  border-radius: 5px;
-  padding: 2px 6px;
+  border-radius: 4px;
+  padding: 3px 7px;
 }
 
 .topbarActions {
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+.sessionStatus {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 11.5px "Geist Mono", monospace;
+  color: $db-text-muted;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.sessionDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $db-green-glow;
+  box-shadow: 0 0 8px $db-green-glow;
+  animation: dbPulse 2.4s ease-in-out infinite;
 }
 
 .identity {
@@ -81,7 +106,7 @@
 .body {
   display: flex;
   align-items: stretch;
-  min-height: calc(100vh - 53px);
+  min-height: calc(100vh - 54px);
 }
 
 .sidebar {

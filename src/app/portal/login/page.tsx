@@ -11,6 +11,30 @@ const ERROR_MESSAGES: Record<string, string> = {
   email_exists: "este e-mail já está cadastrado",
 };
 
+// The Credential Management API's PasswordCredential isn't in TypeScript's
+// bundled DOM lib (dropped upstream years ago), even though Chrome/Edge still
+// implement it -- declared locally rather than reaching for a global .d.ts.
+interface PasswordCredentialCtor {
+  new (data: { id: string; password: string; name?: string }): Credential;
+}
+
+/** Prompts the browser's own password manager to offer saving the
+ *  credential. Login/signup submit via fetch() instead of a real form
+ *  navigation, so browsers have nothing to key a save-password heuristic
+ *  off of without this -- best effort, never blocks the auth flow. */
+async function offerToSaveCredential(email: string, password: string): Promise<void> {
+  const PasswordCredentialImpl = (window as { PasswordCredential?: PasswordCredentialCtor })
+    .PasswordCredential;
+  if (!PasswordCredentialImpl || !navigator.credentials) return;
+  try {
+    const credential = new PasswordCredentialImpl({ id: email, password, name: email });
+    await navigator.credentials.store(credential);
+  } catch {
+    // Unsupported browser, user declined, or a private-browsing restriction --
+    // none of that should surface as an auth error.
+  }
+}
+
 export default function PortalLoginPage() {
   return (
     <Suspense fallback={null}>
@@ -113,6 +137,7 @@ function LoginForm({
         setLoading(false);
         return;
       }
+      await offerToSaveCredential(email, password);
       const body = (await res.json().catch(() => null)) as { isAdmin?: boolean } | null;
       router.push(body?.isAdmin ? adminDestination : destination);
       router.refresh();
@@ -129,6 +154,9 @@ function LoginForm({
         <input
           className={styles.input}
           type="email"
+          name="email"
+          id="login-email"
+          autoComplete="username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -139,6 +167,9 @@ function LoginForm({
         <input
           className={styles.input}
           type="password"
+          name="password"
+          id="login-password"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="sua senha"
@@ -270,6 +301,7 @@ function SignupForm({
         setLoading(false);
         return;
       }
+      await offerToSaveCredential(email, password);
       router.push(destination);
       router.refresh();
     } catch {
@@ -285,6 +317,9 @@ function SignupForm({
           <div className={styles.fieldLabel}>NOME</div>
           <input
             className={styles.input}
+            name="name"
+            id="signup-name"
+            autoComplete="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -295,6 +330,9 @@ function SignupForm({
           <input
             className={styles.input}
             type="email"
+            name="email"
+            id="signup-email"
+            autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -305,6 +343,9 @@ function SignupForm({
           <input
             className={styles.input}
             type="password"
+            name="new-password"
+            id="signup-password"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

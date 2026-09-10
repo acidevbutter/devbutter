@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const { adminFetchMock } = vi.hoisted(() => ({ adminFetchMock: vi.fn() }));
 vi.mock("../api", () => ({ adminFetch: adminFetchMock }));
 
-import { listAccessTokens } from "./asaas";
+import { createAccessToken, listAccessTokens } from "./asaas";
 
 describe("listAccessTokens", () => {
   afterEach(() => {
@@ -49,5 +49,16 @@ describe("listAccessTokens", () => {
 
     const tokens = Array.isArray(result) ? result : result.data;
     expect(tokens[0]).toEqual({ id: "tok_3", status: "revoked" });
+  });
+
+  it("creates an internal token without handling a raw apiKey in the browser", async () => {
+    adminFetchMock.mockResolvedValue({ id: "tok_4", name: "Internal integration" });
+
+    await createAccessToken("acc_4", "Internal integration");
+
+    expect(adminFetchMock).toHaveBeenCalledWith("/admin/subaccounts/acc_4/access-tokens", {
+      method: "POST",
+      body: JSON.stringify({ name: "Internal integration" }),
+    });
   });
 });
