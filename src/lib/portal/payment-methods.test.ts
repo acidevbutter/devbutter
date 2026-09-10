@@ -46,7 +46,8 @@ describe("createOpaquePaymentMethodRequest", () => {
   });
 
   it("throws when the envelope is missing a required key", () => {
-    const { tag: _tag, ...incomplete } = validEnvelope();
+    const incomplete = { ...validEnvelope() } as Partial<SecureEnvelopeV1>;
+    delete incomplete.tag;
     expect(() =>
       createOpaquePaymentMethodRequest("inv_1", "save_only", incomplete as unknown as SecureEnvelopeV1)
     ).toThrow("invalid_payment_method_request");
@@ -93,7 +94,8 @@ describe("submitOpaquePaymentMethodRequest", () => {
   });
 
   it("throws without calling fetch when the envelope is malformed", async () => {
-    const { nonce: _nonce, ...badEnvelope } = validEnvelope();
+    const badEnvelope = { ...validEnvelope() } as Partial<SecureEnvelopeV1>;
+    delete badEnvelope.nonce;
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 
