@@ -2,10 +2,15 @@ name: Frontend quality
 
 on:
   pull_request:
+  merge_group:
   push:
     branches:
       - staging
-      - main
+      - master
+
+concurrency:
+  group: frontend-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
