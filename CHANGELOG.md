@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Simplificado o cadastro inicial do portal para primeiro nome, e-mail e senha.
+
 - Infraestrutura: imagens Docker e pipeline do frontend atualizadas para Node 24.
 - Corrigido o lint dos testes de métodos de pagamento.
 

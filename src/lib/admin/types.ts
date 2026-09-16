@@ -378,13 +378,36 @@ export interface AdminCompanyListItem {
 }
 
 export interface AdminSubaccountLink {
-  asaas_account_id: string;
+  // Null until a creation attempt actually succeeds -- notably still null
+  // when provisioning_status is "CREATION_FAILED" (a link row exists to
+  // track the retry, but Asaas never returned an id). Callers must check
+  // asaas_account_id, not just `link !== null`, before treating a company as
+  // having a working subaccount.
+  asaas_account_id: string | null;
   wallet_id: string | null;
+  provisioning_status: "NONE" | "PROVISIONED" | "CREATION_FAILED" | "CLOSED" | string;
+  last_error: string | null;
   onboarding_status: string | null;
   approval_status: string | null;
   split_quota_percent: string | null;
   quota_set_by: string | null;
   quota_updated_at: string | null;
+}
+
+export interface AdminCompanyBillingProfile {
+  legal_name: string;
+  billing_email: string;
+  cnpj: string;
+  company_type: string;
+  mobile_phone: string;
+  income_value: string;
+  address: string;
+  address_number: string;
+  complement: string | null;
+  province: string;
+  postal_code: string;
+  site: string | null;
+  updated_at: string;
 }
 
 export interface AdminSplitRule {
@@ -405,6 +428,7 @@ export interface AdminCompanyDetail {
   owner_name: string;
   owner_email: string;
   link: AdminSubaccountLink | null;
+  billing_profile: AdminCompanyBillingProfile | null;
   split_rules: AdminSplitRule[];
   access_tokens: Record<string, unknown>;
   used_percent: string | null;

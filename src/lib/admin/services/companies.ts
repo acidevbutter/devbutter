@@ -35,6 +35,20 @@ export function linkSubaccount(id: string, payload: Record<string, unknown>) {
   });
 }
 
+// Real: POST /admin/companies/{id}/subaccount/manual. Fallback for when
+// /provision-subaccount can't run (no/incomplete billing profile) or already
+// left the link CREATION_FAILED -- the admin supplies the Asaas fields by
+// hand instead of them coming from CompanyBillingProfile. A "successful"
+// call can still come back with provisioning_status "CREATION_FAILED" (the
+// backend swallows the Asaas rejection into the link row) -- callers must
+// check the returned link, not just whether the promise resolved.
+export function createManualSubaccount(id: string, payload: Record<string, unknown>) {
+  return adminFetch<AdminSubaccountLink>(`/admin/companies/${id}/subaccount/manual`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 // Real: GET /admin/companies/{id}/features.
 export function listFeatures(id: string) {
   return adminFetch<AdminCompanyFeature[]>(`/admin/companies/${id}/features`);

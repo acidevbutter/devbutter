@@ -113,6 +113,95 @@
   margin: 0;
 }
 
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLocked {
+  .fieldLabel {
+    color: $db-text-muted;
+  }
+
+  input,
+  select {
+    color: $db-text-muted;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: not-allowed;
+  }
+}
+
+.fieldFull {
+  grid-column: 1 / -1;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid rgba(229, 183, 90, 0.35);
+  background: rgba(229, 183, 90, 0.06);
+  border-radius: 10px;
+}
+
+.checklistItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 12px "Geist Mono", monospace;
+  color: $admin-text-2;
+}
+
+.dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $admin-amber;
+}
+
+.dotInvalid {
+  background: $db-pink;
+}
+
+.submitBtn {
+  @include admin.button-solid-sm;
+  align-self: flex-start;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.toggleRow {
+  display: flex;
+  gap: 8px;
+}
+
+.toggleBtn {
+  @include admin.button-outline;
+  padding: 6px 11px;
+  font-size: 11.5px;
+}
+
+.toggleBtnActive {
+  color: $db-text-primary;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 .featureRow {
   display: flex;
   align-items: center;
