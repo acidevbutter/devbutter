@@ -1,0 +1,52 @@
+# Standard Next.js Hostinger/Coolify image: 3-stage build, DOCKER=1 triggers
+# `output: "standalone"` (next.config.ts) so runtime ships only the traced
+# node_modules subset instead of the full yarn install. Mirrors the non-root
+# uid/gid 10001 "app" + WORKDIR /app convention used by every backend service
+# (devbutter_backend, butter_relay, butter_blob, butter_mind, asaas_payment).
+# Tests already gate merges in .github/workflows/frontend-quality.yml, so they
+# are not repeated here -- keeps the deploy build fast and independent of any
+# network access the e2e suite would otherwise need inside the build sandbox.
+
+FROM node:24-alpine AS deps
+
+WORKDIR /app
+
+RUN corepack enable && corepack prepare yarn@1.22.22 --activate
+
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+FROM node:24-alpine AS builder
+
+WORKDIR /app
+
+RUN corepack enable && corepack prepare yarn@1.22.22 --activate
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ARG DOCKER=1
+ENV DOCKER=$DOCKER
+
+RUN yarn build
+
+FROM node:24-alpine AS runtime
+
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+RUN apk add --no-cache curl \
+    && addgroup --system --gid 10001 app \
+    && adduser --system --uid 10001 --ingroup app app
+
+COPY --from=builder --chown=app:app /app/public ./public
+COPY --from=builder --chown=app:app /app/.next/standalone ./
+COPY --from=builder --chown=app:app /app/.next/static ./.next/static
+
+USER app
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]

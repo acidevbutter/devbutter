@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+- Infraestrutura: imagens Docker e pipeline do frontend atualizadas para Node 24.
+- Corrigido o lint dos testes de métodos de pagamento.
+
 - Adicionado mapa Mermaid e teste HTTP integrado que percorre todos os Route
   Handlers BFF com Next e upstream controlado; a imagem Docker e a pipeline
   executam os testes antes do build.
