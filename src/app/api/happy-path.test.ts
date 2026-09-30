@@ -112,6 +112,11 @@ describe("caminhos felizes dos Route Handlers", () => {
     }));
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ok: true });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      name: "Cliente",
+      email: "cliente@devbutter.tech",
+      password: "senha-segura",
+    });
   });
 
   it("cria, retoma e avança a conversa de cotação", async () => {

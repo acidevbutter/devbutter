@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import * as companiesService from "../services/companies";
 import { AdminApiError } from "../api";
+import type { AdminSubaccountLink } from "../types";
 
 export type ActionState = { error: string } | null;
 
@@ -49,6 +50,24 @@ export async function linkSubaccountAction(
   revalidatePath(`/admin/companies/${companyId}`);
   revalidatePath("/admin/companies");
   return null;
+}
+
+export type CreateManualSubaccountState =
+  | { ok: true; link: AdminSubaccountLink }
+  | { ok: false; error: string };
+
+export async function createManualSubaccountAction(
+  companyId: string,
+  payload: Record<string, unknown>
+): Promise<CreateManualSubaccountState> {
+  try {
+    const link = await companiesService.createManualSubaccount(companyId, payload);
+    revalidatePath(`/admin/companies/${companyId}`);
+    revalidatePath("/admin/companies");
+    return { ok: true, link };
+  } catch (err) {
+    return { ok: false, error: errorMessage(err, "Falha ao criar a subconta manualmente") };
+  }
 }
 
 export async function enableFeatureAction(

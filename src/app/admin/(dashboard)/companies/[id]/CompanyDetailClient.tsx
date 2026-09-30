@@ -11,7 +11,9 @@ import {
 } from "@/lib/admin/actions/companies";
 import Badge from "@/components/admin/ui/Badge/Badge";
 import Button from "@/components/admin/ui/Button/Button";
+import type { SubaccountCreatePayload } from "@/lib/admin/asaas-types";
 import type { AdminCompanyDetail, AdminCompanyFeature } from "@/lib/admin/types";
+import ManualSubaccountForm from "./ManualSubaccountForm";
 import styles from "./CompanyDetail.module.scss";
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -37,7 +39,35 @@ export default function CompanyDetailClient({
     null
   );
 
-  const hasPaymentMethod = company.link !== null;
+  // company.link is non-null as soon as a creation attempt is *tried*, not
+  // only once one succeeds -- a CREATION_FAILED attempt leaves a link row
+  // with asaas_account_id still null so it can be retried. Only
+  // asaas_account_id means there's an actual usable subaccount.
+  const hasPaymentMethod = company.link?.asaas_account_id != null;
+  const creationFailed = company.link?.provisioning_status === "CREATION_FAILED";
+  const [openTab, setOpenTab] = useState<"manual" | "existing">("manual");
+
+  const manualPrefill: Partial<SubaccountCreatePayload> = company.billing_profile
+    ? {
+        name: company.billing_profile.legal_name,
+        email: company.billing_profile.billing_email,
+        cpfCnpj: company.billing_profile.cnpj,
+        companyType: company.billing_profile.company_type as SubaccountCreatePayload["companyType"],
+        mobilePhone: company.billing_profile.mobile_phone,
+        incomeValue: company.billing_profile.income_value,
+        address: company.billing_profile.address,
+        addressNumber: company.billing_profile.address_number,
+        complement: company.billing_profile.complement ?? "",
+        province: company.billing_profile.province,
+        postalCode: company.billing_profile.postal_code,
+        site: company.billing_profile.site ?? "",
+      }
+    : {
+        name: company.name,
+        cpfCnpj: company.cnpj ?? "",
+        email: company.owner_email,
+      };
+
   const usedPercent = company.used_percent ? Number(company.used_percent) : 0;
   const quotaPercent = company.link?.split_quota_percent
     ? Number(company.link.split_quota_percent)
@@ -77,20 +107,50 @@ export default function CompanyDetailClient({
               </div>
             </div>
           ) : (
-            <form action={linkFormAction} className={styles.blockBody}>
+            <div className={styles.blockBody}>
               <p className={styles.emptyHint}>
-                Esta empresa ainda não tem meio de pagamento configurado.
+                {creationFailed
+                  ? "Uma tentativa anterior de abrir a subconta falhou (veja o erro abaixo). Corrija os dados e tente de novo."
+                  : "Esta empresa ainda não tem meio de pagamento configurado."}
               </p>
-              <input
-                className={styles.input}
-                name="asaas_account_id"
-                placeholder="id da subconta Asaas existente"
-              />
-              {linkState?.error && <p className={styles.error}>{linkState.error}</p>}
-              <Button type="submit" disabled={linkPending}>
-                {linkPending ? "Vinculando…" : "Configurar meio de pagamento"}
-              </Button>
-            </form>
+
+              <div className={styles.toggleRow}>
+                <button
+                  type="button"
+                  className={`${styles.toggleBtn} ${openTab === "manual" ? styles.toggleBtnActive : ""}`}
+                  onClick={() => setOpenTab("manual")}
+                >
+                  abrir subconta nova
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.toggleBtn} ${openTab === "existing" ? styles.toggleBtnActive : ""}`}
+                  onClick={() => setOpenTab("existing")}
+                >
+                  vincular subconta existente
+                </button>
+              </div>
+
+              {openTab === "manual" ? (
+                <ManualSubaccountForm
+                  companyId={company.id}
+                  prefill={manualPrefill}
+                  initialError={creationFailed ? (company.link?.last_error ?? null) : null}
+                />
+              ) : (
+                <form action={linkFormAction} className={styles.blockBody}>
+                  <input
+                    className={styles.input}
+                    name="asaas_account_id"
+                    placeholder="id da subconta Asaas existente"
+                  />
+                  {linkState?.error && <p className={styles.error}>{linkState.error}</p>}
+                  <Button type="submit" disabled={linkPending}>
+                    {linkPending ? "Vinculando…" : "Configurar meio de pagamento"}
+                  </Button>
+                </form>
+              )}
+            </div>
           )}
         </div>
 

@@ -19,7 +19,9 @@ x-upstreams: &upstreams
 
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     container_name: devbutter-frontend
     command: >-
       sh -c "yarn install --frozen-lockfile &&
@@ -54,7 +56,9 @@ services:
   # Sobe a imagem de produção (sem volume de código, sem autoreload).
   web-prod:
     profiles: ["prod"]
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     container_name: devbutter-frontend-prod
     ports:
       - "${FRONTEND_HOST_PORT:-3000}:3000"
