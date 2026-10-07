@@ -1,17 +1,25 @@
 @use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
 
 .header {
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: $z-nav;
+  background: $db-nav-bg;
+  border-bottom: 1px solid $db-border;
+}
+
+.bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   padding: 16px $db-section-pad-x;
-  background: rgba(5, 7, 13, 0.8);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid $db-border;
+
+  @media (max-width: $bp-md) {
+    gap: 10px;
+    padding: 10px 16px;
+  }
 }
 
 .brand {
@@ -19,7 +27,13 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  text-decoration: none;
+  min-height: $touch-min;
+  color: $db-text-primary;
+  @include site.focus-ring;
+
+  &:hover {
+    color: $db-text-primary;
+  }
 }
 
 .wordmark {
@@ -29,21 +43,33 @@
   color: $db-text-primary;
 }
 
+.wordmarkAccent {
+  color: $db-green;
+}
+
 .nav {
   display: flex;
   gap: 30px;
   font-size: 14px;
+  white-space: nowrap;
+  min-width: 0;
 
-  a {
-    color: $db-text-secondary;
-  }
-
-  a:hover {
-    color: $db-text-primary;
-  }
-
-  @media (max-width: 900px) {
+  @media (max-width: $bp-md) {
     display: none;
+  }
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: $touch-min;
+  color: $db-text-secondary;
+  transition: color 0.2s;
+  @include site.focus-ring;
+
+  &:hover,
+  &[aria-current="page"] {
+    color: $db-text-primary;
   }
 }
 
@@ -51,68 +77,111 @@
   display: flex;
   gap: 10px;
   flex-shrink: 0;
+  align-items: center;
+
+  @media (max-width: $bp-md) {
+    gap: 6px;
+  }
 }
 
-.loginBtn {
+.login {
+  @include site.btn-ghost;
+
+  @media (max-width: $bp-md) {
+    display: none;
+  }
+}
+
+.cta {
+  @include site.btn-primary(nav);
+
+  @media (max-width: 380px) {
+    padding: 9px 12px;
+    font-size: 12.5px;
+  }
+}
+
+.menuButton {
+  display: none;
+  width: $touch-min;
+  height: $touch-min;
+  place-items: center;
+  border: 1px solid $db-border-interactive;
+  border-radius: $r-md;
+  background: transparent;
+  cursor: pointer;
+  @include site.focus-ring;
+
+  @media (max-width: $bp-md) {
+    display: grid;
+  }
+}
+
+// Two bars that cross into an ✕ when open.
+.menuIcon {
+  position: relative;
+  width: 18px;
+  height: 12px;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    border-radius: 1px;
+    background: $db-text-primary;
+    transition: transform 0.16s $ease-spring, top 0.16s $ease-spring;
+  }
+
+  &::before {
+    top: 2px;
+  }
+
+  &::after {
+    top: 9px;
+  }
+
+  &[data-open]::before {
+    top: 5.5px;
+    transform: rotate(45deg);
+  }
+
+  &[data-open]::after {
+    top: 5.5px;
+    transform: rotate(-45deg);
+  }
+}
+
+.mobileMenu {
+  display: none;
+
+  @media (max-width: $bp-md) {
+    &[data-open] {
+      display: flex;
+      flex-direction: column;
+      padding: 4px 16px 14px;
+      border-top: 1px solid $db-border;
+    }
+  }
+}
+
+.mobileLink {
   display: flex;
   align-items: center;
-  padding: 9px 14px;
-  border-radius: 10px;
-  font: 600 13px var(--font-geist-sans);
-  cursor: pointer;
-  background: transparent;
+  min-height: 48px;
+  font-size: 15px;
   color: $db-text-secondary;
-  border: none;
-  transition: color 0.2s;
+  border-bottom: 1px solid $db-border-subtle;
+  @include site.focus-ring(-2px);
 
-  &:hover {
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover,
+  &[aria-current="page"] {
     color: $db-text-primary;
-  }
-
-  @media (max-width: 640px) {
-    display: none;
-  }
-}
-
-.ghostBtn {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-  padding: 9px 16px;
-  border-radius: 10px;
-  font: 600 13px var(--font-geist-sans);
-  cursor: pointer;
-  background: transparent;
-  color: $db-text-primary;
-  border: 1px solid $db-border-interactive;
-  transition: border-color 0.2s, background-color 0.2s;
-
-  &:hover {
-    border-color: rgba(255, 255, 255, 0.28);
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  @media (max-width: 640px) {
-    display: none;
-  }
-}
-
-.solidBtn {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-  padding: 9px 17px;
-  border-radius: 10px;
-  font: 600 13px var(--font-geist-sans);
-  cursor: pointer;
-  background: $db-green;
-  color: $db-bg;
-  border: none;
-  box-shadow: 0 0 24px rgba(0, 210, 106, 0.35);
-  transition: transform 0.15s, box-shadow 0.15s;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 30px rgba(0, 210, 106, 0.48);
   }
 }

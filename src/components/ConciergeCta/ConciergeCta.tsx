@@ -2,25 +2,15 @@
 
 import { useState, type ReactNode } from "react";
 import NewQuoteModal from "@/components/portal/NewQuoteModal/NewQuoteModal";
+import { useConcierge } from "./ConciergeProvider";
+import { CONCIERGE_GREETING, CONCIERGE_INTENTS } from "./copy";
 
-/** Canvas screen 1b: opening bubble the concierge shows before the first turn. */
-export const CONCIERGE_GREETING =
-  "Oi! Sou a IA da DevButter. Eu entendo o que você precisa, monto um diagnóstico com " +
-  "escopo, faixa de investimento e prazo — e o time da DevButter revisa antes de qualquer contato.\n\n" +
-  "Pra começar: o que está te incomodando hoje no seu negócio?";
-
-/** Canvas 1b: the three quick-start chips under the first message. */
-export const CONCIERGE_INTENTS = [
-  "Quero um site/plataforma",
-  "Automatizar atendimento",
-  "Ainda não sei",
-];
+export { CONCIERGE_GREETING, CONCIERGE_INTENTS };
 
 /**
- * A CTA that opens the public "Cotação pela IA" panel (canvas 1b) — the
- * right-anchored, single-column chat panel over the site. Replaces the former
- * `/cotacao` route; every home CTA that used to link there now renders one of
- * these, keeping its own styling via `className`.
+ * A CTA that opens the public diagnosis panel. Inside the site layout it opens
+ * the shared panel from `ConciergeProvider`; anywhere else it falls back to a
+ * panel of its own, so the component keeps working outside the site shell.
  */
 export default function ConciergeCta({
   className,
@@ -31,7 +21,8 @@ export default function ConciergeCta({
   children: ReactNode;
   ariaLabel?: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const concierge = useConcierge();
+  const [localOpen, setLocalOpen] = useState(false);
 
   return (
     <>
@@ -40,13 +31,13 @@ export default function ConciergeCta({
         className={className}
         aria-label={ariaLabel}
         aria-haspopup="dialog"
-        onClick={() => setOpen(true)}
+        onClick={() => (concierge ? concierge.openChat() : setLocalOpen(true))}
       >
         {children}
       </button>
-      {open && (
+      {!concierge && localOpen && (
         <NewQuoteModal
-          onClose={() => setOpen(false)}
+          onClose={() => setLocalOpen(false)}
           mode="public"
           surface="panel"
           initialMessage={CONCIERGE_GREETING}

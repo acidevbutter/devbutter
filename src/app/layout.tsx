@@ -14,10 +14,25 @@ const geistMono = Geist_Mono({
   weight: ["400", "500"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://devbutter.tech";
+const DEFAULT_TITLE = "DevButter — Engenharia aplicada a problemas reais";
+const DEFAULT_DESCRIPTION =
+  "Sites, plataformas, agentes e automações. A tecnologia certa depende do problema, não o contrário — a gente entende a operação antes de falar de stack.";
+
 export const metadata: Metadata = {
-  title: "DevButter — Engenharia aplicada a problemas reais",
-  description:
-    "Sites, plataformas, agentes de IA e automações — construídos por quem também projeta os sistemas por trás deles.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: DEFAULT_TITLE, template: "%s · DevButter" },
+  description: DEFAULT_DESCRIPTION,
+  applicationName: "DevButter",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: "DevButter",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    url: "/",
+  },
+  twitter: { card: "summary_large_image", title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
