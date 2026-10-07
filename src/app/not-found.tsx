@@ -1,13 +1,18 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import SiteShell from "@/components/SiteShell/SiteShell";
+import NotFoundView from "@/components/NotFoundView/NotFoundView";
 
+export const metadata: Metadata = {
+  title: "Página não encontrada",
+  description: "O endereço mudou ou nunca existiu.",
+};
+
+// Fica fora dos route groups: cobre URL sem rota e o notFound() de /cases/[slug],
+// por isso traz o próprio SiteShell (nav + footer + painel de diagnóstico).
 export default function NotFound() {
   return (
     <SiteShell>
-      <section style={{ padding: "64px 4vw", textAlign: "center" }}>
-        <h1>Essa página saiu de órbita.</h1>
-        <Link href="/">Voltar para a home</Link>
-      </section>
+      <NotFoundView />
     </SiteShell>
   );
 }

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+import { EMAIL_RE, forwardToFormWebhook } from "@/lib/forms/webhook";
 
 /**
  * Collects the "avise-me no lançamento" addresses from the maintenance page. There is no
@@ -20,19 +19,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_email" }, { status: 400 });
   }
 
-  const webhook = process.env.WAITLIST_WEBHOOK_URL;
-  if (!webhook) {
-    return NextResponse.json({ error: "not_configured" }, { status: 503 });
-  }
-
-  const res = await fetch(webhook, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: email.trim(), source: "manutencao" }),
-  });
-
-  if (!res.ok) {
-    return NextResponse.json({ error: "upstream_failed" }, { status: 502 });
+  const result = await forwardToFormWebhook({ email: email.trim(), source: "manutencao" });
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
   return NextResponse.json({ ok: true });

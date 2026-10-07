@@ -1,0 +1,84 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
+
+@include site.kf-rise;
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: $db-surface;
+  border: 1px solid $db-border;
+  border-radius: $r-xl;
+  padding: 22px;
+  color: $db-text-primary;
+  @include site.lift-card(green);
+  @include site.focus-ring;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}
+
+.rail {
+  flex: 0 0 288px;
+  scroll-snap-align: start;
+
+  @media (max-width: $bp-sm) {
+    flex-basis: 260px;
+  }
+
+  .sector {
+    margin-bottom: 14px;
+  }
+
+  .tag {
+    @include site.tag;
+  }
+}
+
+.grid {
+  animation: rise 0.26s $ease-out both;
+
+  .title {
+    margin-top: 14px;
+  }
+
+  .tag {
+    @include site.tag($db-text-secondary, $db-border-interactive);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.sector {
+  @include site.mono-label;
+}
+
+.title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.headline {
+  font-size: 13.5px;
+  color: $db-text-secondary;
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+
+.tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.more {
+  margin-top: auto;
+  padding-top: 16px;
+  font-size: 13px;
+  color: $db-green;
+}
