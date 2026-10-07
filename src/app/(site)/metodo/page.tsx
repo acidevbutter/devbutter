@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Card, { Label } from "@/components/admin/ui/Card/Card";
 import ConciergeCta from "@/components/ConciergeCta/ConciergeCta";
+import SiteSceneCanvas from "@/components/SiteScene/SiteSceneCanvas";
 import styles from "./Metodo.module.scss";
 
 export const metadata: Metadata = {
@@ -58,7 +59,13 @@ export default function MetodoPage() {
   return (
     <>
       <section className={styles.hero}>
-        <div className={styles.heroScene} aria-hidden="true" />
+        {/* Fluxo de escopo (c2): partículas rosa caóticas passam por trás do texto
+            ([data-fx-mask]) e se organizam em três canais verdes. Pai do canvas = a seção. */}
+        <SiteSceneCanvas
+          kind="scope"
+          className={styles.heroScene}
+          label="Fluxo de escopo — partículas caóticas em rosa que passam por trás do texto e se organizam em três canais verdes"
+        />
         <div className={styles.heroText}>
           <div className={styles.heroEyebrow} data-fx-mask="">
             Como trabalhamos
@@ -92,7 +99,12 @@ export default function MetodoPage() {
       </section>
 
       <section className={`${styles.section} ${styles.split}`}>
-        <div className={styles.sceneFrame} aria-hidden="true" />
+        <div className={styles.sceneFrame}>
+          <SiteSceneCanvas
+            kind="neural"
+            label="Rede neural: o sinal verde vai, a correção rosa volta"
+          />
+        </div>
         <div className={styles.splitText}>
           <div className={styles.eyebrowPink}>Por dentro</div>
           <h2 className={styles.h2}>Como um modelo aprende — e por que alguém confere.</h2>
