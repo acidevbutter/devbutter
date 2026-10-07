@@ -1,0 +1,62 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
+
+.section {
+  @include site.section(86px);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
+
+  @media (max-width: $bp-md) {
+    padding: 56px 16px;
+  }
+}
+
+.eyebrow {
+  @include site.eyebrow;
+}
+
+.h2 {
+  @include site.h2;
+}
+
+.steps {
+  list-style: none;
+  padding: 0;
+  margin: 34px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.step {
+  border-top: 2px solid $db-green;
+  padding-top: 18px;
+}
+
+.tag {
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-green;
+  letter-spacing: 0.1em;
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.body {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: $db-text-secondary;
+  margin: 8px 0 0;
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  min-height: $touch-min;
+  margin-top: 16px;
+  font-size: 14px;
+  @include site.focus-ring;
+}

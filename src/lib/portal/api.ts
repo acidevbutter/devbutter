@@ -28,8 +28,7 @@ export function portalErrorResponse(error: unknown): Response {
     return Response.json({ error: error.detail ?? "portal_api_error" }, { status: error.status });
   }
 
-  console.log(error);
-  console.log("cu");
+  console.error("portal BFF: erro inesperado", error);
   return Response.json({ error: "upstream_failed" }, { status: 502 });
 }
 

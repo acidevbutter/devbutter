@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import NewQuoteModal from "@/components/portal/NewQuoteModal/NewQuoteModal";
+import dynamic from "next/dynamic";
 import { useConcierge } from "./ConciergeProvider";
-import { CONCIERGE_GREETING, CONCIERGE_INTENTS } from "./copy";
 
-export { CONCIERGE_GREETING, CONCIERGE_INTENTS };
+export { CONCIERGE_GREETING, CONCIERGE_INTENTS } from "./copy";
+
+const DiagnosisPanel = dynamic(() => import("@/components/DiagnosisPanel/DiagnosisPanel"), {
+  ssr: false,
+});
 
 /**
  * A CTA that opens the public diagnosis panel. Inside the site layout it opens
@@ -35,15 +38,7 @@ export default function ConciergeCta({
       >
         {children}
       </button>
-      {!concierge && localOpen && (
-        <NewQuoteModal
-          onClose={() => setLocalOpen(false)}
-          mode="public"
-          surface="panel"
-          initialMessage={CONCIERGE_GREETING}
-          openingIntents={CONCIERGE_INTENTS}
-        />
-      )}
+      {!concierge && localOpen && <DiagnosisPanel onClose={() => setLocalOpen(false)} />}
     </>
   );
 }
