@@ -16,7 +16,7 @@ export interface SceneCanvasProps {
 }
 
 /**
- * Canvas scene. WebGL first for `attention` / `neural`, 2D engine as fallback (and always
+ * Canvas scene. WebGL first for `attention` / `neural` / `distill`, 2D engine as fallback (and always
  * for `scope`). Both engines are dynamic imports so they land in their own client chunks
  * and never run on the server.
  */

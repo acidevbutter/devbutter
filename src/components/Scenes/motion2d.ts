@@ -2,7 +2,7 @@
  * DevButter · motion elements (canvas 2D, zero dependencies).
  * Port of docs/design/assets/motion-elements.js — only the sketches the site uses:
  *   attention (prototype #c1, fallback for the 3D scene) · scope (#c2, 2D only) ·
- *   neural (#c4, fallback for the 3D scene).
+ *   neural (#c4, fallback for the 3D scene) · distill (#c7, fallback for the 3D scene).
  * One shared loop that only runs while some mounted canvas is visible and unpaused;
  * 60 fps cap; respects prefers-reduced-motion (single still frame).
  */
@@ -519,6 +519,146 @@ function neural(s: Surface, labelFont: string): Sketch {
   };
 }
 
+/* 07 — distillation: bubbles rise in the flask, pink drops fall from the spout */
+interface FlaskBubble {
+  x: number;
+  y: number;
+  r: number;
+  v: number;
+}
+interface FlaskDrop {
+  x: number;
+  y: number;
+  v: number;
+  /** frames to wait before falling */
+  d: number;
+}
+function distill(s: Surface): Sketch {
+  let bub: FlaskBubble[] = [],
+    dr: FlaskDrop[] = [];
+  const rnd = mulberry32(33);
+  const flask = () => {
+    const cx = s.w / 2,
+      top = s.h * 0.16,
+      bot = s.h * 0.9;
+    return {
+      cx,
+      top,
+      bot,
+      nw: Math.min(26, s.w * 0.05),
+      bw: Math.min(74, s.w * 0.2),
+      liq: bot - (bot - top) * 0.34,
+    };
+  };
+  type Flask = ReturnType<typeof flask>;
+  const nb = (p: FlaskBubble) => {
+    const f = flask();
+    p.x = f.cx + (rnd() - 0.5) * f.bw * 1.5;
+    p.y = f.bot - 4;
+    p.r = 1 + rnd() * 2.1;
+    p.v = 0.35 + rnd() * 0.75;
+  };
+  const nd = (p: FlaskDrop) => {
+    const f = flask();
+    p.x = f.cx + (rnd() - 0.5) * f.nw * 1.1;
+    p.y = f.top + 10;
+    p.v = 0;
+    p.d = rnd() * 120;
+  };
+  const outline = (ctx: CanvasRenderingContext2D, f: Flask) => {
+    const shoulder = f.top + (f.bot - f.top) * 0.3;
+    ctx.beginPath();
+    ctx.moveTo(f.cx - f.nw / 2, f.top);
+    ctx.lineTo(f.cx - f.nw / 2, shoulder);
+    ctx.lineTo(f.cx - f.bw, f.bot);
+    ctx.lineTo(f.cx + f.bw, f.bot);
+    ctx.lineTo(f.cx + f.nw / 2, shoulder);
+    ctx.lineTo(f.cx + f.nw / 2, f.top);
+  };
+  return {
+    onresize() {
+      bub = [];
+      dr = [];
+      for (let i = 0; i < 26; i++) {
+        const b: FlaskBubble = { x: 0, y: 0, r: 0, v: 0 };
+        nb(b);
+        b.y -= rnd() * (s.h * 0.5);
+        bub.push(b);
+      }
+      /* stagger the drops so the resting frame already has one mid-fall */
+      for (let j = 0; j < 5; j++) {
+        const d: FlaskDrop = { x: 0, y: 0, v: 0, d: 0 };
+        nd(d);
+        d.d = j * 26;
+        d.y += rnd() * 20;
+        d.v = rnd() * 0.9;
+        dr.push(d);
+      }
+    },
+    draw() {
+      const ctx = s.ctx,
+        t = s.t,
+        f = flask();
+      ctx.clearRect(0, 0, s.w, s.h);
+      ctx.strokeStyle = rgba(INK_RGB, ".3");
+      ctx.lineWidth = 1.4;
+      outline(ctx, f);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(f.cx - f.nw / 2 - 5, f.top);
+      ctx.lineTo(f.cx + f.nw / 2 + 5, f.top);
+      ctx.stroke();
+      const surf = f.liq + Math.sin(t * 1.1) * 1.6;
+      ctx.save();
+      outline(ctx, f);
+      ctx.closePath();
+      ctx.clip();
+      ctx.fillStyle = rgba(G_RGB, ".13");
+      ctx.fillRect(0, surf, s.w, s.h);
+      ctx.strokeStyle = rgba(G_RGB, ".5");
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, surf);
+      ctx.lineTo(s.w, surf);
+      ctx.stroke();
+      ctx.strokeStyle = rgba(G_RGB, ".55");
+      ctx.lineWidth = 0.9;
+      for (const b of bub) {
+        b.y -= b.v;
+        if (b.y < surf + 2) {
+          nb(b);
+          continue;
+        }
+        ctx.beginPath();
+        ctx.arc(b.x + Math.sin(t * 2 + b.r * 9) * 1.3, b.y, b.r, 0, 6.283);
+        ctx.stroke();
+      }
+      ctx.restore();
+      ctx.fillStyle = PG;
+      for (const d of dr) {
+        if (d.d > 0) {
+          d.d--;
+          continue;
+        }
+        d.v += 0.075;
+        d.y += d.v;
+        ctx.beginPath();
+        ctx.ellipse(d.x, d.y, 1.9, 3.1 + d.v * 0.7, 0, 0, 6.283);
+        ctx.fill();
+        if (d.y > surf - 2) {
+          nd(d);
+          d.d = 40 + rnd() * 120;
+        }
+      }
+      const g = 0.4 + 0.3 * Math.sin(t * 0.9);
+      ctx.fillStyle = rgba(PG_RGB, g.toFixed(2));
+      ctx.beginPath();
+      ctx.arc(f.cx, f.top + 6, 2.2, 0, 6.283);
+      ctx.fill();
+    },
+  };
+}
+
 /* ---------- shared loop ---------- */
 interface Mount {
   s: Surface;
@@ -585,7 +725,9 @@ export function mountMotion2D(
       ? attention(s)
       : kind === "scope"
         ? scope(s, opts?.maskRoot ?? canvas.parentElement)
-        : neural(s, monoFont(canvas));
+        : kind === "distill"
+          ? distill(s)
+          : neural(s, monoFont(canvas));
   const m: Mount = { s, sketch, visible: false, paused: false };
   let destroyed = false;
 

@@ -1,5 +1,5 @@
 /** Which scene a `<SceneCanvas>` renders. `scope` only exists as a 2D sketch. */
-export type SceneKind = "attention" | "scope" | "neural";
+export type SceneKind = "attention" | "scope" | "neural" | "distill";
 
 /** Kinds that have a WebGL version (the rest go straight to the 2D engine). */
 export type Scene3DKind = Exclude<SceneKind, "scope">;

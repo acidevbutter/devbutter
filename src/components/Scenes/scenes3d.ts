@@ -1,7 +1,7 @@
 /*
  * DevButter · 3D scenes (raw WebGL 1, zero dependencies).
  * Port of docs/design/assets/scenes3d.js — only the scenes the site uses:
- *   attention (prototype #c1) · neural (prototype #c4).
+ *   attention (prototype #c1) · neural (prototype #c4) · distill (prototype #c7).
  *
  * Spheres are impostors (one quad, per-pixel normal, real depth); lines are ribbons
  * extruded in screen space. The GL context is created only when the canvas enters the
@@ -220,6 +220,10 @@ interface KitOpts {
 }
 interface Kit {
   gl: WebGLRenderingContext;
+  /** Compile + link a program; attribute i is bound to `attrs[i]`. */
+  prog(vs: string, fs: string, attrs: readonly Attr[]): Program;
+  /** Create a buffer holding `data` (or `data` bytes, uninitialised). */
+  buf(data: BufferSource | number, target?: number, usage?: number): WebGLBuffer;
   cv: HTMLCanvasElement;
   W: number;
   H: number;
@@ -333,6 +337,8 @@ function makeKit(gl: WebGLRenderingContext, cv: HTMLCanvasElement, opts: KitOpts
   const floor = opts.floor ?? null;
   return {
     gl,
+    prog,
+    buf,
     cv,
     W: 1,
     H: 1,
@@ -866,6 +872,337 @@ const NET: SceneDef<NetState> = {
   },
 };
 
+/* 07 · distillation (the flask is the logo) */
+const LATHE_VS = `attribute vec3 aP; attribute vec3 aN; uniform mat4 uVP; varying vec3 vW, vN; void main(){ vW=aP; vN=aN; gl_Position=uVP*vec4(aP,1.0); }`;
+const GLASS_FS = `precision highp float; uniform vec3 uCam, uG; uniform float uSide; varying vec3 vW, vN;
+void main(){
+  vec3 n=normalize(vN); vec3 V=normalize(uCam-vW); float f=dot(n,V);
+  if(f*uSide<0.0) discard;
+  if(f<0.0) n=-n;
+  float nv=abs(f), fr=0.04+0.96*pow(1.0-nv,5.0);
+  vec3 R=reflect(-V,n);
+  vec3 env=vec3(0.015,0.02,0.03);
+  env+=vec3(0.92,0.96,1.0)*smoothstep(0.5,0.95,R.y)*0.9;
+  float az=atan(R.z,R.x);
+  float strip=(1.0-smoothstep(0.0,0.09,abs(az-0.85)))*smoothstep(-0.35,0.15,R.y)*(1.0-smoothstep(0.35,0.75,R.y));
+  env+=vec3(0.85,0.92,1.0)*strip*1.3;
+  float strip2=(1.0-smoothstep(0.0,0.05,abs(az+2.3)))*(1.0-smoothstep(0.1,0.6,abs(R.y)));
+  env+=vec3(1.0,0.45,0.7)*strip2*0.5;
+  env+=uG*0.3*smoothstep(0.2,0.85,-R.y);
+  vec3 col=env*fr*1.25+uG*pow(1.0-nv,3.0)*0.06;
+  float a=clamp(fr*0.9+0.03,0.0,1.0)*0.7;
+  gl_FragColor=vec4(col,a);
+}`;
+const LIQ_FS = `precision highp float; uniform vec3 uCam, uG; varying vec3 vW, vN;
+void main(){
+  vec3 n=normalize(vN); vec3 V=normalize(uCam-vW); float f=dot(n,V); if(f<0.0) discard;
+  float h=clamp((vW.y+1.3)/1.0,0.0,1.0);
+  vec3 col=uG*(0.10+0.5*pow(f,1.6))*(1.2-0.5*h)+uG*pow(1.0-f,4.0)*0.35;
+  col=1.0-exp(-col*1.3);
+  float a=0.5+0.3*f;
+  gl_FragColor=vec4(col*a,a);
+}`;
+const SURF_VS = `attribute vec2 aP; uniform mat4 uVP; uniform float uY, uRad, uT; uniform vec4 uR0, uR1, uR2;
+varying vec3 vW, vN; varying float vR;
+float rip(vec2 p, vec4 r){ float age=uT-r.z; if(age<0.0||age>2.6) return 0.0; float d=length(p-r.xy); return r.w*exp(-age*1.6)*exp(-pow((d-age*0.32)/0.11,2.0))*sin(d*22.0-age*7.0); }
+float hgt(vec2 p){ return rip(p,uR0)+rip(p,uR1)+rip(p,uR2)+0.0045*sin(p.x*7.0+uT*1.3)*sin(p.y*6.0-uT*1.1); }
+void main(){ vec2 p=aP*uRad; float h=hgt(p), e=0.01; vec2 g=vec2(hgt(p+vec2(e,0.0))-h,hgt(p+vec2(0.0,e))-h)/e;
+  vN=normalize(vec3(-g.x,1.0,-g.y)); vR=length(aP); vW=vec3(p.x,uY+h*(1.0-vR*vR),p.y); gl_Position=uVP*vec4(vW,1.0); }`;
+const SURF_FS = `precision highp float; uniform vec3 uCam, uG; varying vec3 vW, vN; varying float vR;
+void main(){ vec3 n=normalize(vN); vec3 V=normalize(uCam-vW); float nv=max(dot(n,V),0.0); vec3 R=reflect(-V,n);
+  float fr=0.03+0.97*pow(1.0-nv,5.0);
+  vec3 env=vec3(0.92,0.96,1.0)*smoothstep(0.55,0.97,R.y)+vec3(1.0,0.45,0.7)*0.2*smoothstep(0.3,0.9,R.x);
+  vec3 col=uG*0.36+env*fr*0.95+uG*smoothstep(0.82,1.0,vR)*0.4;
+  col=1.0-exp(-col*1.3);
+  gl_FragColor=vec4(col*0.85,0.85); }`;
+const LATHE_ATTRS: readonly Attr[] = [["aP", 3], ["aN", 3]];
+const BUBBLE_BODY: Vec3 = [0.05, 0.14, 0.09]; // deep green glass
+const DROP_BODY: Vec3 = [0.5, 0.12, 0.28]; // deep pink glass
+
+interface MeshData {
+  v: Float32Array<ArrayBuffer>;
+  i: Uint16Array<ArrayBuffer>;
+}
+
+/** Surface of revolution of a 2D profile ([radius, y] pairs) around the Y axis: interleaved pos+normal. */
+function lathe(profile: readonly [number, number][], segs: number): MeshData {
+  const P = profile,
+    n = P.length,
+    pos: number[] = [],
+    nor: number[] = [],
+    idx: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = P[Math.max(0, i - 1)],
+      b = P[Math.min(n - 1, i + 1)];
+    let tx = b[0] - a[0],
+      ty = b[1] - a[1];
+    const l = Math.hypot(tx, ty) || 1;
+    tx /= l;
+    ty /= l;
+    const nr = ty,
+      ny = -tx;
+    for (let j = 0; j <= segs; j++) {
+      const th = (j / segs) * Math.PI * 2,
+        c = Math.cos(th),
+        s = Math.sin(th);
+      pos.push(P[i][0] * c, P[i][1], P[i][0] * s);
+      nor.push(nr * c, ny, nr * s);
+    }
+  }
+  for (let i = 0; i < n - 1; i++)
+    for (let j = 0; j < segs; j++) {
+      const a = i * (segs + 1) + j,
+        b = a + segs + 1;
+      idx.push(a, b, a + 1, b, b + 1, a + 1);
+    }
+  const nv = pos.length / 3,
+    v = new Float32Array(nv * 6);
+  for (let i = 0; i < nv; i++) {
+    v.set(pos.slice(i * 3, i * 3 + 3), i * 6);
+    v.set(nor.slice(i * 3, i * 3 + 3), i * 6 + 3);
+  }
+  return { v, i: new Uint16Array(idx) };
+}
+
+interface Mesh {
+  b: WebGLBuffer;
+  x: WebGLBuffer;
+  n: number;
+}
+interface Bubble {
+  x: number;
+  y: number;
+  z: number;
+  r: number;
+  v: number;
+  ph: number;
+}
+interface Drop {
+  x: number;
+  y: number;
+  z: number;
+  v: number;
+  /** grow-in progress at the spout, 0 → 1, before it falls */
+  g: number;
+  wait: number;
+}
+type Ripple = [x: number, z: number, t0: number, amp: number];
+interface FlaskState {
+  /** liquid surface height and its radius (the flask wall at that height) */
+  yf: number;
+  rf: number;
+  pLathe: Program;
+  pLiq: Program;
+  pSurf: Program;
+  glass: Mesh;
+  liquid: Mesh;
+  surf: Mesh;
+  rnd: () => number;
+  bub: Bubble[];
+  drops: Drop[];
+  rips: [Ripple, Ripple, Ripple];
+  ri: number;
+}
+function flaskBubble(st: FlaskState, b: Bubble, anywhere: boolean): void {
+  const rnd = st.rnd,
+    y = anywhere ? -1.2 + rnd() * 0.85 : -1.2;
+  const rm = (y < -1.12 ? 0.92 : 1.015 - 0.4228 * (y + 1.09)) - 0.1,
+    a = rnd() * 6.283,
+    rr = Math.sqrt(rnd()) * rm;
+  b.x = Math.cos(a) * rr;
+  b.z = Math.sin(a) * rr;
+  b.y = y;
+  b.r = 0.018 + rnd() * 0.035;
+  b.v = 0.18 + rnd() * 0.32;
+  b.ph = rnd() * 6.28;
+}
+function flaskDrop(st: FlaskState, d: Drop, k: number): void {
+  const rnd = st.rnd,
+    a = rnd() * 6.283;
+  d.x = Math.cos(a) * 0.22;
+  d.z = Math.sin(a) * 0.22;
+  d.y = 1.34;
+  d.v = 0;
+  d.g = 0;
+  d.wait = k * 0.9 + rnd() * 1.5;
+}
+function flaskRipple(S: Kit, st: FlaskState, x: number, z: number, amp: number): void {
+  st.rips[st.ri] = [x, z, S.t, amp];
+  st.ri = (st.ri + 1) % 3;
+}
+function drawMesh(S: Kit, pr: Program, mesh: Mesh): Uniforms {
+  const gl = S.gl,
+    u = S.bind(pr, mesh.b);
+  gl.uniformMatrix4fv(u.uVP, false, S.VP);
+  gl.uniform3fv(u.uCam, S.eye);
+  gl.uniform3fv(u.uG, G);
+  return u;
+}
+const FLASK: SceneDef<FlaskState> = {
+  opts: {
+    fov: 30,
+    floor: { y: -1.302, size: 5.5, cell: 0.6, grid: 0.02, spec: 70, l0: 0.35, l1: 1.2 },
+    maxBalls: 48,
+    maxSegs: 24,
+    maxGlows: 24,
+  },
+  init(S) {
+    const gl = S.gl,
+      low = getEnv().low;
+    const outer: [number, number][] = [
+      [0, -1.3], [0.6, -1.3], [0.86, -1.295], [0.95, -1.28], [1.01, -1.25], [1.045, -1.2], [1.06, -1.14], [1.05, -1.09],
+      [0.42, 0.4], [0.35, 0.52], [0.3, 0.62], [0.28, 0.72], [0.28, 1.38], [0.3, 1.42], [0.33, 1.455], [0.335, 1.5],
+      [0.318, 1.53], [0.29, 1.535],
+    ];
+    const yf = -0.3,
+      rf = 1.015 - 0.4228 * (yf + 1.09);
+    const inner: [number, number][] = [
+      [0, -1.265], [0.6, -1.265], [0.84, -1.26], [0.93, -1.245], [0.985, -1.215], [1.015, -1.17], [1.022, -1.12],
+      [1.015, -1.09], [rf, yf],
+    ];
+    const go = lathe(outer, low ? 48 : 72),
+      li = lathe(inner, low ? 40 : 56);
+    const mesh = (m: MeshData): Mesh => ({
+      b: S.buf(m.v),
+      x: S.buf(m.i, gl.ELEMENT_ARRAY_BUFFER),
+      n: m.i.length,
+    });
+    /* liquid surface: a unit disc of RG rings × SG sectors, displaced in the vertex shader */
+    const RG = 22,
+      SG = 48,
+      dv = [0, 0],
+      di: number[] = [];
+    for (let r = 1; r <= RG; r++)
+      for (let s = 0; s < SG; s++) {
+        const a = (s / SG) * Math.PI * 2;
+        dv.push(Math.cos(a) * (r / RG), Math.sin(a) * (r / RG));
+      }
+    for (let s = 0; s < SG; s++) di.push(0, 1 + s, 1 + ((s + 1) % SG));
+    for (let r = 1; r < RG; r++)
+      for (let s = 0; s < SG; s++) {
+        const a = 1 + (r - 1) * SG + s,
+          b = 1 + (r - 1) * SG + ((s + 1) % SG),
+          c = a + SG,
+          d = b + SG;
+        di.push(a, c, b, b, c, d);
+      }
+    const off: Ripple = [0, 0, -9, 0];
+    const st: FlaskState = {
+      yf,
+      rf,
+      pLathe: S.prog(LATHE_VS, GLASS_FS, LATHE_ATTRS),
+      pLiq: S.prog(LATHE_VS, LIQ_FS, LATHE_ATTRS),
+      pSurf: S.prog(SURF_VS, SURF_FS, [["aP", 2]]),
+      glass: mesh(go),
+      liquid: mesh(li),
+      surf: mesh({ v: new Float32Array(dv), i: new Uint16Array(di) }),
+      rnd: mulberry(33),
+      bub: [],
+      drops: [],
+      rips: [[...off], [...off], [...off]],
+      ri: 0,
+    };
+    for (let i = 0; i < (low ? 16 : 26); i++) {
+      const b: Bubble = { x: 0, y: 0, z: 0, r: 0, v: 0, ph: 0 };
+      flaskBubble(st, b, true);
+      st.bub.push(b);
+    }
+    for (let i = 0; i < 4; i++) {
+      const d: Drop = { x: 0, y: 0, z: 0, v: 0, g: 0, wait: 0 };
+      flaskDrop(st, d, i);
+      st.drops.push(d);
+    }
+    S.amb = [0.06, 0.08, 0.08];
+    S.rim = [0.6, 0.95, 0.75];
+    S.L[0] = { p: [-4, 5, 5], c: [0.85, 0.9, 1], k: 0.002 };
+    S.L[1] = { p: [0, -0.75, 0], c: scale3(G, 0.9), k: 0.8 };
+    return st;
+  },
+  frame(S, st, dt) {
+    const gl = S.gl,
+      reduce = getEnv().reduce,
+      t = S.t,
+      yaw = 0.35 + t * 0.12,
+      el = 0.2,
+      dist = Math.max(7.0, fit(S, 5.2, 1.8)),
+      tg: Vec3 = [0, 0.08, 0];
+    look(S, [Math.sin(yaw) * Math.cos(el) * dist, tg[1] + Math.sin(el) * dist, Math.cos(yaw) * Math.cos(el) * dist], tg);
+    shadow(S, 0, 0, 1.75, 0.7);
+    const sy = st.yf;
+    for (const b of st.bub) {
+      if (!reduce) {
+        b.v += dt * 0.12;
+        b.y += b.v * dt;
+        b.ph += dt * 5;
+      }
+      const wx = b.x + Math.sin(b.ph) * 0.012,
+        wz = b.z + Math.cos(b.ph * 0.8) * 0.012;
+      if (b.y > sy - b.r) {
+        if (b.r > 0.04) flaskRipple(S, st, wx, wz, 0.012);
+        flaskBubble(st, b, false);
+        continue;
+      }
+      ball(S, wx, b.y, wz, b.r, BUBBLE_BODY, scale3(G, 0.18), 1);
+    }
+    begin(S);
+    drawFloor(S);
+    /* back faces of the glass, then bubbles, liquid body and its rippling surface */
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthMask(false);
+    let u = drawMesh(S, st.pLathe, st.glass);
+    gl.uniform1f(u.uSide, -1);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, st.glass.x);
+    gl.drawElements(gl.TRIANGLES, st.glass.n, gl.UNSIGNED_SHORT, 0);
+    drawBalls(S);
+    gl.depthMask(false);
+    drawMesh(S, st.pLiq, st.liquid);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, st.liquid.x);
+    gl.drawElements(gl.TRIANGLES, st.liquid.n, gl.UNSIGNED_SHORT, 0);
+    u = drawMesh(S, st.pSurf, st.surf);
+    gl.uniform1f(u.uY, sy);
+    gl.uniform1f(u.uRad, st.rf);
+    gl.uniform1f(u.uT, t);
+    gl.uniform4fv(u.uR0, st.rips[0]);
+    gl.uniform4fv(u.uR1, st.rips[1]);
+    gl.uniform4fv(u.uR2, st.rips[2]);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, st.surf.x);
+    gl.drawElements(gl.TRIANGLES, st.surf.n, gl.UNSIGNED_SHORT, 0);
+    /* pink drops form at the spout, fall and ripple the surface */
+    for (const d of st.drops) {
+      if (!reduce) {
+        if (d.wait > 0) {
+          d.wait -= dt;
+          continue;
+        }
+        if (d.g < 1) d.g = Math.min(1, d.g + dt * 0.7);
+        else {
+          d.v += 3.4 * dt;
+          d.y -= d.v * dt;
+        }
+      } else if (d.wait > 0) continue;
+      if (d.y <= sy + 0.02) {
+        flaskRipple(S, st, d.x, d.z, 0.03);
+        flaskDrop(st, d, 0);
+        continue;
+      }
+      const r = 0.012 + 0.026 * d.g;
+      ball(S, d.x, d.y, d.z, r, DROP_BODY, scale3(PG, 0.7), 1);
+      if (d.v > 0.4) seg(S, [d.x, d.y + r, d.z], [d.x, d.y + r + Math.min(0.3, d.v * 0.06), d.z], PG, 0.35, 0.8);
+    }
+    drawBalls(S);
+    drawSegs(S);
+    /* front faces of the glass over everything */
+    gl.depthMask(false);
+    u = drawMesh(S, st.pLathe, st.glass);
+    gl.uniform1f(u.uSide, 1);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, st.glass.x);
+    gl.drawElements(gl.TRIANGLES, st.glass.n, gl.UNSIGNED_SHORT, 0);
+    glow(S, 0, 1.56, 0, 0.35, PG, 0.35 + 0.2 * Math.sin(t * 0.9));
+    glow(S, 0, -0.75, 0, 1.6, GG, 0.08);
+    drawGlows(S);
+  },
+};
+
 /* ---------- scheduler: one loop for every mounted scene ---------- */
 interface Mount {
   /** Has a kit and should be advanced by the loop when visible and not paused. */
@@ -1127,5 +1464,12 @@ export function mountScene3D(
   onFail?: () => void,
 ): SceneApi | null {
   if (typeof window === "undefined" || typeof IntersectionObserver === "undefined" || !hasWebGL()) return null;
-  return kind === "attention" ? mountWith(canvas, ATT, onFail) : mountWith(canvas, NET, onFail);
+  switch (kind) {
+    case "attention":
+      return mountWith(canvas, ATT, onFail);
+    case "neural":
+      return mountWith(canvas, NET, onFail);
+    case "distill":
+      return mountWith(canvas, FLASK, onFail);
+  }
 }

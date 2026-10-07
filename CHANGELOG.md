@@ -24,6 +24,10 @@
     mais tokens no JSON.
   - Tokens/mixins do site em `_tokens.scss`/`_site.scss` (keyframes por
     módulo), metadata pt-BR por página.
+  - `/manutencao`: cena c7 "destilação" (`SceneCanvas kind="distill"`, WebGL
+    com fallback 2D) no lugar de Flask3D/FlaskSvg; keyframes do módulo locais
+    (#53). Removidos Flask3D, `useMediaQuery`, `three`, `@react-three/fiber` e
+    `@types/three`.
   - Corrigidos: #32, #60, #61, #62, #63, #64, #65, #66, #67, #68.
   - Lighthouse mobile da home (prod): performance 96 → 98, peso total
     498 KB → 261 KB.
