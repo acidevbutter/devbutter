@@ -93,7 +93,7 @@ const RECEBIMENTOS_PATH = "/portal/recebimentos";
 // is the defensive list for anything the matcher still lets through.
 function isGateExemptPortalPath(pathname: string): boolean {
   if (pathname === RECEBIMENTOS_PATH || pathname.startsWith(`${RECEBIMENTOS_PATH}/`)) return true;
-  return /^\/portal\/(login|signup|sessao-expirada|acesso-negado|senha)(\/|$)/.test(pathname);
+  return /^\/portal\/(login|signup|sessao-expirada|acesso-negado|senha|recuperar-senha)(\/|$)/.test(pathname);
 }
 
 // The onboarding gate (portal-recebimentos-onboarding.md §2): while
@@ -183,6 +183,8 @@ export const config = {
     "/portal",
     // sessao-expirada / acesso-negado are the unauthenticated fallbacks the
     // portal redirects *to*, so they must stay reachable without a session.
-    "/portal/((?!login|signup|sessao-expirada|acesso-negado).*)",
+    // senha / recuperar-senha are opened from e-mail links by visitors who
+    // aren't logged in yet (issues #60, #61).
+    "/portal/((?!login|signup|sessao-expirada|acesso-negado|senha|recuperar-senha).*)",
   ],
 };
