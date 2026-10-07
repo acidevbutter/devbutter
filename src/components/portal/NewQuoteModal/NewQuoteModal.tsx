@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Logomark from "@/components/icons/Logomark";
-import type { DiagnosisPreview, DraftQuoteOverrides, NextStep, ProductOption } from "./types";
+import type { DiagnosisPreview, NextStep, ProductOption } from "./types";
 import useDiagnosisConversation from "./useDiagnosisConversation";
 import styles from "./NewQuoteModal.module.scss";
 
@@ -68,29 +68,12 @@ function dossierChecks(preview: DiagnosisPreview | null): boolean[] {
   ];
 }
 
-export default function NewQuoteModal({
-  onClose,
-  initialMessage = INITIAL_AI_MESSAGE,
-  mode = "public",
-  surface = "panel",
-  openingIntents,
-}: {
-  onClose?: () => void;
-  initialMessage?: string;
-  /** "public": anonymous visitor -- shows the 1e contact/password step before
-   * confirming. "portal": already-logged-in client -- skips straight to
-   * confirm, matching canvas screen 1g ("sem passo de cadastro"). */
-  mode?: "public" | "portal";
-  /** "panel": público -- painel de coluna única ancorado à direita sobre o site
-   * (canvas 1b), minimizável, sem arrastar. "workspace": portal -- overlay de
-   * duas colunas (dossiê ao vivo à esquerda + chat à direita, canvas 2a),
-   * minimizável, sem arrastar. */
-  surface?: "panel" | "workspace";
-  /** Hardcoded quick-start options shown under the very first AI message,
-   * before any turn (canvas 1b chips). Tapping one sends it as the first
-   * message. */
-  openingIntents?: string[];
-}) {
+/** The portal's "novo orçamento" workspace for an already-logged-in client:
+ * a two-column overlay (live dossiê on the left + chat on the right, canvas
+ * 2a), minimizable, not draggable. No sign-up step -- confirming goes straight
+ * to draft-quote (canvas 1g, "sem passo de cadastro"). The public site renders
+ * the same conversation with `DiagnosisPanel`. */
+export default function NewQuoteModal({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   // Rendered through a portal on <body> so an ancestor with backdrop-filter (the
   // sticky nav) can't become the containing block for the fixed-position overlay.
@@ -103,27 +86,12 @@ export default function NewQuoteModal({
   const [draft, setDraft] = useState("");
   const [forceComposer, setForceComposer] = useState(false);
   const [minimized, setMinimized] = useState(false);
-  const [contactName, setContactName] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactPassword, setContactPassword] = useState("");
-  // Canvas 1e "empresa": prefilled from the chat's detected company until the
-  // visitor edits it -- tracked as touched rather than seeded via an effect.
-  const [contactCompany, setContactCompany] = useState("");
-  const [companyTouched, setCompanyTouched] = useState(false);
-  const [noCompany, setNoCompany] = useState(false);
-  // Canvas 1e: required consent before "Criar conta e enviar cotação".
-  const [consent, setConsent] = useState(false);
   // Canvas 1f: "enviado dd/mm · HH:MM" on the confirmation card. Captured at
   // confirm time (the backend doesn't return a timestamp today).
   const [confirmedAtLabel, setConfirmedAtLabel] = useState<string | null>(null);
-  // Overlay entrance: panel slides from the right (canvas 1b "entra da direita
-  // 240ms"); workspace fades + lifts. Cleared once the animation is done.
+  // Overlay entrance: the workspace fades + lifts. Cleared once the animation
+  // is done.
   const [entering, setEntering] = useState(true);
-  // "hoje · HH:MM" divider at the top of the thread (panel surface). Rendered
-  // only after `hydrated`, so the server/first-paint markup omits it and there
-  // is no time-based hydration mismatch.
-  const [startedAtLabel] = useState(() => `hoje · ${hhmm()}`);
   // Checkbox state for a multi-select in-chat next_step (canvas screen 3),
   // reset every turn.
   const [checkedOptionIds, setCheckedOptionIds] = useState<string[]>([]);
@@ -145,7 +113,7 @@ export default function NewQuoteModal({
   // Canvas 2a: each dossiê block keeps the "aterrissou às HH:MM" stamp from the
   // first render it had content. butter_mind recomputes the profile every turn
   // with no memory of when a field filled, so the stamp is client-side.
-  const dossierStamps = useRef<Map<string, string>>(new Map());
+  const [dossierStamps, setDossierStamps] = useState<Record<string, string>>({});
   // Canvas 2a chat column: the "N blocos foram pro dossiê" causality pill with
   // the fly particle. Set after a turn grows the dossiê; cleared on a timer.
   const [landed, setLanded] = useState(0);
@@ -160,7 +128,6 @@ export default function NewQuoteModal({
     confirming,
     confirmedQuote,
     error,
-    setError,
     send: sendText,
     sendOption: sendOptionTurn,
     retry,
@@ -169,19 +136,38 @@ export default function NewQuoteModal({
     confirm,
     clearConfirmed,
   } = useDiagnosisConversation({
-    initialMessage,
+    initialMessage: INITIAL_AI_MESSAGE,
     // Canvas 2a: count how many dossiê blocks just filled, to pulse the
     // "N blocos foram pro dossiê" pill + fly particle in the chat column.
     onTurn: (next: DiagnosisPreview | null, resumed: boolean) => {
       const now = dossierChecks(next).filter(Boolean).length;
       const grew = now - prevChecksRef.current;
       prevChecksRef.current = now;
-      if (!resumed && grew > 0 && surface === "workspace") {
+      if (!resumed && grew > 0) {
         setLanded(grew);
         window.setTimeout(() => setLanded(0), 2600);
       }
     },
   });
+
+  // Stamp newly filled dossiê blocks while rendering (React's "adjust state
+  // when a prop changes" pattern): ids as passed to blockHead in renderDossier.
+  const stampChecks = dossierChecks(preview);
+  const unstamped = Object.entries({
+    problema: stampChecks[0],
+    numeros: stampChecks[2],
+    escopo: stampChecks[4],
+    prazo: readyToSubmit && stampChecks[5],
+  })
+    .filter(([id, has]) => has && !dossierStamps[id])
+    .map(([id]) => id);
+  if (unstamped.length > 0) {
+    const at = hhmm();
+    setDossierStamps((cur) => ({
+      ...cur,
+      ...Object.fromEntries(unstamped.map((id) => [id, at])),
+    }));
+  }
 
   useEffect(() => {
     if (!entering) return;
@@ -192,7 +178,7 @@ export default function NewQuoteModal({
   // Esc closes, keeping the draft (canvas 1b: "Esc fecha e guarda o rascunho").
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && !minimized) closeOrHome();
+      if (e.key === "Escape" && !minimized) onClose();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -247,8 +233,7 @@ export default function NewQuoteModal({
       ? [reviewTimeline, ...timelineCatalog]
       : timelineCatalog;
 
-  const showContactStep = readyToSubmit && !forceComposer && mode === "public";
-  const showReadyPanel = readyToSubmit && !forceComposer && mode === "portal";
+  const showReadyPanel = readyToSubmit && !forceComposer;
   const showComposer = !readyToSubmit || forceComposer;
 
   // True when a tappable-options block is up (next_step pills, ADR-0004 option
@@ -271,7 +256,7 @@ export default function NewQuoteModal({
     messages[messages.length - 1]?.role === "ai" &&
     messages[messages.length - 1]?.content === "";
 
-  // Canvas 1b: "foco automático no textarea" once the panel has finished entering.
+  // "foco automático no textarea" once the workspace has finished entering.
   useEffect(() => {
     if (showComposer && !entering && !minimized) textareaRef.current?.focus();
   }, [showComposer, entering, minimized]);
@@ -348,53 +333,16 @@ export default function NewQuoteModal({
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} · ${hhmm(d)}`;
   }
 
-  async function handleConfirm(overrides?: DraftQuoteOverrides) {
-    const quote = await confirm({ ...reviewOverrides(), ...(overrides ?? {}) });
+  async function handleConfirm() {
+    const quote = await confirm(reviewOverrides());
     if (!quote) return;
     setConfirmedAtLabel(stamp(new Date()));
     if (quote.tokens) router.refresh();
   }
 
-  const detectedLegalEntity = preview?.business_profile?.is_legal_entity === true;
-  const showCompanyField = detectedLegalEntity && !noCompany;
-  const companyValue = companyTouched
-    ? contactCompany
-    : preview?.business_profile?.company_name ?? "";
-
-  function handleContactSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!contactName.trim()) {
-      setError("informe seu nome pra montar a cotação.");
-      return;
-    }
-    if (!contactEmail.trim()) {
-      setError("informe um e-mail pra receber a cotação.");
-      return;
-    }
-    if (!consent) {
-      setError("confirme a autorização de contato pra enviar a cotação.");
-      return;
-    }
-    handleConfirm({
-      email: contactEmail.trim(),
-      phone: contactPhone.trim() || undefined,
-      password: contactPassword.trim() || undefined,
-      contact_name: contactName.trim(),
-      // "" is meaningful: the visitor said "não tenho empresa" -> clear it.
-      ...(detectedLegalEntity
-        ? { contact_company: noCompany ? "" : companyValue.trim() }
-        : {}),
-    });
-  }
-
   function goToQuotes() {
-    onClose?.();
+    onClose();
     router.push("/portal/orcamentos");
-  }
-
-  function closeOrHome() {
-    if (onClose) onClose();
-    else router.push("/");
   }
 
   /** From the confirmation card: drop back into the same thread (same
@@ -406,35 +354,6 @@ export default function NewQuoteModal({
   function keepChatting() {
     clearConfirmed();
     setForceComposer(true);
-  }
-
-  /** Canvas 1b: quick-start pills under the first AI message, before any turn. */
-  function renderOpeningIntents() {
-    if (
-      !openingIntents ||
-      openingIntents.length === 0 ||
-      preview?.next_step ||
-      sending ||
-      messages.length !== 1 ||
-      messages[0].role !== "ai"
-    ) {
-      return null;
-    }
-    return (
-      <div className={styles.optionsPills} role="group" aria-label="Sugestões para começar">
-        {openingIntents.map((intent) => (
-          <button
-            key={intent}
-            type="button"
-            className={styles.optionPill}
-            disabled={sending || !hydrated}
-            onClick={() => send(intent)}
-          >
-            {intent}
-          </button>
-        ))}
-      </div>
-    );
   }
 
   /** Canvas screen 3: the concierge's tappable options for the current
@@ -578,7 +497,7 @@ export default function NewQuoteModal({
   }
 
   /** Canvas 1d-1e: editable checkbox group of solution kinds + timeline
-   * radios shown on the review/contact step, seeded from the preview.
+   * radios shown on the review step, seeded from the preview.
    * Budget is no longer an editable review field (ADR-0007: budget_ceiling
    * is an optional constraint, never a question posed to the visitor). */
   function renderReviewFields() {
@@ -678,65 +597,6 @@ export default function NewQuoteModal({
     );
   }
 
-  /** Canvas 1c: the captured-info chip row under the thread while qualifying
-   * (public panel only — the portal workspace shows the full dossiê instead). */
-  function renderCaptureChips() {
-    const bp = preview?.business_profile;
-    if (!bp || mode !== "public") return null;
-    const chips: React.ReactNode[] = [];
-    if (bp.company_name) {
-      chips.push(
-        <span key="empresa" className={styles.captureChip}>
-          empresa: {bp.company_name} <span className={styles.captureEdit} aria-hidden>✎</span>
-        </span>
-      );
-    } else if (bp.is_legal_entity === true) {
-      chips.push(
-        <span key="empresa" className={styles.captureChipMissing}>
-          empresa: falta
-        </span>
-      );
-    }
-    if (bp.segment) {
-      chips.push(
-        <span key="segmento" className={styles.captureChip}>
-          segmento: {bp.segment}
-        </span>
-      );
-    }
-    if (bp.city) {
-      chips.push(
-        <span key="cidade" className={styles.captureChip}>
-          cidade: {bp.city}
-        </span>
-      );
-    }
-    if (bp.volume) {
-      chips.push(
-        <span key="volume" className={styles.captureChip}>
-          volume: {bp.volume} <span className={styles.captureEdit} aria-hidden>✎</span>
-        </span>
-      );
-    }
-    for (const m of bp.metrics ?? []) {
-      chips.push(
-        <span key={`m-${m.label}`} className={styles.captureChip}>
-          {m.label}: {m.value}
-        </span>
-      );
-    }
-    chips.push(
-      <span
-        key="contato"
-        className={bp.contact_ready ? styles.captureChip : styles.captureChipMissing}
-      >
-        contato: {bp.contact_ready ? "ok" : "falta"}
-      </span>
-    );
-    if (chips.length === 0) return null;
-    return <div className={styles.captureChips}>{chips}</div>;
-  }
-
   /** Canvas screen 2a: the live dossiê that assembles on the left of the portal
    * workspace as the conversation progresses. Blocks land with `rowIn`; the
    * live "números do negócio" card sweeps; prazo stays skeleton-locked
@@ -758,11 +618,8 @@ export default function NewQuoteModal({
     const CIRC = 201; // 2·π·r, r = 32
     const dashOffset = CIRC - (CIRC * answered) / total;
 
-    const stampFor = (id: string, has: boolean): string | null => {
-      if (!has) return null;
-      if (!dossierStamps.current.has(id)) dossierStamps.current.set(id, hhmm());
-      return dossierStamps.current.get(id) ?? null;
-    };
+    const stampFor = (id: string, has: boolean): string | null =>
+      has ? dossierStamps[id] ?? null : null;
 
     const blockHead = (id: string, label: string, ok: boolean, extra?: React.ReactNode) => (
       <div className={styles.dossierBlockHead}>
@@ -932,47 +789,27 @@ export default function NewQuoteModal({
 
   if (!portalReady) return null;
 
-  /** Wraps the chat column in the right shell for this surface and portals it
-   * onto <body>. `workspace` adds the live dossiê as a second column. */
-  const shell = (children: React.ReactNode) => {
-    if (surface === "workspace") {
-      return createPortal(
-        <div
-          className={`${styles.scrim} ${entering ? styles.scrimEnter : ""}`}
-          onClick={closeOrHome}
-        >
-          <div
-            className={`${styles.workspace} ${entering ? styles.workspaceEnter : ""}`}
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Novo orçamento com a IA"
-          >
-            <aside className={styles.dossier}>{renderDossier()}</aside>
-            <div className={styles.chatCol}>{children}</div>
-          </div>
-        </div>,
-        document.body
-      );
-    }
-    return createPortal(
+  /** Wraps the chat column in the two-column workspace (live dossiê on the
+   * left) and portals it onto <body>. */
+  const shell = (children: React.ReactNode) =>
+    createPortal(
       <div
-        className={`${styles.scrim} ${styles.scrimPanel} ${entering ? styles.scrimEnter : ""}`}
-        onClick={closeOrHome}
+        className={`${styles.scrim} ${entering ? styles.scrimEnter : ""}`}
+        onClick={onClose}
       >
         <div
-          className={`${styles.panel} ${entering ? styles.panelEnter : ""}`}
+          className={`${styles.workspace} ${entering ? styles.workspaceEnter : ""}`}
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
-          aria-label="Falar com a IA da DevButter"
+          aria-label="Novo orçamento com a IA"
         >
-          {children}
+          <aside className={styles.dossier}>{renderDossier()}</aside>
+          <div className={styles.chatCol}>{children}</div>
         </div>
       </div>,
       document.body
     );
-  };
 
   if (confirmedQuote) {
     return shell(
@@ -983,11 +820,7 @@ export default function NewQuoteModal({
           <p className={styles.confirmText}>
             {confirmedQuote.pending_account_link
               ? "Esse e-mail já é de um cliente nosso — avisamos o dono da conta pra conferir o pedido."
-              : `${
-                  contactEmail.trim()
-                    ? `Confirmação enviada para ${contactEmail.trim()}. `
-                    : ""
-                }O time da DevButter revisa o escopo e manda a proposta com valor — normalmente em até 1 dia útil.`}
+              : "O time da DevButter revisa o escopo e manda a proposta com valor — normalmente em até 1 dia útil."}
           </p>
         </div>
         <div className={styles.confirmCard}>
@@ -1016,9 +849,7 @@ export default function NewQuoteModal({
           <span className={styles.altContactSep} aria-hidden>
             ·
           </span>
-          <span onClick={closeOrHome}>
-            {mode === "portal" ? "Preciso pedir outra coisa" : "Voltar para a home"}
-          </span>
+          <span onClick={onClose}>Preciso pedir outra coisa</span>
         </div>
       </div>
     );
@@ -1035,11 +866,7 @@ export default function NewQuoteModal({
     );
   }
 
-  const headStatus = sending
-    ? "digitando…"
-    : surface === "workspace"
-      ? "online · novo orçamento"
-      : "online · responde na hora";
+  const headStatus = sending ? "digitando…" : "online · novo orçamento";
 
   return shell(
     <>
@@ -1077,7 +904,7 @@ export default function NewQuoteModal({
           <button
             type="button"
             className={styles.close}
-            onClick={closeOrHome}
+            onClick={onClose}
             aria-label="Fechar"
           >
             ✕
@@ -1090,9 +917,6 @@ export default function NewQuoteModal({
         className={`${styles.scrollRegion} ${composerHidden ? styles.scrollFrozen : ""}`}
       >
       <div className={styles.thread}>
-        {surface === "panel" && hydrated && (
-          <div className={styles.dateDivider}>{startedAtLabel}</div>
-        )}
         {messages.map((m, i) => {
           if (m.content === "") return null;
           if (m.status === "failed") {
@@ -1142,8 +966,6 @@ export default function NewQuoteModal({
 
       {showComposer ? (
         <>
-          {renderCaptureChips()}
-          {renderOpeningIntents()}
           {renderOptions()}
           {renderOptionCards()}
           {renderCollectingForm()}
@@ -1156,173 +978,39 @@ export default function NewQuoteModal({
               escrever resposta
             </button>
           ) : (
-            <>
-              <div className={styles.composer}>
-                <div className={styles.composerRow}>
-                  <textarea
-                    ref={textareaRef}
-                    className={styles.textarea}
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    placeholder={
-                      preview?.next_step
-                        ? "…ou escreva a sua resposta"
-                        : "conta o que você precisa…"
+            <div className={styles.composer}>
+              <div className={styles.composerRow}>
+                <textarea
+                  ref={textareaRef}
+                  className={styles.textarea}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder={
+                    preview?.next_step
+                      ? "…ou escreva a sua resposta"
+                      : "conta o que você precisa…"
+                  }
+                  disabled={sending || !hydrated}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      send();
                     }
-                    disabled={sending || !hydrated}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        send();
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className={styles.send}
-                    onClick={() => send()}
-                    disabled={!draft.trim() || sending || !hydrated}
-                    aria-label="Enviar"
-                  >
-                    {sending ? "…" : "↑"}
-                  </button>
-                </div>
-              </div>
-              {surface === "panel" && (
-                <div className={styles.composerHint}>
-                  enter envia · shift+enter quebra linha · sem cadastro pra conversar
-                </div>
-              )}
-            </>
-          )}
-        </>
-      ) : showContactStep ? (
-        <form className={styles.contactForm} onSubmit={handleContactSubmit}>
-          {renderPreview()}
-          {renderReviewFields()}
-          <div className={styles.contactField}>
-            <div className={styles.contactFieldLabel}>
-              seu nome <span className={styles.required}>obrigatório</span>
-            </div>
-            <input
-              className={styles.contactInput}
-              type="text"
-              value={contactName}
-              onChange={(e) => setContactName(e.target.value)}
-              placeholder="como devemos te chamar"
-              autoComplete="name"
-              required
-            />
-          </div>
-          {detectedLegalEntity && (
-            <div className={styles.contactField}>
-              <div className={styles.contactFieldLabel}>
-                empresa <span className={styles.detected}>detectado no chat</span>
-              </div>
-              {showCompanyField ? (
-                <>
-                  <input
-                    className={`${styles.contactInput} ${styles.contactInputDetected}`}
-                    type="text"
-                    value={companyValue}
-                    onChange={(e) => {
-                      setCompanyTouched(true);
-                      setContactCompany(e.target.value);
-                    }}
-                    placeholder="nome da empresa"
-                    autoComplete="organization"
-                  />
-                  <button
-                    type="button"
-                    className={styles.contactToggle}
-                    onClick={() => setNoCompany(true)}
-                  >
-                    não tenho empresa — é pra mim mesmo
-                  </button>
-                </>
-              ) : (
+                  }}
+                />
                 <button
                   type="button"
-                  className={styles.contactToggle}
-                  onClick={() => setNoCompany(false)}
+                  className={styles.send}
+                  onClick={() => send()}
+                  disabled={!draft.trim() || sending || !hydrated}
+                  aria-label="Enviar"
                 >
-                  tenho empresa — quero informar
+                  {sending ? "…" : "↑"}
                 </button>
-              )}
+              </div>
             </div>
           )}
-          <div className={styles.contactFieldRow}>
-            <div className={styles.contactField}>
-              <div className={styles.contactFieldLabel}>
-                e-mail <span className={styles.required}>obrigatório</span>
-              </div>
-              <input
-                className={`${styles.contactInput} ${styles.contactInputDetected}`}
-                type="email"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-                placeholder="voce@empresa.com.br"
-                autoComplete="email"
-                required
-              />
-            </div>
-            <div className={styles.contactField}>
-              <div className={styles.contactFieldLabel}>
-                whatsapp <span className={styles.optional}>opcional</span>
-              </div>
-              <input
-                className={styles.contactInput}
-                type="tel"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-                placeholder="(41) 99999-9999"
-                autoComplete="tel"
-              />
-            </div>
-          </div>
-          <div className={styles.contactField}>
-            <div className={styles.contactFieldLabel}>senha</div>
-            <input
-              className={styles.contactInput}
-              type="password"
-              value={contactPassword}
-              onChange={(e) => setContactPassword(e.target.value)}
-              placeholder="mínimo 8 caracteres"
-              autoComplete="new-password"
-            />
-            <div className={styles.contactHint}>
-              mínimo 8 caracteres · ou receba um link mágico por e-mail
-            </div>
-          </div>
-          <label className={styles.consentRow}>
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-            />
-            <span className={styles.consentBox} aria-hidden>
-              {consent ? "✓" : ""}
-            </span>
-            <span>
-              Autorizo a DevButter a me contatar sobre esta cotação. Posso apagar meus dados
-              quando quiser.
-            </span>
-          </label>
-          <button
-            type="submit"
-            className={styles.submit}
-            disabled={confirming || !consent}
-          >
-            {confirming ? "Registrando…" : "Criar conta e enviar cotação"}
-          </button>
-          <div className={styles.altContact} onClick={() => setForceComposer(true)}>
-            Continuar conversando
-          </div>
-          <div className={styles.contactFootnote}>
-            <span aria-hidden>↑</span>
-            a conversa fica salva mesmo se você fechar agora — o link volta pra este ponto.
-          </div>
-        </form>
+        </>
       ) : showReadyPanel ? (
         <div className={styles.readyPanel}>
           {renderPreview()}

@@ -18,6 +18,9 @@
   - Chat de diagnóstico: núcleo extraído para `useDiagnosisConversation`
     (portal e site); `DiagnosisPanel` no visual do design, carregado sob
     demanda; nunca mostra preço; `pending_account_link` sem login automático.
+  - `NewQuoteModal` agora é só o workspace do portal: removidos `mode`,
+    `surface`, o painel público, o passo de contato/senha/consentimento, os
+    chips de captura, os opening intents e as classes SCSS correspondentes.
   - BFF: `password-recovery` (request/check/complete), `verify-email/resend`
     (501 tipado), `api/contato` (webhook de formulários, `source=contato`);
     conversas redigem `price_range`/`budget_range`; draft-quote não devolve
