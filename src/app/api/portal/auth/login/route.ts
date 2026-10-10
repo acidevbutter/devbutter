@@ -29,12 +29,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 400 });
   }
 
-  const loginRes = await fetch(`${API_BASE_URL}/accounts/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-    cache: "no-store",
-  });
+  let loginRes: Response;
+  try {
+    loginRes = await fetch(`${API_BASE_URL}/accounts/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      cache: "no-store",
+    });
+  } catch {
+    // Backend unreachable: a typed 502 instead of an unhandled 500 (#64).
+    return NextResponse.json({ error: "upstream_failed" }, { status: 502 });
+  }
+
+  if (loginRes.status >= 500) {
+    return NextResponse.json({ error: "upstream_failed" }, { status: 502 });
+  }
 
   if (!loginRes.ok) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
@@ -47,8 +57,8 @@ export async function POST(request: Request) {
   const meRes = await fetch(`${API_BASE_URL}/accounts/me`, {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
     cache: "no-store",
-  });
-  const account = meRes.ok ? ((await meRes.json()) as AccountRead) : null;
+  }).catch(() => null);
+  const account = meRes?.ok ? ((await meRes.json()) as AccountRead) : null;
   const isAdmin = account?.is_admin ?? false;
 
   const cookieStore = await cookies();

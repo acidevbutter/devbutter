@@ -3,7 +3,7 @@ import { API_BASE_URL } from "@/lib/portal/config";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const checkRes = await fetch(`${API_BASE_URL}/accounts/password-setup/${token}`, {
+  const checkRes = await fetch(`${API_BASE_URL}/accounts/password-setup/${encodeURIComponent(token)}`, {
     cache: "no-store",
   });
 

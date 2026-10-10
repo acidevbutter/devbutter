@@ -2,6 +2,48 @@
 
 ## [Unreleased]
 
+- Corrigido o `MAINTENANCE_MODE`: o proxy agora reescreve páginas para
+  `/manutencao`, preservando APIs e arquivos estáticos. O comportamento foi
+  validado no servidor Next de produção local.
+
+- **Site hi-fi** (`docs/design/Site DevButter.dc.html`), branch `feat/site-hifi`:
+  - Route groups `(site)` (SiteShell: nav, footer, skip link, painel único de
+    diagnóstico) e `(auth)` (AuthShell). Novas rotas: `/metodo`, `/cases`
+    (filtro `?setor=`), `/cases/[slug]` (SSG, slug inválido → 404), `/contato`,
+    404 global, `/entrar`, `/criar-conta`, `/verificar-email`,
+    `/esqueci-senha`, `/redefinir-senha`, `/link-expirado`,
+    `/portal/recuperar-senha/[token]` (link do e-mail do backend).
+  - Hero com curvatura WebGL (port TS de `curvature3d.js`, client-only, lazy,
+    fallback estático, pausa com o chat/fora da tela) e cenas de seção
+    (`scenes3d.js` + `motion-elements.js`: atenção, fluxo de escopo, rede
+    neural). Removidos HeroFlaskSvg, HeroTerrain, Concierge, DataDecision,
+    ChatSimulation, Projects e `useRevealOnce`.
+  - `content/cases.ts`: fonte única dos cases (home, lista, detalhe).
+  - Chat de diagnóstico: núcleo extraído para `useDiagnosisConversation`
+    (portal e site); `DiagnosisPanel` no visual do design, carregado sob
+    demanda; nunca mostra preço; `pending_account_link` sem login automático.
+  - `NewQuoteModal` agora é só o workspace do portal: removidos `mode`,
+    `surface`, o painel público, o passo de contato/senha/consentimento, os
+    chips de captura, os opening intents e as classes SCSS correspondentes.
+  - BFF: `password-recovery` (request/check/complete), `verify-email/resend`
+    (501 tipado), `api/contato` (webhook de formulários, `source=contato`);
+    conversas redigem `price_range`/`budget_range`; draft-quote não devolve
+    mais tokens no JSON.
+  - Tokens/mixins do site em `_tokens.scss`/`_site.scss` (keyframes por
+    módulo), metadata pt-BR por página.
+  - `/manutencao`: cena c7 "destilação" (`SceneCanvas kind="distill"`, WebGL
+    com fallback 2D) no lugar de Flask3D/FlaskSvg; keyframes do módulo locais
+    (#53). Removidos Flask3D, `useMediaQuery`, `three`, `@react-three/fiber` e
+    `@types/three`.
+  - Recuperação do frasco anterior: na home, consultar `2dce96d` antes de
+    `e58fc91` (`Hero.tsx`, `HeroFlaskSvg.tsx`, `HeroTerrain.tsx`); na página
+    `/manutencao`, consultar `c93b613` antes de `661a0c5` (`Flask3D/*`,
+    `Maintenance/FlaskSvg.tsx`, `Maintenance.tsx`). O frasco do logotipo segue
+    em `src/components/icons/Logomark.tsx`.
+  - Corrigidos: #32, #60, #61, #62, #63, #64, #65, #66, #67, #68.
+  - Lighthouse mobile da home (prod): performance 96 → 98, peso total
+    498 KB → 261 KB.
+
 - Simplificado o cadastro inicial do portal para primeiro nome, e-mail e senha.
 
 - Infraestrutura: imagens Docker e pipeline do frontend atualizadas para Node 24.

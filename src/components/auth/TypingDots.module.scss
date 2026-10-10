@@ -1,0 +1,25 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
+
+@include site.kf-typed;
+
+.dots {
+  display: inline-flex;
+  gap: 5px;
+  padding: 12px 15px;
+  border-radius: $r-tile;
+  background: rgba($db-white, 0.03);
+  border: 1px solid rgba($db-white, 0.12);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $db-green;
+  animation: typed 1.2s infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}

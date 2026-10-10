@@ -1,0 +1,138 @@
+@use "sass:color";
+@use "../../styles/tokens" as *;
+
+/// Cor de token com alfa — evita hex soltos.
+@function alpha($c, $a) {
+  @return color.change($c, $alpha: $a);
+}
+
+/// Preenche o pai (que precisa estar posicionado). O canvas do motor entra em `.stage`
+/// por cima do fallback e faz fade-in sozinho quando o primeiro quadro fica pronto.
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: $db-surface-deep;
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+}
+
+// ---------- fallback estático ----------
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 38% 30% at 24% 26%, alpha($db-green, 0.05), alpha($db-green, 0)),
+    radial-gradient(ellipse 34% 28% at 78% 20%, alpha($db-pink-glow, 0.05), alpha($db-pink-glow, 0)),
+    radial-gradient(ellipse 80% 70% at 50% 45%, $db-surface-inset 0%, $db-surface-deep 55%, $db-bg 100%);
+}
+
+.fallbackSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.stars {
+  fill: $db-text-primary;
+}
+
+.spokes,
+.ringGreen,
+.ringPink,
+.orbit {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.spokes {
+  stroke: $db-green;
+  stroke-width: 1;
+  stroke-opacity: 0.22;
+}
+
+.ringGreen {
+  stroke: $db-green;
+  stroke-width: 1.3;
+}
+
+.ringPink {
+  stroke: $db-pink-glow;
+  stroke-width: 1.3;
+}
+
+.orbit {
+  stroke: $db-green-glow;
+  stroke-width: 1;
+  stroke-opacity: 0.28;
+  stroke-dasharray: 3 9;
+}
+
+.einstein {
+  fill: none;
+  stroke: $db-pink-glow;
+  stroke-width: 1.2;
+  stroke-opacity: 0.22;
+}
+
+// Máscara de luminância: apaga a malha nas bordas, como o `edge` do shader.
+.maskOn {
+  stop-color: $db-text-primary;
+  stop-opacity: 1;
+}
+
+.maskOff {
+  stop-color: $db-text-primary;
+  stop-opacity: 0;
+}
+
+// Massa principal: núcleo quente → rosa glow → rosa → borda escura.
+.haloIn {
+  stop-color: $db-pink-glow;
+  stop-opacity: 0.34;
+}
+
+.haloMid {
+  stop-color: $db-pink;
+  stop-opacity: 0.12;
+}
+
+.haloOut {
+  stop-color: $db-pink;
+  stop-opacity: 0;
+}
+
+.coreHot {
+  stop-color: color.mix($db-pink-glow, $db-text-primary, 55%);
+}
+
+.coreMid {
+  stop-color: $db-pink-glow;
+}
+
+.coreRim {
+  stop-color: $db-pink;
+}
+
+.coreEdge {
+  stop-color: color.scale($db-pink, $lightness: -45%);
+}
+
+// Companheira verde.
+.moonHot {
+  stop-color: color.mix($db-green, $db-text-primary, 55%);
+}
+
+.moonMid {
+  stop-color: $db-green;
+}
+
+.moonRim {
+  stop-color: $db-green-glow;
+}

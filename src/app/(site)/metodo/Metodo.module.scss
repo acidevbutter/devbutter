@@ -1,0 +1,205 @@
+@use "../../../styles/tokens" as *;
+@use "../../../styles/site" as site;
+
+@include site.kf-fade-up;
+
+.section {
+  @include site.section(64px);
+}
+
+.hero {
+  @include site.section(74px);
+  padding-bottom: 56px;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: center;
+
+  @media (max-width: $bp-md) {
+    padding: 48px 16px 40px;
+  }
+}
+
+// The scope-flow canvas sits behind the copy (data-fx-mask keeps particles off the text).
+.heroScene {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.heroText {
+  flex: 1 1 340px;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.heroSpacer {
+  flex: 1.2 1 400px;
+  min-width: 0;
+  height: 380px;
+
+  @media (max-width: $bp-md) {
+    height: 220px;
+  }
+}
+
+.heroEyebrow {
+  @include site.eyebrow($db-green, 0.16em);
+  @include site.fade-up(0s);
+  margin-bottom: 20px;
+}
+
+.heroTitle {
+  @include site.fade-up(0.12s);
+  margin: 0;
+  font-size: clamp(36px, 4.4vw, 60px);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+
+.heroLead {
+  @include site.fade-up(0.22s);
+  max-width: 440px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: $db-text-secondary;
+  margin: 24px 0 0;
+}
+
+.accent {
+  color: $db-green;
+}
+
+.pipeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: $db-panel;
+  border: 1px solid $db-border;
+  border-radius: $r-xl;
+  overflow: hidden;
+}
+
+.pipelineRow {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 20px;
+  padding: 22px 26px;
+  border-bottom: 1px solid $db-border-subtle;
+  align-items: baseline;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: $bp-md) {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 6px 14px;
+    padding: 18px;
+  }
+}
+
+.pipelineNum {
+  font: 500 12px var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-green;
+}
+
+.pipelineTitle {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.pipelineBody {
+  font-size: 14px;
+  line-height: 1.6;
+  color: $db-text-secondary;
+
+  @media (max-width: $bp-md) {
+    grid-column: 2;
+  }
+}
+
+.split {
+  padding-top: 86px;
+  padding-bottom: 86px;
+  display: flex;
+  flex-wrap: wrap-reverse;
+  gap: 40px;
+  align-items: center;
+}
+
+.sceneFrame {
+  flex: 1.1 1 400px;
+  min-width: 0;
+  height: 340px;
+  border: 1px solid $db-border;
+  border-radius: $r-xl;
+  overflow: hidden;
+  background: $db-bg;
+  position: relative;
+
+  @media (max-width: $bp-md) {
+    flex-basis: 100%;
+    height: 260px;
+  }
+}
+
+.splitText {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.eyebrow {
+  @include site.eyebrow;
+}
+
+.eyebrowPink {
+  @include site.eyebrow($db-pink);
+}
+
+.h2 {
+  @include site.h2;
+}
+
+.intro {
+  @include site.intro;
+  margin: 14px 0 0;
+  max-width: 460px;
+}
+
+.deliverables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-top: 22px;
+}
+
+.deliverable {
+  padding: 18px;
+}
+
+.cardTitle {
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.cardBody {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: $db-text-secondary;
+  margin: 8px 0 0;
+}
+
+.cta {
+  @include site.btn-primary(lg);
+  margin-top: 32px;
+}

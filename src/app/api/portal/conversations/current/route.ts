@@ -1,3 +1,4 @@
+import { redactPrices } from "@/lib/portal/redact";
 import { PortalApiError, portalFetchOptionalAuth } from "@/lib/portal/api";
 import { clearConversationCookie, getConversationCookie } from "@/lib/portal/session";
 
@@ -48,7 +49,7 @@ export async function GET() {
       await clearConversationCookie();
       return Response.json({ conversation: null });
     }
-    return Response.json({ conversation });
+    return Response.json({ conversation: redactPrices(conversation) });
   } catch (error) {
     if (error instanceof PortalApiError && error.status === 404) {
       await clearConversationCookie();

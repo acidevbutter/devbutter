@@ -1,0 +1,525 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
+
+@include site.kf-rise;
+@include site.kf-slide;
+@include site.kf-pop;
+@include site.kf-pulse;
+@include site.kf-typed;
+
+$mono: var(--font-geist-mono), ui-monospace, monospace;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-overlay;
+  background: $db-overlay;
+  animation: rise 0.16s ease both;
+}
+
+.panel {
+  position: fixed;
+  z-index: $z-dialog;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  width: min(460px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
+  background: $db-surface;
+  border: 1px solid rgba($db-green, 0.24);
+  border-radius: $r-2xl;
+  overflow: hidden;
+  box-shadow: $shadow-dialog;
+  animation: slide 0.42s $ease-out both;
+  outline: none;
+
+  @media (max-width: $bp-sm) {
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: calc(100vw - 16px);
+  }
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid $db-border;
+  background: $db-surface-inset;
+}
+
+.headMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $db-green-glow;
+  box-shadow: $glow-dot;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+.headTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.headSub {
+  font: 10.5px $mono;
+  color: $db-text-muted;
+}
+
+.close {
+  min-height: $touch-min;
+  min-width: $touch-min;
+  background: none;
+  border: 1px solid $db-border-interactive;
+  border-radius: $r-sm;
+  color: $db-text-secondary;
+  font: 11px $mono;
+  padding: 5px 9px;
+  cursor: pointer;
+  @include site.focus-ring;
+
+  &:hover {
+    color: $db-text-primary;
+    border-color: rgba($db-white, 0.3);
+  }
+}
+
+.log {
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba($db-white, 0.14) transparent;
+  scrollbar-width: thin;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.ai {
+  max-width: 88%;
+  padding: 11px 14px;
+  background: rgba($db-white, 0.03);
+  border: 1px solid rgba($db-white, 0.12);
+  border-radius: $r-tile $r-tile $r-tile $r-xs;
+  font-size: 14px;
+  line-height: 1.55;
+  color: $db-chat-text-strong;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  animation: rise 0.26s $ease-out both;
+}
+
+.caret {
+  color: $db-green;
+  margin-left: 2px;
+}
+
+.meRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.me {
+  max-width: 82%;
+  padding: 11px 14px;
+  background: rgba($db-green, 0.08);
+  border: 1px solid rgba($db-green, 0.3);
+  border-radius: $r-tile $r-tile $r-xs $r-tile;
+  font-size: 14px;
+  line-height: 1.55;
+  color: $db-chat-user-text;
+  overflow-wrap: anywhere;
+  animation: rise 0.26s $ease-out both;
+}
+
+.meFailed {
+  border-style: dashed;
+  border-color: rgba($db-pink, 0.5);
+  background: rgba($db-pink, 0.05);
+}
+
+.retry {
+  @include site.link-button;
+  min-height: 32px;
+  font: 11px $mono;
+  color: $db-pink;
+
+  &:hover {
+    color: $db-pink-glow;
+  }
+}
+
+.pill {
+  font: 11px $mono;
+  color: $db-green;
+  border: 1px solid rgba($db-green, 0.3);
+  border-radius: $r-pill;
+  padding: 5px 10px;
+  animation: pop 0.26s $ease-out both;
+}
+
+.typing {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dots {
+  display: inline-flex;
+  gap: 5px;
+  padding: 12px 15px;
+  border-radius: $r-tile;
+  background: rgba($db-white, 0.03);
+  border: 1px solid rgba($db-white, 0.12);
+
+  i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $db-green;
+    animation: typed 1.2s infinite;
+  }
+
+  i:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  i:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+.typingLabel {
+  font: 11px $mono;
+  color: $db-text-muted;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.option {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: $db-bg;
+  border: 1px solid $db-border-interactive;
+  border-radius: $r-lg;
+  padding: 13px 14px;
+  min-height: $touch-min;
+  cursor: pointer;
+  color: $db-text-primary;
+  font: inherit;
+  animation: rise 0.26s $ease-out both;
+  transition: border-color 0.15s, background 0.15s;
+  @include site.focus-ring;
+
+  &:hover {
+    border-color: rgba($db-green, 0.5);
+    background: rgba($db-green, 0.05);
+  }
+}
+
+.optionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.badge {
+  font: 500 10px $mono;
+  color: $db-green;
+  border: 1px solid rgba($db-green, 0.4);
+  border-radius: $r-pill;
+  padding: 2px 8px;
+}
+
+.optionDesc {
+  font-size: 12.5px;
+  color: $db-text-secondary;
+  line-height: 1.45;
+}
+
+.optionTime {
+  font: 10.5px $mono;
+  color: $db-text-muted;
+  margin-top: 2px;
+}
+
+.note {
+  font: 10.5px $mono;
+  color: $db-text-muted;
+  line-height: 1.5;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: $db-bg;
+  border: 1px solid $db-border-interactive;
+  border-radius: $r-lg;
+  padding: 14px;
+  animation: rise 0.26s $ease-out both;
+}
+
+.cardHint {
+  font-size: 13px;
+  color: $db-text-secondary;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed $db-border-interactive;
+}
+
+.summaryTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.summaryDesc {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: $db-text-secondary;
+}
+
+.summaryMeta {
+  font: 11px $mono;
+  color: $db-green;
+  margin-top: 4px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  @include site.mono-label;
+}
+
+.input {
+  @include site.input;
+  background: $db-surface;
+  padding: 10px 12px;
+}
+
+.consent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.5;
+  color: $db-text-secondary;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    margin: 1px 0 0;
+    flex: none;
+    accent-color: $db-green;
+  }
+}
+
+.error {
+  @include site.form-error;
+}
+
+.actions,
+.finish {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.finish {
+  animation: rise 0.26s $ease-out both;
+}
+
+.solid {
+  @include site.btn-base;
+  padding: 8px 16px;
+  border-radius: $r-sm;
+  font-size: 13px;
+  background: $db-green;
+  color: $db-bg;
+  transition: filter 0.15s;
+
+  &:hover:not(:disabled) {
+    color: $db-bg;
+    filter: brightness(1.08);
+  }
+}
+
+.outline {
+  @include site.btn-outline(sm);
+  border-radius: $r-sm;
+}
+
+.textBtn {
+  @include site.link-button;
+  min-height: $touch-min;
+  padding: 0 6px;
+  font: 12px $mono;
+  color: $db-text-muted;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 0 18px 12px;
+}
+
+.chip {
+  min-height: 36px;
+  font: 400 12.5px var(--font-geist-sans), system-ui, sans-serif;
+  color: $db-chat-user-text;
+  border: 1px solid rgba($db-green, 0.35);
+  border-radius: $r-pill;
+  padding: 7px 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.16s;
+  @include site.focus-ring;
+
+  &:hover {
+    background: rgba($db-green, 0.1);
+  }
+
+  @media (pointer: coarse) {
+    min-height: $touch-min;
+  }
+}
+
+.chipOn {
+  background: rgba($db-green, 0.12);
+  border-color: rgba($db-green, 0.6);
+}
+
+.chipConfirm {
+  @extend .chip;
+  color: $db-bg;
+  background: $db-green;
+  border-color: $db-green;
+  font-weight: 600;
+
+  &:hover:not(:disabled) {
+    background: $db-green;
+    filter: brightness(1.08);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.composer {
+  border-top: 1px solid $db-border;
+  padding: 10px 18px 16px;
+}
+
+.writeInstead {
+  @include site.link-button;
+  display: block;
+  min-height: 32px;
+  font: 11px $mono;
+  color: $db-text-muted;
+  margin-bottom: 6px;
+
+  &:hover {
+    color: $db-green;
+  }
+}
+
+.composerRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+
+  .input {
+    flex: 1;
+    min-width: 0;
+    background: $db-bg;
+    border-color: rgba($db-white, 0.14);
+    border-radius: $r-lg;
+    padding: 12px 14px;
+    resize: none;
+    line-height: 1.4;
+    max-height: 140px;
+
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+}
+
+.send {
+  width: $touch-min;
+  height: $touch-min;
+  flex: none;
+  border: none;
+  border-radius: $r-lg;
+  background: rgba($db-white, 0.06);
+  color: $db-text-muted;
+  font: 16px $mono;
+  cursor: pointer;
+  transition: background 0.16s, color 0.16s;
+  @include site.focus-ring;
+
+  &[data-ready] {
+    background: $db-green;
+    color: $db-bg;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .panel,
+  .ai,
+  .me,
+  .pill,
+  .option,
+  .card,
+  .finish,
+  .liveDot,
+  .dots i {
+    animation: none;
+  }
+}

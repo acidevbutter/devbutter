@@ -65,8 +65,8 @@ src/app/
 
 src/components/
 ├── Nav/                  # header sticky, CTAs "Falar com a IA" / "Solicitar diagnóstico" (sem ação)
-├── Hero/                 # headline + ilustração (node-map/flask SVG, ver Flask3D)
-├── Flask3D/              # cena 3D (react-three-fiber + three.js) do frasco da marca
+├── Hero/                 # headline + curvatura 3D (ver Curvature3D)
+├── Scenes/               # cenas de seção em WebGL puro + fallback 2D (atenção, escopo, rede neural, destilação)
 ├── FeatureStrip/         # 4 cards de feature (estático)
 ├── Projects/             # cases em destaque — hardcoded (Crate Diggr, Orbit AI, GranAI, PlantOS, Spotme)
 ├── Concierge/             # simulação do "concierge de IA" (terminal), texto fixo
@@ -77,12 +77,11 @@ src/components/
 ├── ChatSimulation/        # simulação de chat "na prática" — mensagens hardcoded, sem input real
 ├── ClosingCta/            # CTA final "Solicitar diagnóstico"
 ├── Footer/                # sem links reais (redes sociais, e-mail, endereço)
-├── Maintenance/           # página /manutencao: formulário, status log, copy por variante
+├── Maintenance/           # página /manutencao: cena de destilação, formulário, status log, copy por variante
 ├── StreamingText/          # efeito de texto "digitando" reutilizado em Concierge/ChatSimulation
 └── icons/                 # Logomark (frasco + `</>`) e outros ícones inline SVG
 
 src/hooks/
-├── useMediaQuery.ts
 ├── usePrefersReducedMotion.ts   # respeita prefers-reduced-motion (ver design_handoff_homepage/README.md)
 └── useRevealOnce.ts             # IntersectionObserver, dispara reveal uma única vez
 
@@ -107,7 +106,7 @@ confirmação por e-mail ao inscrito — só confirmação visual na tela.
 | Camada | Escolha |
 |---|---|
 | Framework | Next.js 16 (App Router) + React 19 |
-| 3D/animação | `@react-three/fiber` 9 + `three` 0.185 (usado só em `Flask3D`) |
+| 3D/animação | WebGL 1 puro + canvas 2D, sem dependências (`Curvature3D`, `Scenes`) |
 | Estilo | Sass Modules (`.module.scss`) + tokens em `_tokens.scss` — sem Tailwind/CSS-in-JS |
 | Fontes | Geist / Geist Mono via `next/font/google` |
 | Lint | ESLint 9 (`eslint-config-next`) |

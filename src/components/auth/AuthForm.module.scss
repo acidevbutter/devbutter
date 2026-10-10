@@ -1,0 +1,238 @@
+// Card content shared by every account screen (`(auth)/*`). AuthShell draws
+// the card itself; these are the pieces inside it ("Site DevButter.dc.html",
+// auth section).
+@use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
+
+@include site.kf-rise;
+@include site.kf-ring;
+
+// ---- text -----------------------------------------------------------------
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+
+  // Result headings receive focus programmatically (tabIndex -1) when the
+  // form they replace goes away; they aren't interactive, so no ring.
+  &[tabindex="-1"]:focus {
+    outline: none;
+  }
+}
+
+.lede {
+  margin: 6px 0 22px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: $db-text-secondary;
+}
+
+// "Criar conta" sits a little tighter above the chat banner.
+.ledeTight {
+  margin-bottom: 18px;
+}
+
+.center {
+  text-align: center;
+}
+
+.body {
+  margin: 10px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: $db-text-secondary;
+}
+
+.bodySpaced {
+  margin-bottom: 22px;
+}
+
+.strong {
+  color: $db-text-primary;
+  overflow-wrap: anywhere;
+}
+
+// ---- form -----------------------------------------------------------------
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  @include site.field;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  @include site.mono-label;
+}
+
+// "esqueci a senha" beside the label: the padding/negative-margin pair gives
+// it a 44px hit area without pushing the input down.
+.labelLink {
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
+  padding: 16px 0;
+  margin: -16px 0;
+  @include site.focus-ring;
+}
+
+.input {
+  @include site.input;
+}
+
+.error {
+  @include site.form-error;
+
+  a {
+    @include site.focus-ring;
+  }
+}
+
+.submit {
+  width: 100%;
+  min-height: $touch-min;
+  @include site.focus-ring;
+}
+
+// Link-styled DevButter.Button (`href`), sized to its label.
+.action {
+  min-height: $touch-min;
+  @include site.focus-ring;
+}
+
+.foot {
+  margin: 20px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: $db-text-secondary;
+
+  a {
+    display: inline-block;
+    padding: 12px 2px;
+    margin: -12px 0;
+    @include site.focus-ring;
+  }
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: $touch-min;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-text-muted;
+  @include site.focus-ring;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}
+
+// ✓ seu diagnóstico fica salvo nesta conta (chat → signup handoff).
+.banner {
+  margin-bottom: 16px;
+  border: 1px solid rgba($db-green, 0.35);
+  border-radius: $r-md;
+  padding: 10px 12px;
+  font: 11.5px/1.5 var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-chat-user-text;
+  background: rgba($db-green, 0.05);
+}
+
+// ---- "não chegou? reenviar" ---------------------------------------------------
+
+.meta {
+  margin-top: 22px;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-text-muted;
+}
+
+.metaTight {
+  margin-top: 20px;
+}
+
+.inlineButton {
+  @include site.link-button;
+  min-height: $touch-min;
+  padding: 0 4px;
+}
+
+.note {
+  margin: 10px 0 0;
+  font: 11.5px/1.5 var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-text-muted;
+}
+
+// "Esqueci a senha" while the request is in flight.
+.sending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 30px 0;
+  font-size: 13.5px;
+  color: $db-text-secondary;
+}
+
+.hint {
+  margin: 0;
+  padding: 30px 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: $db-text-secondary;
+}
+
+// ---- icons above the title ---------------------------------------------------
+
+.tile {
+  width: 52px;
+  height: 52px;
+  border-radius: $r-tile;
+  margin: 0 auto 18px;
+  border: 1px solid rgba($db-green, 0.3);
+  background: $db-surface-inset;
+  display: grid;
+  place-items: center;
+  color: $db-green;
+  font: 18px var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  margin: 0 auto 18px;
+  border: 1px solid $db-green;
+  display: grid;
+  place-items: center;
+  color: $db-green;
+  font-size: 20px;
+}
+
+.badgeRing {
+  animation: ring 1.2s ease-out 1;
+}
+
+.badgeExpired {
+  border: 1px dashed rgba($db-pink, 0.5);
+  color: $db-pink;
+  font: 18px var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.rise {
+  animation: rise 0.26s $ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .badgeRing {
+    animation: none;
+  }
+}

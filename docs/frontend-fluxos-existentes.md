@@ -9,7 +9,7 @@ Este mapa descreve o que o código implementa ou encaminha. Não é prova de exe
 
 | Área | Fluxo observado | Evidência principal |
 |---|---|---|
-| Público | landing, waitlist e concierge de orçamento | `src/app/page.tsx`, `src/app/api/waitlist/route.ts`, `src/components/portal/NewQuoteModal/NewQuoteModal.tsx` |
+| Público | landing, waitlist e concierge de orçamento | `src/app/(site)/page.tsx`, `src/app/api/waitlist/route.ts`, `src/components/DiagnosisPanel/DiagnosisPanel.tsx` |
 | Cotação IA | conversa anônima/autenticada, retomada, preview, gate e draft quote | `src/app/api/portal/conversations/**`, `src/lib/portal/api.ts` |
 | Portal | login/signup, password setup, sessão, dashboard, dados, catálogo, projetos e faturas | `src/app/portal/**`, `src/proxy.ts` |
 | Pagamentos | Pix/boleto exibidos, método salvo listado/revogado e pagamento encaminhado | `src/app/portal/(dashboard)/faturas/**`, `src/app/api/portal/payment-methods/**` |

@@ -1,5 +1,38 @@
 @use "../../styles/tokens" as *;
 
+// CSS Modules scope `animation-name`, so the keyframes this module uses live here (issue #53).
+@keyframes padblink {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes glowb {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes gridmove {
+  to {
+    background-position: 0 46px;
+  }
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
 .page {
   min-height: 100vh;
   display: flex;
@@ -40,8 +73,8 @@
   gap: 8px;
   font-size: 12px;
   color: $db-text-secondary;
-  border: 1px solid rgba(255, 79, 163, 0.35);
-  background: rgba(246, 76, 111, 0.06);
+  border: 1px solid rgba($db-pink-glow, 0.35);
+  background: rgba($db-pink, 0.06);
   border-radius: 20px;
   padding: 7px 14px;
 }
@@ -52,7 +85,7 @@
   border-radius: 50%;
   background: $db-pink;
   box-shadow: 0 0 8px $db-pink-glow;
-  animation: db-padblink 1.8s ease-in-out infinite;
+  animation: padblink 1.8s ease-in-out infinite;
 }
 
 // ---- layout ----
@@ -146,12 +179,12 @@
 }
 
 .tagGreen {
-  border-color: rgba(121, 229, 155, 0.3);
+  border-color: rgba($db-green, 0.3);
   color: $db-green;
 }
 
 .tagPink {
-  border-color: rgba(255, 79, 163, 0.3);
+  border-color: rgba($db-pink-glow, 0.3);
   color: $db-pink;
 }
 
@@ -194,8 +227,8 @@
   }
 
   &:focus {
-    border-color: rgba(121, 229, 155, 0.6);
-    box-shadow: 0 0 22px rgba(0, 210, 106, 0.15);
+    border-color: rgba($db-green, 0.6);
+    box-shadow: 0 0 22px rgba($db-green-glow, 0.15);
   }
 }
 
@@ -207,12 +240,12 @@
   background: $db-green;
   color: $db-bg;
   border: none;
-  box-shadow: 0 0 32px rgba(0, 210, 106, 0.4);
+  box-shadow: 0 0 32px rgba($db-green-glow, 0.4);
   transition: transform 0.15s, box-shadow 0.15s;
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 0 40px rgba(0, 210, 106, 0.5);
+    box-shadow: 0 0 40px rgba($db-green-glow, 0.5);
   }
 
   &:disabled {
@@ -228,7 +261,7 @@
   padding: 14px 16px;
   border-radius: 12px;
   background: $db-surface;
-  border: 1px solid rgba(121, 229, 155, 0.35);
+  border: 1px solid rgba($db-green, 0.35);
 }
 
 .notifyHint {
@@ -280,7 +313,7 @@
 .contactDivider {
   width: 1px;
   height: 34px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba($db-white, 0.1);
 
   @media (max-width: 560px) {
     display: none;
@@ -291,90 +324,42 @@
 
 .stage {
   position: relative;
-  height: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 
   @media (max-width: 960px) {
-    height: 480px;
     max-width: 520px;
     width: 100%;
     margin: 0 auto;
-  }
-
-  @media (max-width: 560px) {
-    height: 380px;
   }
 }
 
 .stageGlow {
   position: absolute;
   inset: -6%;
-  background: radial-gradient(circle at 56% 40%, rgba(246, 76, 111, 0.16), transparent 46%),
-    radial-gradient(circle at 42% 62%, rgba(121, 229, 155, 0.16), transparent 48%);
-  animation: db-glowb 5s ease-in-out infinite;
+  background: radial-gradient(circle at 56% 40%, rgba($db-pink, 0.16), transparent 46%),
+    radial-gradient(circle at 42% 62%, rgba($db-green, 0.16), transparent 48%);
+  animation: glowb 5s ease-in-out infinite;
 }
 
-.circuitSvg,
-.ringSvg {
-  position: absolute;
-  inset: 0;
+// The design's maintenance card ("Site DevButter.dc.html", #c7): the canvas fills it.
+.scene {
+  position: relative;
   z-index: 1;
-}
-
-.circuitSvg {
-  overflow: visible;
-}
-
-.ringOuter {
-  transform-origin: 50% 46.3%;
-  animation: db-ringspin 34s linear infinite;
-}
-
-.ringInner {
-  transform-origin: 50% 46.3%;
-  animation: db-ringspin-r 26s linear infinite;
-}
-
-.flaskSvg {
-  position: absolute;
-  width: 164px;
-  height: 196px;
-  left: calc(50% - 82px);
-  top: calc(46.3% - 104px);
-
-  @media (max-width: 560px) {
-    width: 132px;
-    height: 158px;
-    left: calc(50% - 66px);
-    top: calc(32% - 79px);
-  }
-}
-
-.flaskLiquidTop {
-  animation: db-wave 6s ease-in-out infinite;
-}
-
-.flaskLiquidBottom {
-  animation: db-wave 6s ease-in-out infinite 0.5s;
-}
-
-.bubble {
-  animation: db-bubrise 2.4s ease-in infinite;
-}
-
-.drip {
-  animation: db-drip 3.4s ease-in infinite;
+  height: 300px;
+  border: 1px solid $db-border;
+  border-radius: $r-xl;
+  overflow: hidden;
+  background: $db-bg;
 }
 
 // ---- status log card ----
 
 .logCard {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  z-index: 3;
-  width: min(420px, 96%);
-  border: 1px solid rgba(121, 229, 155, 0.3);
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba($db-green, 0.3);
   border-radius: 14px;
   background: $db-surface-deep;
   overflow: hidden;
@@ -387,7 +372,7 @@
   justify-content: space-between;
   gap: 10px;
   padding: 11px 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba($db-white, 0.06);
 }
 
 .logTitle {
@@ -418,7 +403,7 @@
   border-radius: 50%;
   background: $db-pink-glow;
   box-shadow: 0 0 8px $db-pink-glow;
-  animation: db-padblink 1.6s ease-in-out infinite;
+  animation: padblink 1.6s ease-in-out infinite;
 }
 
 .logBody {
@@ -450,7 +435,7 @@
 
 .caret {
   color: $db-green;
-  animation: db-caret 1s step-end infinite;
+  animation: caret 1s step-end infinite;
 }
 
 // ---- perspective floor ----
@@ -463,14 +448,14 @@
   height: 240px;
   z-index: 1;
   pointer-events: none;
-  background-image: linear-gradient(rgba(121, 229, 155, 0.28) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 79, 163, 0.18) 1px, transparent 1px);
+  background-image: linear-gradient(rgba($db-green, 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba($db-pink-glow, 0.18) 1px, transparent 1px);
   background-size: 46px 46px;
   transform: perspective(300px) rotateX(66deg);
   transform-origin: bottom;
   -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 86%);
   mask-image: linear-gradient(to top, #000 10%, transparent 86%);
-  animation: db-gridmove 7s linear infinite;
+  animation: gridmove 7s linear infinite;
 }
 
 // ---- footer ----
@@ -493,12 +478,7 @@
   color: $db-text-muted;
 }
 
-// Reduced motion parks the travelling pulses mid-route instead of at the origin.
 @media (prefers-reduced-motion: reduce) {
-  .circuitSvg circle[style] {
-    offset-distance: 58% !important;
-  }
-
   .logRow {
     opacity: 1;
     transform: none;

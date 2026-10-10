@@ -1,0 +1,384 @@
+// Shared building blocks for the public site and the auth screens
+// ("Site DevButter.dc.html"). Import with `@use "../../styles/site" as site;`
+// from a component's .module.scss (tokens come along via `site.$…` or a
+// separate `@use "…/tokens" as *;`).
+//
+// Keyframes: CSS Modules rename `animation-name` inside a module, so a module
+// can't point at the global @keyframes in _animations.scss (issue #53). Every
+// module that animates includes the matching `kf-*` mixin at its root, which
+// emits the @keyframes inside that same module.
+
+@use "tokens" as *;
+
+// ---- keyframes ------------------------------------------------------------
+
+@mixin kf-fade-up {
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@mixin kf-rise {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(7px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@mixin kf-pop {
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.97) translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@mixin kf-slide {
+  @keyframes slide {
+    from {
+      opacity: 0;
+      transform: translateX(22px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@mixin kf-pulse {
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+}
+
+@mixin kf-ring {
+  @keyframes ring {
+    0% {
+      box-shadow: 0 0 0 0 rgba($db-green, 0.5);
+    }
+    100% {
+      box-shadow: 0 0 0 9px rgba($db-green, 0);
+    }
+  }
+}
+
+@mixin kf-typed {
+  @keyframes typed {
+    0%,
+    60%,
+    100% {
+      opacity: 0.25;
+      transform: translateY(0);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-3px);
+    }
+  }
+}
+
+@mixin kf-fill {
+  @keyframes fill {
+    from {
+      width: 0;
+    }
+  }
+}
+
+// The hero/page-title entrance (".fu" in the design): fade up 22px in .7s.
+@mixin fade-up($delay: 0s) {
+  opacity: 0;
+  animation: fadeUp 0.7s $ease-out $delay forwards;
+
+  @media (prefers-reduced-motion: reduce) {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+// ---- layout ---------------------------------------------------------------
+
+@mixin section($pad-y: 86px) {
+  max-width: $db-content-max;
+  margin: 0 auto;
+  padding: $pad-y $db-section-pad-x;
+  border-bottom: 1px solid $db-border;
+}
+
+@mixin eyebrow($color: $db-green, $tracking: 0.14em) {
+  font-size: 12px;
+  letter-spacing: $tracking;
+  text-transform: uppercase;
+  color: $color;
+}
+
+@mixin h2 {
+  font-size: clamp(28px, 3.4vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 12px 0 0;
+  text-wrap: pretty;
+}
+
+@mixin page-title {
+  margin: 0;
+  font-size: clamp(34px, 4vw, 54px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+@mixin intro {
+  color: $db-text-secondary;
+  font-size: 16px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+@mixin mono-label {
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+}
+
+@mixin tag($color: $db-green, $border: rgba($db-green, 0.3)) {
+  font-size: 10px;
+  padding: 4px 9px;
+  border-radius: $r-pill;
+  border: 1px solid $border;
+  color: $color;
+}
+
+// ---- interaction ----------------------------------------------------------
+
+// Visible keyboard focus everywhere on the site (2px green, offset 2).
+@mixin focus-ring($offset: 2px) {
+  &:focus-visible {
+    outline: 2px solid $db-green;
+    outline-offset: $offset;
+  }
+}
+
+@mixin lift-card($accent: green) {
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+
+  &:hover {
+    transform: translateY(-4px);
+    @if $accent == pink {
+      border-color: rgba($db-pink-glow, 0.5);
+      box-shadow: $shadow-card, $glow-card-pink;
+    } @else {
+      border-color: rgba($db-green, 0.6);
+      box-shadow: $shadow-card-lg, $glow-card-green;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// ---- buttons --------------------------------------------------------------
+// Sizes: nav (9×17 · 13px · r10), lg (14×26 · 15px · r12), xl (15×30 · 15px).
+
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: $touch-min;
+  border-radius: $r-lg;
+  font: 600 15px var(--font-geist-sans), system-ui, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  @include focus-ring;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+@mixin btn-primary($size: lg) {
+  @include btn-base;
+  background: $db-green;
+  color: $db-bg;
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  @if $size == nav {
+    padding: 9px 17px;
+    border-radius: $r-md;
+    font-size: 13px;
+    box-shadow: $glow-btn;
+  } @else if $size == md {
+    padding: 12px 22px;
+    font-size: 14px;
+    box-shadow: $glow-btn;
+  } @else if $size == xl {
+    padding: 15px 30px;
+    box-shadow: $glow-cta-xl;
+  } @else {
+    padding: 14px 26px;
+    box-shadow: $glow-cta;
+  }
+
+  &:hover:not(:disabled) {
+    color: $db-bg;
+    transform: translateY(-1px);
+    @if $size == nav or $size == md {
+      box-shadow: $glow-btn-hover;
+    } @else if $size == xl {
+      box-shadow: $glow-cta-xl-hover;
+    } @else {
+      box-shadow: $glow-cta-hover;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover:not(:disabled) {
+      transform: none;
+    }
+  }
+}
+
+@mixin btn-secondary {
+  @include btn-base;
+  padding: 14px 26px;
+  background: transparent;
+  color: $db-text-primary;
+  border: 1.5px solid rgba($db-pink-glow, 0.5);
+  box-shadow: $glow-pink;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    color: $db-text-primary;
+    border-color: rgba($db-pink-glow, 0.8);
+    box-shadow: $glow-pink-hover;
+  }
+}
+
+@mixin btn-outline($size: md) {
+  @include btn-base;
+  @if $size == sm {
+    padding: 8px 14px;
+    font-size: 13px;
+  } @else {
+    padding: 12px 22px;
+    font-size: 14px;
+  }
+  background: transparent;
+  color: $db-text-primary;
+  border: 1px solid $db-border-interactive;
+  transition: border-color 0.15s, background-color 0.15s;
+
+  &:hover:not(:disabled) {
+    color: $db-text-primary;
+    border-color: $db-border-hover;
+    background: rgba($db-white, 0.04);
+  }
+}
+
+// Text-only action ("Entrar" in the nav, inline "reenviar").
+@mixin btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  min-height: $touch-min;
+  padding: 9px 14px;
+  border-radius: $r-md;
+  font: 600 13px var(--font-geist-sans), system-ui, sans-serif;
+  color: $db-text-secondary;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  @include focus-ring;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}
+
+@mixin link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: $db-green;
+  cursor: pointer;
+  @include focus-ring;
+
+  &:hover {
+    color: $db-green-glow;
+  }
+}
+
+// ---- forms ----------------------------------------------------------------
+
+@mixin field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+@mixin input {
+  width: 100%;
+  min-height: $touch-min;
+  background: $db-bg;
+  border: 1px solid $db-border-interactive;
+  border-radius: $r-sm;
+  padding: 11px 14px;
+  font: 400 14px var(--font-geist-sans), system-ui, sans-serif;
+  color: $db-text-primary;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder {
+    color: $db-text-muted;
+  }
+
+  &:focus,
+  &:focus-visible {
+    border-color: rgba($db-green, 0.5);
+    box-shadow: 0 0 0 3px rgba($db-green, 0.1);
+  }
+
+  &[aria-invalid="true"] {
+    border-color: rgba($db-pink, 0.6);
+  }
+}
+
+@mixin form-error {
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-pink;
+}

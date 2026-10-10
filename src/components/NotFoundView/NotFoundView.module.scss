@@ -1,0 +1,77 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
+
+.section {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 64px $db-section-pad-x 96px;
+  text-align: center;
+
+  @media (max-width: $bp-md) {
+    padding: 32px 16px 64px;
+  }
+}
+
+.stage {
+  position: relative;
+  height: 340px;
+  border: 1px solid $db-border;
+  border-radius: $r-xl;
+  overflow: hidden;
+  background: $db-surface-deep;
+
+  @media (max-width: $bp-md) {
+    height: 260px;
+  }
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba($db-surface-deep, 0.5),
+    rgba($db-surface-deep, 0) 18%,
+    rgba($db-surface-deep, 0) 82%,
+    rgba($db-surface-deep, 0.6)
+  );
+}
+
+.code {
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.14em;
+  color: $db-text-muted;
+  margin-top: 36px;
+}
+
+.title {
+  margin: 10px 0 0;
+  font-size: clamp(30px, 3.6vw, 46px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.text {
+  font-size: 16px;
+  color: $db-text-secondary;
+  margin: 14px auto 0;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.primary {
+  @include site.btn-primary(md);
+}
+
+.secondary {
+  @include site.btn-outline(md);
+}

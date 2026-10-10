@@ -3,50 +3,10 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { io, type Socket } from "socket.io-client";
 import Logomark from "@/components/icons/Logomark";
-import { PUBLIC_SOCKET_URL } from "@/lib/portal/config";
+import type { DiagnosisPreview, NextStep, ProductOption } from "./types";
+import useDiagnosisConversation from "./useDiagnosisConversation";
 import styles from "./NewQuoteModal.module.scss";
-
-type Message = { role: "ai" | "me"; content: string; status?: "sending" | "failed" };
-
-type JoinAck = { ok: boolean; detail?: string };
-
-type DraftQuoteResult = {
-  quote_id: string;
-  reference: string;
-  scope_summary: string;
-  price_range: string | null;
-  timeline: string | null;
-  tokens: unknown | null;
-  pending_account_link: boolean;
-};
-
-type NextStepOption = { id: string; label: string };
-type NextStep = {
-  prompt: string;
-  field: string;
-  selection_mode: "single" | "multi";
-  allow_free_text: boolean;
-  options: NextStepOption[];
-};
-
-/** One "números do negócio" stat card in the live dossiê (canvas screen 2a).
- * `value` is free text; `computed` marks a figure the AI derived. */
-type BusinessMetric = { label: string; value: string; computed: boolean };
-
-/** ADR-0004: one of the 2-3 paths the concierge proposes in the `choosing`
- * stage. `key` is a stable server-assigned slug. */
-type ProductOption = {
-  key: string;
-  title: string;
-  summary: string;
-  price_range: string | null;
-  timeline: string | null;
-  recommended: boolean;
-};
-
-type DiagnosisStage = "qualifying" | "choosing" | "collecting" | "ready";
 
 /** The collecting-step fields (ADR-0004), keyed as butter_mind names them. */
 const PROFILE_FIELD_LABELS: Record<string, string> = {
@@ -57,53 +17,6 @@ const PROFILE_FIELD_LABELS: Record<string, string> = {
   contact_name: "seu nome",
   contact_email: "e-mail",
   contact_phone: "whatsapp",
-};
-
-/** Live qualification slice butter_mind fills as the chat progresses. Feeds the
- * chip row + "X de N perguntas" counter on the public panel (canvas 1c) and the
- * whole left-hand dossiê in the portal workspace (canvas 2a). Optional/partial:
- * a conversation resumed from an older preview simply omits fields. */
-type BusinessProfile = {
-  company_name: string | null;
-  is_legal_entity: boolean | null;
-  segment: string | null;
-  city: string | null;
-  volume: string | null;
-  metrics?: BusinessMetric[] | null;
-  pain_points: string[];
-  scope_modules: string[];
-  contact_ready: boolean;
-};
-
-type QualificationProgress = { answered: number; total: number };
-
-// Mirrors butter_mind `app/diagnosis/schemas.py::DiagnosisPreview` (canonical
-// shape; snapshot in butter_mind `contracts/conversation_state.schema.json`).
-// devbutter_backend relays it verbatim -- it no longer re-declares it (ADR-0005).
-// Keep this hand-written type in step with that schema until codegen lands.
-type DiagnosisPreview = {
-  problem_summary: string;
-  // ADR-0007: renamed from services_of_interest -- a light label taxonomy;
-  // the real cost drivers live server-side in the (not yet rendered here)
-  // scoping_vector.
-  solution_kinds: string[];
-  budget_range: string | null;
-  timeline: string | null;
-  missing_information: string[];
-  grounding_status: string;
-  next_step: NextStep | null;
-  business_profile?: BusinessProfile | null;
-  progress?: QualificationProgress | null;
-  stage?: DiagnosisStage;
-  options?: ProductOption[];
-  selected_option_key?: string | null;
-  missing_fields?: string[];
-  /** butter_mind's _SCOPING_CATALOG for the review step's editable fields
-   * (canvas 1d-1e) and next_step pills. Keys match ScopingVector's field
-   * names (solution_kinds, rush, ...). The review groups render from this;
-   * the *_FALLBACK consts below are only the fallback for a preview from an
-   * older butter_mind. */
-  field_options?: Record<string, NextStepOption[]>;
 };
 
 /** Fallback only — the live option lists come from `preview.field_options`
@@ -125,15 +38,6 @@ const RUSH_FALLBACK = ["O quanto antes", "1–3 meses", "3–6 meses", "Sem praz
  * module stylesheet. */
 const COMPOSER_MAX_H = 160;
 
-type ConversationRead = {
-  id: string;
-  account_id: string | null;
-  status: string;
-  transcript: { role: string; content: string; selected?: { field: string; option_ids: string[] } }[];
-  ready_to_submit: boolean;
-  draft_preview: DiagnosisPreview | null;
-};
-
 const INITIAL_AI_MESSAGE = "Oi! Vi que você já tem projetos com a gente. Me conta o que você precisa agora.";
 
 const noopSubscribe = () => () => {};
@@ -143,34 +47,8 @@ function hhmm(d = new Date()): string {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function appendToLastAi(current: Message[], delta: string): Message[] {
-  const lastIndex = current.length - 1;
-  if (lastIndex < 0 || current[lastIndex].role !== "ai") return current;
-  const next = [...current];
-  next[lastIndex] = { ...next[lastIndex], content: next[lastIndex].content + delta };
-  return next;
-}
-
-function dropTrailingEmptyAi(current: Message[]): Message[] {
-  const lastIndex = current.length - 1;
-  if (lastIndex >= 0 && current[lastIndex].role === "ai" && current[lastIndex].content === "") {
-    return current.slice(0, lastIndex);
-  }
-  return current;
-}
-
-function setStatusAt(current: Message[], index: number, status: Message["status"]): Message[] {
-  if (index < 0 || index >= current.length) return current;
-  const next = [...current];
-  next[index] = { ...next[index], status };
-  return next;
-}
-
-function transcriptToMessages(transcript: { role: string; content: string }[]): Message[] {
-  return transcript.map((m) => ({ role: m.role === "user" ? "me" : "ai", content: m.content }));
-}
-
-/** The dossiê's 7 completeness checkpoints (canvas screen 2a ring: "5 / 7").
+/** The dossiê's completeness checkpoints (canvas screen 2a ring: "5 / 6"). The
+ * budget checkpoint is gone: no price reaches the client before approval.
  * Kept client-side -- butter_mind's `progress` is the shorter chat-header
  * counter ("X de N perguntas"); the ring measures dossiê blocks. */
 function dossierChecks(preview: DiagnosisPreview | null): boolean[] {
@@ -186,34 +64,16 @@ function dossierChecks(preview: DiagnosisPreview | null): boolean[] {
     !!bp?.volume || metrics.length > 0,
     !!bp?.city,
     modules.length > 0,
-    !!preview?.budget_range,
     !!preview?.timeline,
   ];
 }
 
-export default function NewQuoteModal({
-  onClose,
-  initialMessage = INITIAL_AI_MESSAGE,
-  mode = "public",
-  surface = "panel",
-  openingIntents,
-}: {
-  onClose?: () => void;
-  initialMessage?: string;
-  /** "public": anonymous visitor -- shows the 1e contact/password step before
-   * confirming. "portal": already-logged-in client -- skips straight to
-   * confirm, matching canvas screen 1g ("sem passo de cadastro"). */
-  mode?: "public" | "portal";
-  /** "panel": público -- painel de coluna única ancorado à direita sobre o site
-   * (canvas 1b), minimizável, sem arrastar. "workspace": portal -- overlay de
-   * duas colunas (dossiê ao vivo à esquerda + chat à direita, canvas 2a),
-   * minimizável, sem arrastar. */
-  surface?: "panel" | "workspace";
-  /** Hardcoded quick-start options shown under the very first AI message,
-   * before any turn (canvas 1b chips). Tapping one sends it as the first
-   * message. */
-  openingIntents?: string[];
-}) {
+/** The portal's "novo orçamento" workspace for an already-logged-in client:
+ * a two-column overlay (live dossiê on the left + chat on the right, canvas
+ * 2a), minimizable, not draggable. No sign-up step -- confirming goes straight
+ * to draft-quote (canvas 1g, "sem passo de cadastro"). The public site renders
+ * the same conversation with `DiagnosisPanel`. */
+export default function NewQuoteModal({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   // Rendered through a portal on <body> so an ancestor with backdrop-filter (the
   // sticky nav) can't become the containing block for the fixed-position overlay.
@@ -223,39 +83,15 @@ export default function NewQuoteModal({
     () => true,
     () => false
   );
-  const [hydrated, setHydrated] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([{ role: "ai", content: initialMessage }]);
   const [draft, setDraft] = useState("");
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [readyToSubmit, setReadyToSubmit] = useState(false);
-  const [preview, setPreview] = useState<DiagnosisPreview | null>(null);
   const [forceComposer, setForceComposer] = useState(false);
   const [minimized, setMinimized] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [confirming, setConfirming] = useState(false);
-  const [confirmedQuote, setConfirmedQuote] = useState<DraftQuoteResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [contactName, setContactName] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactPassword, setContactPassword] = useState("");
-  // Canvas 1e "empresa": prefilled from the chat's detected company until the
-  // visitor edits it -- tracked as touched rather than seeded via an effect.
-  const [contactCompany, setContactCompany] = useState("");
-  const [companyTouched, setCompanyTouched] = useState(false);
-  const [noCompany, setNoCompany] = useState(false);
-  // Canvas 1e: required consent before "Criar conta e enviar cotação".
-  const [consent, setConsent] = useState(false);
   // Canvas 1f: "enviado dd/mm · HH:MM" on the confirmation card. Captured at
   // confirm time (the backend doesn't return a timestamp today).
   const [confirmedAtLabel, setConfirmedAtLabel] = useState<string | null>(null);
-  // Overlay entrance: panel slides from the right (canvas 1b "entra da direita
-  // 240ms"); workspace fades + lifts. Cleared once the animation is done.
+  // Overlay entrance: the workspace fades + lifts. Cleared once the animation
+  // is done.
   const [entering, setEntering] = useState(true);
-  // "hoje · HH:MM" divider at the top of the thread (panel surface). Rendered
-  // only after `hydrated`, so the server/first-paint markup omits it and there
-  // is no time-based hydration mismatch.
-  const [startedAtLabel] = useState(() => `hoje · ${hhmm()}`);
   // Checkbox state for a multi-select in-chat next_step (canvas screen 3),
   // reset every turn.
   const [checkedOptionIds, setCheckedOptionIds] = useState<string[]>([]);
@@ -274,22 +110,64 @@ export default function NewQuoteModal({
   const reviewSeededRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const scrollRegionRef = useRef<HTMLDivElement | null>(null);
-  const socketRef = useRef<Socket | null>(null);
-  const joinedConversationsRef = useRef<Set<string>>(new Set());
   // Canvas 2a: each dossiê block keeps the "aterrissou às HH:MM" stamp from the
   // first render it had content. butter_mind recomputes the profile every turn
   // with no memory of when a field filled, so the stamp is client-side.
-  const dossierStamps = useRef<Map<string, string>>(new Map());
+  const [dossierStamps, setDossierStamps] = useState<Record<string, string>>({});
   // Canvas 2a chat column: the "N blocos foram pro dossiê" causality pill with
   // the fly particle. Set after a turn grows the dossiê; cleared on a timer.
   const [landed, setLanded] = useState(0);
   const prevChecksRef = useRef(0);
 
-  useEffect(() => {
-    return () => {
-      socketRef.current?.disconnect();
-    };
-  }, []);
+  const {
+    hydrated,
+    messages,
+    readyToSubmit,
+    preview,
+    sending,
+    confirming,
+    confirmedQuote,
+    error,
+    send: sendText,
+    sendOption: sendOptionTurn,
+    retry,
+    selectOption: selectOptionTurn,
+    submitBusinessProfile: submitProfile,
+    confirm,
+    clearConfirmed,
+  } = useDiagnosisConversation({
+    initialMessage: INITIAL_AI_MESSAGE,
+    // Canvas 2a: count how many dossiê blocks just filled, to pulse the
+    // "N blocos foram pro dossiê" pill + fly particle in the chat column.
+    onTurn: (next: DiagnosisPreview | null, resumed: boolean) => {
+      const now = dossierChecks(next).filter(Boolean).length;
+      const grew = now - prevChecksRef.current;
+      prevChecksRef.current = now;
+      if (!resumed && grew > 0) {
+        setLanded(grew);
+        window.setTimeout(() => setLanded(0), 2600);
+      }
+    },
+  });
+
+  // Stamp newly filled dossiê blocks while rendering (React's "adjust state
+  // when a prop changes" pattern): ids as passed to blockHead in renderDossier.
+  const stampChecks = dossierChecks(preview);
+  const unstamped = Object.entries({
+    problema: stampChecks[0],
+    numeros: stampChecks[2],
+    escopo: stampChecks[4],
+    prazo: readyToSubmit && stampChecks[5],
+  })
+    .filter(([id, has]) => has && !dossierStamps[id])
+    .map(([id]) => id);
+  if (unstamped.length > 0) {
+    const at = hhmm();
+    setDossierStamps((cur) => ({
+      ...cur,
+      ...Object.fromEntries(unstamped.map((id) => [id, at])),
+    }));
+  }
 
   useEffect(() => {
     if (!entering) return;
@@ -300,53 +178,12 @@ export default function NewQuoteModal({
   // Esc closes, keeping the draft (canvas 1b: "Esc fecha e guarda o rascunho").
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && !minimized) closeOrHome();
+      if (e.key === "Escape" && !minimized) onClose();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [minimized]);
-
-  // Resume-or-start on open. If this browser has a resumable conversation we
-  // rehydrate it; otherwise we create one right now so the first message goes
-  // out against a real diagnosis session (deliver() still creates one lazily
-  // as a fallback). The ref guards against React StrictMode's double-invoke
-  // creating two conversations.
-  const bootstrappedRef = useRef(false);
-  useEffect(() => {
-    if (bootstrappedRef.current) return;
-    bootstrappedRef.current = true;
-
-    (async () => {
-      try {
-        const res = await fetch("/api/portal/conversations/current");
-        const body: { conversation: ConversationRead | null } = res.ok
-          ? await res.json()
-          : { conversation: null };
-
-        if (body.conversation) {
-          setConversationId(body.conversation.id);
-          const resumed = transcriptToMessages(body.conversation.transcript);
-          setMessages(resumed.length ? resumed : [{ role: "ai", content: initialMessage }]);
-          setReadyToSubmit(body.conversation.ready_to_submit);
-          setPreview(body.conversation.draft_preview);
-          prevChecksRef.current = dossierChecks(body.conversation.draft_preview).filter(Boolean).length;
-        } else {
-          const created = await fetch("/api/portal/conversations", { method: "POST" });
-          if (created.ok) {
-            const conversation = (await created.json()) as { id: string };
-            setConversationId(conversation.id);
-          }
-        }
-      } catch {
-        // Swallowed on purpose: deliver() creates a conversation lazily if we
-        // couldn't here.
-      } finally {
-        setHydrated(true);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Seed the editable review fields from the preview the first time the chat
   // reports it's ready. `matchServices` keeps any service the visitor named
@@ -396,8 +233,7 @@ export default function NewQuoteModal({
       ? [reviewTimeline, ...timelineCatalog]
       : timelineCatalog;
 
-  const showContactStep = readyToSubmit && !forceComposer && mode === "public";
-  const showReadyPanel = readyToSubmit && !forceComposer && mode === "portal";
+  const showReadyPanel = readyToSubmit && !forceComposer;
   const showComposer = !readyToSubmit || forceComposer;
 
   // True when a tappable-options block is up (next_step pills, ADR-0004 option
@@ -420,7 +256,7 @@ export default function NewQuoteModal({
     messages[messages.length - 1]?.role === "ai" &&
     messages[messages.length - 1]?.content === "";
 
-  // Canvas 1b: "foco automático no textarea" once the panel has finished entering.
+  // "foco automático no textarea" once the workspace has finished entering.
   useEffect(() => {
     if (showComposer && !entering && !minimized) textareaRef.current?.focus();
   }, [showComposer, entering, minimized]);
@@ -446,231 +282,37 @@ export default function NewQuoteModal({
     if (el) el.scrollTop = el.scrollHeight;
   }, [composerHidden, messages.length]);
 
-  async function connectSocket(): Promise<Socket> {
-    if (!socketRef.current) {
-      socketRef.current = io(PUBLIC_SOCKET_URL, { withCredentials: true });
-    }
-    const socket = socketRef.current;
-    if (socket.connected) return socket;
-    await new Promise<void>((resolve, reject) => {
-      socket.once("connect", () => resolve());
-      socket.once("connect_error", (err) => reject(err instanceof Error ? err : new Error(String(err))));
-    });
-    return socket;
-  }
-
-  async function joinConversation(socket: Socket, id: string): Promise<void> {
-    if (joinedConversationsRef.current.has(id)) return;
-    const ack = await new Promise<JoinAck>((resolve) => {
-      socket.emit("join_conversation", { conversation_id: id }, resolve);
-    });
-    if (!ack.ok) throw new Error(ack.detail ?? "Não foi possível entrar na conversa.");
-    joinedConversationsRef.current.add(id);
-  }
-
-  function streamReply(
-    socket: Socket,
-    id: string,
-    content: string,
-    selection?: { field: string; option_ids: string[] }
-  ): Promise<{ ready_to_submit: boolean; preview: DiagnosisPreview | null }> {
-    return new Promise((resolve, reject) => {
-      function onChunk(payload: { content: string }) {
-        setMessages((current) => appendToLastAi(current, payload.content));
-      }
-      function onDone(payload: {
-        ready_to_submit: boolean;
-        message_id: string;
-        preview?: DiagnosisPreview | null;
-      }) {
-        cleanup();
-        resolve({ ready_to_submit: payload.ready_to_submit, preview: payload.preview ?? null });
-      }
-      function onError(payload: { detail: string }) {
-        cleanup();
-        reject(new Error(payload.detail || "Não foi possível continuar a conversa."));
-      }
-      function cleanup() {
-        socket.off("assistant_chunk", onChunk);
-        socket.off("assistant_done", onDone);
-        socket.off("assistant_error", onError);
-      }
-      socket.on("assistant_chunk", onChunk);
-      socket.on("assistant_done", onDone);
-      socket.on("assistant_error", onError);
-      socket.emit("send_message", {
-        conversation_id: id,
-        content,
-        ...(selection ? { selection } : {}),
-      });
-    });
-  }
-
-  /** Runs the network round-trip for the `me` message at `meIndex`. On failure the
-   * message is left in the thread flagged `failed` (never re-appended) so the user
-   * can retry it in place instead of typing it again. */
-  async function deliver(
-    content: string,
-    meIndex: number,
-    selection?: { field: string; option_ids: string[] }
-  ) {
-    setSending(true);
-    setError(null);
-
-    try {
-      let activeConversationId = conversationId;
-      if (!activeConversationId) {
-        const conversationRes = await fetch("/api/portal/conversations", { method: "POST" });
-        if (!conversationRes.ok) throw new Error("Não foi possível iniciar a conversa.");
-        const conversation = (await conversationRes.json()) as { id: string };
-        activeConversationId = conversation.id;
-        setConversationId(activeConversationId);
-      }
-
-      const socket = await connectSocket();
-      await joinConversation(socket, activeConversationId);
-      const result = await streamReply(socket, activeConversationId, content, selection);
-      setMessages((current) => setStatusAt(current, meIndex, undefined));
-      setReadyToSubmit(result.ready_to_submit);
-      setPreview(result.preview);
-      // Canvas 2a: count how many dossiê blocks just filled, to pulse the
-      // "N blocos foram pro dossiê" pill + fly particle in the chat column.
-      const now = dossierChecks(result.preview).filter(Boolean).length;
-      const grew = now - prevChecksRef.current;
-      prevChecksRef.current = now;
-      if (grew > 0 && surface === "workspace") {
-        setLanded(grew);
-        window.setTimeout(() => setLanded(0), 2600);
-      }
-    } catch (err) {
-      setMessages((current) => dropTrailingEmptyAi(setStatusAt(current, meIndex, "failed")));
-      setError(err instanceof Error ? err.message : "Não foi possível continuar a conversa.");
-    } finally {
-      setSending(false);
-    }
-  }
-
   async function send(explicitContent?: string) {
     const content = (explicitContent ?? draft).trim();
     if (!content || sending || !hydrated) return;
-    const meIndex = messages.length;
     if (explicitContent === undefined) setDraft("");
     setForceComposer(false);
     setCheckedOptionIds([]);
     setWriteInstead(false);
-    setMessages((current) => [
-      ...current,
-      { role: "me", content, status: "sending" },
-      { role: "ai", content: "" },
-    ]);
-    await deliver(content, meIndex);
+    await sendText(content);
   }
 
   /** Answer the current qualification turn by tapping options instead of
-   * typing (canvas screen 3). butter_mind still only sees the synthesized
-   * `content`; `selection` is persisted alongside the user turn for the
-   * reviewer. */
+   * typing (canvas screen 3). */
   async function sendOption(step: NextStep, optionIds: string[]) {
     if (sending || !hydrated || optionIds.length === 0) return;
-    const labels = step.options
-      .filter((o) => optionIds.includes(o.id))
-      .map((o) => o.label);
-    const content =
-      step.selection_mode === "multi"
-        ? `${step.prompt.replace(/[:?]?\s*$/, "")}: ${labels.join(", ")}`
-        : labels.join(", ");
-    const meIndex = messages.length;
     setForceComposer(false);
     setCheckedOptionIds([]);
     setWriteInstead(false);
-    setMessages((current) => [
-      ...current,
-      { role: "me", content, status: "sending" },
-      { role: "ai", content: "" },
-    ]);
-    await deliver(content, meIndex, { field: step.field, option_ids: optionIds });
+    await sendOptionTurn(step, optionIds);
   }
 
-  async function retry(index: number) {
-    if (sending || !hydrated) return;
-    const target = messages[index];
-    if (!target || target.role !== "me") return;
-    setMessages((current) => [...setStatusAt(current, index, "sending"), { role: "ai", content: "" }]);
-    await deliver(target.content, index);
-  }
-
-  /** ADR-0004 `choosing` stage: the visitor picked one of the proposed paths.
-   * Not a socket turn -- a plain POST that returns the recomputed preview. */
+  /** ADR-0004 `choosing` stage: the visitor picked one of the proposed paths. */
   async function selectOption(option: ProductOption) {
-    if (!conversationId || sending || !hydrated) return;
-    setSending(true);
-    setError(null);
     setSkipCollecting(false);
     setWriteInstead(false);
-    try {
-      const res = await fetch(
-        `/api/portal/conversations/${conversationId}/select-option`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ option_key: option.key }),
-        }
-      );
-      if (!res.ok) throw new Error("Não foi possível confirmar a opção.");
-      const turn = (await res.json()) as {
-        reply: string;
-        ready_to_submit: boolean;
-        preview: DiagnosisPreview | null;
-      };
-      setMessages((current) => [
-        ...current,
-        { role: "me", content: `Escolhi: ${option.title}` },
-        { role: "ai", content: turn.reply },
-      ]);
-      setReadyToSubmit(turn.ready_to_submit);
-      setPreview(turn.preview);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível confirmar a opção.");
-    } finally {
-      setSending(false);
-    }
+    await selectOptionTurn(option);
   }
 
-  /** ADR-0004 `collecting` stage: the visitor filled the missing business
-   * fields on the mini-form. PATCH merges them and recomputes the stage. */
+  /** ADR-0004 `collecting` stage: save the missing business-profile fields. */
   async function submitBusinessProfile() {
-    if (!conversationId || sending || !hydrated) return;
-    const body = Object.fromEntries(
-      Object.entries(collectingDraft)
-        .map(([k, v]) => [k, v.trim()])
-        .filter(([, v]) => v)
-    );
-    if (Object.keys(body).length === 0) return;
-    setSending(true);
-    setError(null);
     setWriteInstead(false);
-    try {
-      const res = await fetch(
-        `/api/portal/conversations/${conversationId}/business-profile`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        }
-      );
-      if (!res.ok) throw new Error("Não foi possível salvar os dados.");
-      const turn = (await res.json()) as {
-        ready_to_submit: boolean;
-        preview: DiagnosisPreview | null;
-      };
-      setReadyToSubmit(turn.ready_to_submit);
-      setPreview(turn.preview);
-      setCollectingDraft({});
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível salvar os dados.");
-    } finally {
-      setSending(false);
-    }
+    if (await submitProfile(collectingDraft)) setCollectingDraft({});
   }
 
   /** The edits made on the review step's checkbox/radio groups, only included
@@ -691,74 +333,16 @@ export default function NewQuoteModal({
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} · ${hhmm(d)}`;
   }
 
-  async function handleConfirm(overrides?: {
-    email?: string;
-    phone?: string;
-    password?: string;
-    contact_name?: string;
-    contact_company?: string;
-  }) {
-    if (!conversationId || confirming) return;
-    setConfirming(true);
-    setError(null);
-    try {
-      const response = await fetch(`/api/portal/conversations/${conversationId}/draft-quote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...reviewOverrides(), ...(overrides ?? {}) }),
-      });
-      if (!response.ok) throw new Error("Não foi possível registrar o orçamento.");
-      const quote = (await response.json()) as DraftQuoteResult;
-      setConfirmedAtLabel(stamp(new Date()));
-      setConfirmedQuote(quote);
-      if (quote.tokens) router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível registrar o orçamento.");
-    } finally {
-      setConfirming(false);
-    }
-  }
-
-  const detectedLegalEntity = preview?.business_profile?.is_legal_entity === true;
-  const showCompanyField = detectedLegalEntity && !noCompany;
-  const companyValue = companyTouched
-    ? contactCompany
-    : preview?.business_profile?.company_name ?? "";
-
-  function handleContactSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!contactName.trim()) {
-      setError("informe seu nome pra montar a cotação.");
-      return;
-    }
-    if (!contactEmail.trim()) {
-      setError("informe um e-mail pra receber a cotação.");
-      return;
-    }
-    if (!consent) {
-      setError("confirme a autorização de contato pra enviar a cotação.");
-      return;
-    }
-    handleConfirm({
-      email: contactEmail.trim(),
-      phone: contactPhone.trim() || undefined,
-      password: contactPassword.trim() || undefined,
-      contact_name: contactName.trim(),
-      // "" is meaningful: the visitor said "não tenho empresa" -> clear it.
-      ...(detectedLegalEntity
-        ? { contact_company: noCompany ? "" : companyValue.trim() }
-        : {}),
-    });
+  async function handleConfirm() {
+    const quote = await confirm(reviewOverrides());
+    if (!quote) return;
+    setConfirmedAtLabel(stamp(new Date()));
+    if (quote.tokens) router.refresh();
   }
 
   function goToQuotes() {
-    onClose?.();
+    onClose();
     router.push("/portal/orcamentos");
-  }
-
-  function closeOrHome() {
-    if (onClose) onClose();
-    else router.push("/");
   }
 
   /** From the confirmation card: drop back into the same thread (same
@@ -768,37 +352,8 @@ export default function NewQuoteModal({
    * rejected server-side -- that path surfaces as a normal failed-message
    * retry, and reopening the session is a separate follow-up. */
   function keepChatting() {
-    setConfirmedQuote(null);
+    clearConfirmed();
     setForceComposer(true);
-  }
-
-  /** Canvas 1b: quick-start pills under the first AI message, before any turn. */
-  function renderOpeningIntents() {
-    if (
-      !openingIntents ||
-      openingIntents.length === 0 ||
-      preview?.next_step ||
-      sending ||
-      messages.length !== 1 ||
-      messages[0].role !== "ai"
-    ) {
-      return null;
-    }
-    return (
-      <div className={styles.optionsPills} role="group" aria-label="Sugestões para começar">
-        {openingIntents.map((intent) => (
-          <button
-            key={intent}
-            type="button"
-            className={styles.optionPill}
-            disabled={sending || !hydrated}
-            onClick={() => send(intent)}
-          >
-            {intent}
-          </button>
-        ))}
-      </div>
-    );
   }
 
   /** Canvas screen 3: the concierge's tappable options for the current
@@ -879,10 +434,10 @@ export default function NewQuoteModal({
               {o.recommended && <span className={styles.optionCardBadge}>recomendado</span>}
             </div>
             <p className={styles.optionCardSummary}>{o.summary}</p>
-            {(o.price_range || o.timeline) && (
+            {/* Só prazo: preço nunca aparece antes da aprovação (#66). */}
+            {o.timeline && (
               <div className={styles.optionCardMeta}>
-                {o.price_range && <span>{o.price_range}</span>}
-                {o.timeline && <span>{o.timeline}</span>}
+                <span>{o.timeline}</span>
               </div>
             )}
             <button
@@ -942,7 +497,7 @@ export default function NewQuoteModal({
   }
 
   /** Canvas 1d-1e: editable checkbox group of solution kinds + timeline
-   * radios shown on the review/contact step, seeded from the preview.
+   * radios shown on the review step, seeded from the preview.
    * Budget is no longer an editable review field (ADR-0007: budget_ceiling
    * is an optional constraint, never a question posed to the visitor). */
   function renderReviewFields() {
@@ -994,7 +549,7 @@ export default function NewQuoteModal({
   }
 
   /** Canvas 1d: the "diagnóstico · rascunho" card — kicker + source, solution
-   * title, short description, a 2-up faixa/prazo grid in Geist Mono, and the
+   * title, short description, the prazo stat in Geist Mono, and the
    * diamond estimate caveat. Data is reformatted from `preview`; no new call. */
   function renderPreview() {
     if (!preview) return null;
@@ -1017,11 +572,8 @@ export default function NewQuoteModal({
         </div>
         <h3 className={styles.previewCardTitle}>{title}</h3>
         {desc && <p className={styles.previewCardDesc}>{desc}</p>}
+        {/* Sem faixa de preço: o valor só chega depois da revisão (#66). */}
         <div className={styles.previewCardGrid}>
-          <div className={styles.previewStat}>
-            <div className={styles.previewStatLabel}>faixa estimada</div>
-            <div className={styles.previewStatGreen}>{preview.budget_range || "a estimar"}</div>
-          </div>
           <div className={styles.previewStat}>
             <div className={styles.previewStatLabel}>prazo estimado</div>
             <div className={styles.previewStatPlain}>{preview.timeline || "a estimar"}</div>
@@ -1029,12 +581,11 @@ export default function NewQuoteModal({
         </div>
         <div className={styles.previewCardWarn}>
           <span className={styles.previewDiamond}>◆</span>
-          faixa e prazo são estimativas — sujeitas à revisão do time da DevButter antes de virar
-          proposta.
+          escopo e prazo são estimativas — o time da DevButter revisa e manda a proposta com valor.
         </div>
         {!grounded && (
           <div className={styles.previewMissing}>
-            Faixa preliminar; a base não trouxe uma referência suficiente.
+            Estimativa preliminar; a base não trouxe uma referência suficiente.
           </div>
         )}
         {preview.missing_information.length > 0 && (
@@ -1046,68 +597,9 @@ export default function NewQuoteModal({
     );
   }
 
-  /** Canvas 1c: the captured-info chip row under the thread while qualifying
-   * (public panel only — the portal workspace shows the full dossiê instead). */
-  function renderCaptureChips() {
-    const bp = preview?.business_profile;
-    if (!bp || mode !== "public") return null;
-    const chips: React.ReactNode[] = [];
-    if (bp.company_name) {
-      chips.push(
-        <span key="empresa" className={styles.captureChip}>
-          empresa: {bp.company_name} <span className={styles.captureEdit} aria-hidden>✎</span>
-        </span>
-      );
-    } else if (bp.is_legal_entity === true) {
-      chips.push(
-        <span key="empresa" className={styles.captureChipMissing}>
-          empresa: falta
-        </span>
-      );
-    }
-    if (bp.segment) {
-      chips.push(
-        <span key="segmento" className={styles.captureChip}>
-          segmento: {bp.segment}
-        </span>
-      );
-    }
-    if (bp.city) {
-      chips.push(
-        <span key="cidade" className={styles.captureChip}>
-          cidade: {bp.city}
-        </span>
-      );
-    }
-    if (bp.volume) {
-      chips.push(
-        <span key="volume" className={styles.captureChip}>
-          volume: {bp.volume} <span className={styles.captureEdit} aria-hidden>✎</span>
-        </span>
-      );
-    }
-    for (const m of bp.metrics ?? []) {
-      chips.push(
-        <span key={`m-${m.label}`} className={styles.captureChip}>
-          {m.label}: {m.value}
-        </span>
-      );
-    }
-    chips.push(
-      <span
-        key="contato"
-        className={bp.contact_ready ? styles.captureChip : styles.captureChipMissing}
-      >
-        contato: {bp.contact_ready ? "ok" : "falta"}
-      </span>
-    );
-    if (chips.length === 0) return null;
-    return <div className={styles.captureChips}>{chips}</div>;
-  }
-
   /** Canvas screen 2a: the live dossiê that assembles on the left of the portal
    * workspace as the conversation progresses. Blocks land with `rowIn`; the
-   * live "números do negócio" card sweeps; faixa/prazo stay skeleton-locked
+   * live "números do negócio" card sweeps; prazo stays skeleton-locked
    * until `ready_to_submit`, then unlock with `tick`. */
   function renderDossier() {
     const bp = preview?.business_profile ?? null;
@@ -1126,11 +618,8 @@ export default function NewQuoteModal({
     const CIRC = 201; // 2·π·r, r = 32
     const dashOffset = CIRC - (CIRC * answered) / total;
 
-    const stampFor = (id: string, has: boolean): string | null => {
-      if (!has) return null;
-      if (!dossierStamps.current.has(id)) dossierStamps.current.set(id, hhmm());
-      return dossierStamps.current.get(id) ?? null;
-    };
+    const stampFor = (id: string, has: boolean): string | null =>
+      has ? dossierStamps[id] ?? null : null;
 
     const blockHead = (id: string, label: string, ok: boolean, extra?: React.ReactNode) => (
       <div className={styles.dossierBlockHead}>
@@ -1256,18 +745,13 @@ export default function NewQuoteModal({
 
           <div className={`${styles.dossierBlock} ${readyToSubmit ? "" : styles.dossierBlockLocked}`}>
             {blockHead(
-              "faixa",
-              readyToSubmit ? "faixa e prazo" : "faixa e prazo · bloqueado",
-              readyToSubmit && (checks[5] || checks[6])
+              "prazo",
+              readyToSubmit ? "prazo" : "prazo · bloqueado",
+              readyToSubmit && checks[5]
             )}
+            {/* Sem faixa de preço antes da aprovação (#66). */}
             {readyToSubmit ? (
               <div className={styles.dossierUnlockGrid}>
-                <div className={styles.dossierUnlockStat}>
-                  <div className={styles.dossierStatLabel}>faixa estimada</div>
-                  <div className={styles.dossierUnlockValueGreen}>
-                    {preview?.budget_range || "a estimar"}
-                  </div>
-                </div>
                 <div className={styles.dossierUnlockStat}>
                   <div className={styles.dossierStatLabel}>prazo estimado</div>
                   <div className={styles.dossierUnlockValue}>
@@ -1278,10 +762,6 @@ export default function NewQuoteModal({
             ) : (
               <>
                 <div className={styles.dossierUnlockGrid}>
-                  <div className={styles.dossierLockBox}>
-                    <div className={styles.dossierStatLabel}>faixa estimada</div>
-                    <span className={styles.dossierSkeletonLine} />
-                  </div>
                   <div className={styles.dossierLockBox}>
                     <div className={styles.dossierStatLabel}>prazo estimado</div>
                     <span className={styles.dossierSkeletonLine} />
@@ -1309,47 +789,27 @@ export default function NewQuoteModal({
 
   if (!portalReady) return null;
 
-  /** Wraps the chat column in the right shell for this surface and portals it
-   * onto <body>. `workspace` adds the live dossiê as a second column. */
-  const shell = (children: React.ReactNode) => {
-    if (surface === "workspace") {
-      return createPortal(
-        <div
-          className={`${styles.scrim} ${entering ? styles.scrimEnter : ""}`}
-          onClick={closeOrHome}
-        >
-          <div
-            className={`${styles.workspace} ${entering ? styles.workspaceEnter : ""}`}
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Novo orçamento com a IA"
-          >
-            <aside className={styles.dossier}>{renderDossier()}</aside>
-            <div className={styles.chatCol}>{children}</div>
-          </div>
-        </div>,
-        document.body
-      );
-    }
-    return createPortal(
+  /** Wraps the chat column in the two-column workspace (live dossiê on the
+   * left) and portals it onto <body>. */
+  const shell = (children: React.ReactNode) =>
+    createPortal(
       <div
-        className={`${styles.scrim} ${styles.scrimPanel} ${entering ? styles.scrimEnter : ""}`}
-        onClick={closeOrHome}
+        className={`${styles.scrim} ${entering ? styles.scrimEnter : ""}`}
+        onClick={onClose}
       >
         <div
-          className={`${styles.panel} ${entering ? styles.panelEnter : ""}`}
+          className={`${styles.workspace} ${entering ? styles.workspaceEnter : ""}`}
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
-          aria-label="Falar com a IA da DevButter"
+          aria-label="Novo orçamento com a IA"
         >
-          {children}
+          <aside className={styles.dossier}>{renderDossier()}</aside>
+          <div className={styles.chatCol}>{children}</div>
         </div>
       </div>,
       document.body
     );
-  };
 
   if (confirmedQuote) {
     return shell(
@@ -1360,11 +820,7 @@ export default function NewQuoteModal({
           <p className={styles.confirmText}>
             {confirmedQuote.pending_account_link
               ? "Esse e-mail já é de um cliente nosso — avisamos o dono da conta pra conferir o pedido."
-              : `${
-                  contactEmail.trim()
-                    ? `Confirmação enviada para ${contactEmail.trim()}. `
-                    : ""
-                }O time da DevButter revisa o escopo e a faixa antes de virar proposta — normalmente em até 1 dia útil.`}
+              : "O time da DevButter revisa o escopo e manda a proposta com valor — normalmente em até 1 dia útil."}
           </p>
         </div>
         <div className={styles.confirmCard}>
@@ -1374,7 +830,6 @@ export default function NewQuoteModal({
           </div>
           <div className={styles.confirmCardTitle}>{confirmedQuote.scope_summary}</div>
           <div className={styles.confirmCardMeta}>
-            {confirmedQuote.price_range && <span>faixa {confirmedQuote.price_range}</span>}
             {confirmedQuote.timeline && <span>prazo {confirmedQuote.timeline}</span>}
             {confirmedAtLabel && (
               <span className={styles.confirmCardMuted}>enviado {confirmedAtLabel}</span>
@@ -1394,9 +849,7 @@ export default function NewQuoteModal({
           <span className={styles.altContactSep} aria-hidden>
             ·
           </span>
-          <span onClick={closeOrHome}>
-            {mode === "portal" ? "Preciso pedir outra coisa" : "Voltar para a home"}
-          </span>
+          <span onClick={onClose}>Preciso pedir outra coisa</span>
         </div>
       </div>
     );
@@ -1413,11 +866,7 @@ export default function NewQuoteModal({
     );
   }
 
-  const headStatus = sending
-    ? "digitando…"
-    : surface === "workspace"
-      ? "online · novo orçamento"
-      : "online · responde na hora";
+  const headStatus = sending ? "digitando…" : "online · novo orçamento";
 
   return shell(
     <>
@@ -1455,7 +904,7 @@ export default function NewQuoteModal({
           <button
             type="button"
             className={styles.close}
-            onClick={closeOrHome}
+            onClick={onClose}
             aria-label="Fechar"
           >
             ✕
@@ -1468,9 +917,6 @@ export default function NewQuoteModal({
         className={`${styles.scrollRegion} ${composerHidden ? styles.scrollFrozen : ""}`}
       >
       <div className={styles.thread}>
-        {surface === "panel" && hydrated && (
-          <div className={styles.dateDivider}>{startedAtLabel}</div>
-        )}
         {messages.map((m, i) => {
           if (m.content === "") return null;
           if (m.status === "failed") {
@@ -1520,8 +966,6 @@ export default function NewQuoteModal({
 
       {showComposer ? (
         <>
-          {renderCaptureChips()}
-          {renderOpeningIntents()}
           {renderOptions()}
           {renderOptionCards()}
           {renderCollectingForm()}
@@ -1534,173 +978,39 @@ export default function NewQuoteModal({
               escrever resposta
             </button>
           ) : (
-            <>
-              <div className={styles.composer}>
-                <div className={styles.composerRow}>
-                  <textarea
-                    ref={textareaRef}
-                    className={styles.textarea}
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    placeholder={
-                      preview?.next_step
-                        ? "…ou escreva a sua resposta"
-                        : "conta o que você precisa…"
+            <div className={styles.composer}>
+              <div className={styles.composerRow}>
+                <textarea
+                  ref={textareaRef}
+                  className={styles.textarea}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder={
+                    preview?.next_step
+                      ? "…ou escreva a sua resposta"
+                      : "conta o que você precisa…"
+                  }
+                  disabled={sending || !hydrated}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      send();
                     }
-                    disabled={sending || !hydrated}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        send();
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className={styles.send}
-                    onClick={() => send()}
-                    disabled={!draft.trim() || sending || !hydrated}
-                    aria-label="Enviar"
-                  >
-                    {sending ? "…" : "↑"}
-                  </button>
-                </div>
-              </div>
-              {surface === "panel" && (
-                <div className={styles.composerHint}>
-                  enter envia · shift+enter quebra linha · sem cadastro pra conversar
-                </div>
-              )}
-            </>
-          )}
-        </>
-      ) : showContactStep ? (
-        <form className={styles.contactForm} onSubmit={handleContactSubmit}>
-          {renderPreview()}
-          {renderReviewFields()}
-          <div className={styles.contactField}>
-            <div className={styles.contactFieldLabel}>
-              seu nome <span className={styles.required}>obrigatório</span>
-            </div>
-            <input
-              className={styles.contactInput}
-              type="text"
-              value={contactName}
-              onChange={(e) => setContactName(e.target.value)}
-              placeholder="como devemos te chamar"
-              autoComplete="name"
-              required
-            />
-          </div>
-          {detectedLegalEntity && (
-            <div className={styles.contactField}>
-              <div className={styles.contactFieldLabel}>
-                empresa <span className={styles.detected}>detectado no chat</span>
-              </div>
-              {showCompanyField ? (
-                <>
-                  <input
-                    className={`${styles.contactInput} ${styles.contactInputDetected}`}
-                    type="text"
-                    value={companyValue}
-                    onChange={(e) => {
-                      setCompanyTouched(true);
-                      setContactCompany(e.target.value);
-                    }}
-                    placeholder="nome da empresa"
-                    autoComplete="organization"
-                  />
-                  <button
-                    type="button"
-                    className={styles.contactToggle}
-                    onClick={() => setNoCompany(true)}
-                  >
-                    não tenho empresa — é pra mim mesmo
-                  </button>
-                </>
-              ) : (
+                  }}
+                />
                 <button
                   type="button"
-                  className={styles.contactToggle}
-                  onClick={() => setNoCompany(false)}
+                  className={styles.send}
+                  onClick={() => send()}
+                  disabled={!draft.trim() || sending || !hydrated}
+                  aria-label="Enviar"
                 >
-                  tenho empresa — quero informar
+                  {sending ? "…" : "↑"}
                 </button>
-              )}
+              </div>
             </div>
           )}
-          <div className={styles.contactFieldRow}>
-            <div className={styles.contactField}>
-              <div className={styles.contactFieldLabel}>
-                e-mail <span className={styles.required}>obrigatório</span>
-              </div>
-              <input
-                className={`${styles.contactInput} ${styles.contactInputDetected}`}
-                type="email"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-                placeholder="voce@empresa.com.br"
-                autoComplete="email"
-                required
-              />
-            </div>
-            <div className={styles.contactField}>
-              <div className={styles.contactFieldLabel}>
-                whatsapp <span className={styles.optional}>opcional</span>
-              </div>
-              <input
-                className={styles.contactInput}
-                type="tel"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-                placeholder="(41) 99999-9999"
-                autoComplete="tel"
-              />
-            </div>
-          </div>
-          <div className={styles.contactField}>
-            <div className={styles.contactFieldLabel}>senha</div>
-            <input
-              className={styles.contactInput}
-              type="password"
-              value={contactPassword}
-              onChange={(e) => setContactPassword(e.target.value)}
-              placeholder="mínimo 8 caracteres"
-              autoComplete="new-password"
-            />
-            <div className={styles.contactHint}>
-              mínimo 8 caracteres · ou receba um link mágico por e-mail
-            </div>
-          </div>
-          <label className={styles.consentRow}>
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-            />
-            <span className={styles.consentBox} aria-hidden>
-              {consent ? "✓" : ""}
-            </span>
-            <span>
-              Autorizo a DevButter a me contatar sobre esta cotação. Posso apagar meus dados
-              quando quiser.
-            </span>
-          </label>
-          <button
-            type="submit"
-            className={styles.submit}
-            disabled={confirming || !consent}
-          >
-            {confirming ? "Registrando…" : "Criar conta e enviar cotação"}
-          </button>
-          <div className={styles.altContact} onClick={() => setForceComposer(true)}>
-            Continuar conversando
-          </div>
-          <div className={styles.contactFootnote}>
-            <span aria-hidden>↑</span>
-            a conversa fica salva mesmo se você fechar agora — o link volta pra este ponto.
-          </div>
-        </form>
+        </>
       ) : showReadyPanel ? (
         <div className={styles.readyPanel}>
           {renderPreview()}
