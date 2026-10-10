@@ -34,8 +34,22 @@ function adminLoginUrl(request: NextRequest) {
 }
 
 export async function proxy(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/portal")) {
+  const { pathname } = request.nextUrl;
+
+  if (process.env.MAINTENANCE_MODE === "true") {
+    if (pathname !== "/manutencao" && !pathname.startsWith("/manutencao/")) {
+      return NextResponse.rewrite(new URL("/manutencao", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith("/portal")) {
+    if (PUBLIC_PORTAL_PATH.test(pathname)) return NextResponse.next();
     return portalProxy(request);
+  }
+
+  if (!pathname.startsWith("/admin") || pathname === "/admin/login") {
+    return NextResponse.next();
   }
 
   const accessToken = request.cookies.get(ADMIN_ACCESS_COOKIE)?.value;
@@ -87,13 +101,14 @@ async function refreshTokenPair(
 }
 
 const RECEBIMENTOS_PATH = "/portal/recebimentos";
+const PUBLIC_PORTAL_PATH = /^\/portal\/(login|signup|sessao-expirada|acesso-negado|senha|recuperar-senha)(\/|$)/;
 
 // Paths that stay reachable even while the onboarding gate is active. The
 // matcher already keeps login/signup/sessao-expirada/acesso-negado out; this
 // is the defensive list for anything the matcher still lets through.
 function isGateExemptPortalPath(pathname: string): boolean {
   if (pathname === RECEBIMENTOS_PATH || pathname.startsWith(`${RECEBIMENTOS_PATH}/`)) return true;
-  return /^\/portal\/(login|signup|sessao-expirada|acesso-negado|senha|recuperar-senha)(\/|$)/.test(pathname);
+  return PUBLIC_PORTAL_PATH.test(pathname);
 }
 
 // The onboarding gate (portal-recebimentos-onboarding.md §2): while
@@ -177,14 +192,5 @@ async function refreshPortalTokenPair(
 }
 
 export const config = {
-  matcher: [
-    "/admin",
-    "/admin/((?!login).*)",
-    "/portal",
-    // sessao-expirada / acesso-negado are the unauthenticated fallbacks the
-    // portal redirects *to*, so they must stay reachable without a session.
-    // senha / recuperar-senha are opened from e-mail links by visitors who
-    // aren't logged in yet (issues #60, #61).
-    "/portal/((?!login|signup|sessao-expirada|acesso-negado|senha|recuperar-senha).*)",
-  ],
+  matcher: ["/((?!api/|_next/|.*\\.).*)"],
 };

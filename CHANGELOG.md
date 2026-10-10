@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- Corrigido o `MAINTENANCE_MODE`: o proxy agora reescreve páginas para
+  `/manutencao`, preservando APIs e arquivos estáticos. O comportamento foi
+  validado no servidor Next de produção local.
+
 - **Site hi-fi** (`docs/design/Site DevButter.dc.html`), branch `feat/site-hifi`:
   - Route groups `(site)` (SiteShell: nav, footer, skip link, painel único de
     diagnóstico) e `(auth)` (AuthShell). Novas rotas: `/metodo`, `/cases`
@@ -31,6 +35,11 @@
     com fallback 2D) no lugar de Flask3D/FlaskSvg; keyframes do módulo locais
     (#53). Removidos Flask3D, `useMediaQuery`, `three`, `@react-three/fiber` e
     `@types/three`.
+  - Recuperação do frasco anterior: na home, consultar `2dce96d` antes de
+    `e58fc91` (`Hero.tsx`, `HeroFlaskSvg.tsx`, `HeroTerrain.tsx`); na página
+    `/manutencao`, consultar `c93b613` antes de `661a0c5` (`Flask3D/*`,
+    `Maintenance/FlaskSvg.tsx`, `Maintenance.tsx`). O frasco do logotipo segue
+    em `src/components/icons/Logomark.tsx`.
   - Corrigidos: #32, #60, #61, #62, #63, #64, #65, #66, #67, #68.
   - Lighthouse mobile da home (prod): performance 96 → 98, peso total
     498 KB → 261 KB.
