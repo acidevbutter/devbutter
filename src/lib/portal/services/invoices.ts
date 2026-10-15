@@ -16,6 +16,7 @@ export async function listInvoices(): Promise<PortalInvoice[]> {
         status: invoice.status as PortalInvoice["status"],
         pixCode: null,
         boletoUrl: invoice.payment_link,
+        billingType: invoice.billing_type ?? null,
       }))
     )
     .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());

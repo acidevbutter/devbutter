@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatCurrency, formatDate } from "@/lib/admin/format";
+import { describePayment } from "@/lib/portal/payment-label";
 import styles from "./PixBoletoView.module.scss";
 
 // Renders whatever the invoice actually carries from Asaas: a Pix
@@ -10,17 +11,20 @@ import styles from "./PixBoletoView.module.scss";
 export default function PixBoletoView({
   pixCode,
   boletoUrl,
+  billingType,
   amount,
   dueDate,
   projectTitle,
 }: {
   pixCode: string | null;
   boletoUrl: string | null;
+  billingType: string | null;
   amount: string;
   dueDate: string;
   projectTitle: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const view = describePayment(billingType, pixCode, !!boletoUrl);
 
   if (!pixCode && !boletoUrl) {
     return (
@@ -44,7 +48,7 @@ export default function PixBoletoView({
   return (
     <div className={styles.wrap}>
       <div className={styles.head}>
-        <span className={styles.method}>{pixCode ? "Pix" : "Boleto"}</span>
+        <span className={styles.method}>{view.method}</span>
         <span className={styles.pending}>aguardando pagamento</span>
       </div>
 
@@ -57,9 +61,9 @@ export default function PixBoletoView({
         </div>
       )}
 
-      {boletoUrl && (
+      {boletoUrl && view.linkLabel && (
         <a className={styles.boletoLink} href={boletoUrl} target="_blank" rel="noreferrer">
-          baixar boleto (PDF) →
+          {view.linkLabel}
         </a>
       )}
 
