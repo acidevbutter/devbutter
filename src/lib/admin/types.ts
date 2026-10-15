@@ -116,6 +116,8 @@ export interface InvoiceRead {
   status: string;
   due_date: string;
   payment_link: string | null;
+  /** Asaas billingType: PIX | BOLETO | CREDIT_CARD | UNDEFINED (null on legacy invoices). */
+  billing_type?: string | null;
   created_at: string;
 }
 

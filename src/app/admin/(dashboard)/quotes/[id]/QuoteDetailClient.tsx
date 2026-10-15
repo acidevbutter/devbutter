@@ -57,18 +57,18 @@ export default function QuoteDetailClient({
     null
   );
 
+  // Controlled so a failed approval (which resets uncontrolled form fields)
+  // keeps what the admin typed.
+  const [approveAmount, setApproveAmount] = useState("");
+  const [approveDueDate, setApproveDueDate] = useState("");
+  const [approveBilling, setApproveBilling] = useState("UNDEFINED");
+
   const [documentState, documentFormAction, documentPending] = useActionState<ActionState, FormData>(
     updateClientDocumentAction.bind(null, accountId, quote.id),
     null
   );
   const missingDocument =
     !!linkedClient && !linkedClient.cpf && !linkedClient.cnpj && !linkedClient.asaas_customer_id;
-
-  // Controlled so a failed approval (which resets uncontrolled form fields)
-  // keeps what the admin typed.
-  const [approveAmount, setApproveAmount] = useState("");
-  const [approveDueDate, setApproveDueDate] = useState("");
-  const [approveBilling, setApproveBilling] = useState("UNDEFINED");
 
   const [rejectError, setRejectError] = useState<string | null>(null);
   const [rejectPending, setRejectPending] = useState(false);
