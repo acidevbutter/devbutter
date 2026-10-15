@@ -49,4 +49,11 @@ USER app
 
 EXPOSE 3000
 
+# Liveness only: Coolify has its UI healthcheck off for these apps, so the image
+# carries its own. 127.0.0.1, not localhost (which resolves to ::1 while the
+# server listens on IPv4 -- DVB-348/DVB-458). Any HTTP answer counts as alive, so
+# maintenance mode or redirects never mark the container unhealthy.
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
+  CMD curl -s -o /dev/null http://127.0.0.1:3000/ || exit 1
+
 CMD ["node", "server.js"]
