@@ -64,6 +64,12 @@ export default function QuoteDetailClient({
   const missingDocument =
     !!linkedClient && !linkedClient.cpf && !linkedClient.cnpj && !linkedClient.asaas_customer_id;
 
+  // Controlled so a failed approval (which resets uncontrolled form fields)
+  // keeps what the admin typed.
+  const [approveAmount, setApproveAmount] = useState("");
+  const [approveDueDate, setApproveDueDate] = useState("");
+  const [approveBilling, setApproveBilling] = useState("UNDEFINED");
+
   const [rejectError, setRejectError] = useState<string | null>(null);
   const [rejectPending, setRejectPending] = useState(false);
   // In-page confirmation: window.confirm() is invisible to automated tests and
@@ -285,9 +291,28 @@ export default function QuoteDetailClient({
                   </form>
                 )}
                 <form action={approveFormAction} className={styles.approveForm}>
-                  <input className={styles.input} name="amount" placeholder="valor (R$)" required />
-                  <input className={styles.input} name="due_date" type="date" required />
-                  <select className={styles.input} name="billing_type" defaultValue="UNDEFINED">
+                  <input
+                    className={styles.input}
+                    name="amount"
+                    placeholder="valor (R$)"
+                    required
+                    value={approveAmount}
+                    onChange={(e) => setApproveAmount(e.target.value)}
+                  />
+                  <input
+                    className={styles.input}
+                    name="due_date"
+                    type="date"
+                    required
+                    value={approveDueDate}
+                    onChange={(e) => setApproveDueDate(e.target.value)}
+                  />
+                  <select
+                    className={styles.input}
+                    name="billing_type"
+                    value={approveBilling}
+                    onChange={(e) => setApproveBilling(e.target.value)}
+                  >
                     <option value="UNDEFINED">forma de cobrança a definir</option>
                     <option value="BOLETO">boleto</option>
                     <option value="PIX">pix</option>
