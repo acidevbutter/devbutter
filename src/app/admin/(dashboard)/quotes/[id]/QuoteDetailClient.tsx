@@ -55,13 +55,16 @@ export default function QuoteDetailClient({
 
   const [rejectError, setRejectError] = useState<string | null>(null);
   const [rejectPending, setRejectPending] = useState(false);
+  // In-page confirmation: window.confirm() is invisible to automated tests and
+  // freezes the tab under CDP, which made "Rejeitar" look like a no-op (DVB-358).
+  const [confirmingReject, setConfirmingReject] = useState(false);
 
   async function handleReject() {
-    if (!confirm("Rejeitar este quote?")) return;
     setRejectPending(true);
     setRejectError(null);
     const result = await rejectQuoteAction(quote.id);
     setRejectPending(false);
+    setConfirmingReject(false);
     if (result?.error) {
       setRejectError(result.error);
       return;
@@ -277,14 +280,38 @@ export default function QuoteDetailClient({
                 >
                   {editPending ? "Salvando…" : "Salvar alterações"}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleReject}
-                  disabled={rejectPending}
-                  className={styles.btnDanger}
-                >
-                  {rejectPending ? "Rejeitando…" : "Rejeitar"}
-                </button>
+                {confirmingReject ? (
+                  <>
+                    <div role="alert">Rejeitar este quote? O cliente deixa de poder aprová-lo.</div>
+                    <button
+                      type="button"
+                      onClick={handleReject}
+                      disabled={rejectPending}
+                      className={styles.btnDanger}
+                    >
+                      {rejectPending ? "Rejeitando…" : "Confirmar rejeição"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingReject(false)}
+                      disabled={rejectPending}
+                      className={styles.btnGhost}
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRejectError(null);
+                      setConfirmingReject(true);
+                    }}
+                    className={styles.btnDanger}
+                  >
+                    Rejeitar
+                  </button>
+                )}
                 {rejectError && <div className={styles.error}>{rejectError}</div>}
               </div>
             ) : (
