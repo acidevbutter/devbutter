@@ -1,3 +1,4 @@
+import { redactPrices } from "@/lib/portal/redact";
 import { portalErrorResponse, portalFetchOptionalAuth } from "@/lib/portal/api";
 
 // ADR-0004: the visitor picked one of the concierge's proposed paths.
@@ -12,7 +13,7 @@ export async function POST(
       method: "POST",
       body: JSON.stringify(body),
     });
-    return Response.json(turn);
+    return Response.json(redactPrices(turn));
   } catch (error) {
     return portalErrorResponse(error);
   }

@@ -1,76 +1,79 @@
-"use client";
-
-import useRevealOnce from "@/hooks/useRevealOnce";
 import styles from "./FeatureStrip.module.scss";
 
 const FEATURES = [
   {
     accent: "green" as const,
-    title: "Experiências 3D imersivas",
-    desc: "WebGL e Three.js que dão presença à marca.",
+    title: "Sites",
+    desc: "Que explicam o que você faz e trazem o contato certo, sem depender de agência pra cada ajuste.",
     icon: (
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#79E59B" strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round">
-        <path d="M13 3 4 8v10l9 5 9-5V8z" />
-        <path d="M4 8l9 5 9-5M13 13v10" />
-      </svg>
+      <>
+        <rect x="3" y="5" width="20" height="16" rx="2.5" />
+        <path d="M3 9.5h20M6.5 7.2h.01M9 7.2h.01" />
+      </>
     ),
   },
   {
     accent: "pink" as const,
-    title: "IA aplicada a problemas reais",
-    desc: "Agentes e RAG treinados no seu contexto.",
+    title: "Plataformas",
+    desc: "No lugar das planilhas que ninguém mais confia. Estoque, pedidos e financeiro conversando.",
     icon: (
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#F64C6F" strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round">
-        <path d="M10 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3V4z" />
-        <path d="M16 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3V4z" />
-        <path d="M10 10h2M14 15h2" />
-      </svg>
+      <>
+        <rect x="3.5" y="3.5" width="8" height="8" rx="2" />
+        <rect x="14.5" y="3.5" width="8" height="8" rx="2" />
+        <rect x="3.5" y="14.5" width="8" height="8" rx="2" />
+        <rect x="14.5" y="14.5" width="8" height="8" rx="2" />
+      </>
     ),
   },
   {
     accent: "green" as const,
-    title: "Automação que escala",
-    desc: "Fluxos que conectam suas ferramentas.",
+    title: "Agentes",
+    desc: "Que atendem do seu jeito, no WhatsApp ou no site, e passam pra uma pessoa quando precisa.",
     icon: (
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#79E59B" strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round">
-        <circle cx="7" cy="7" r="3" />
-        <circle cx="19" cy="19" r="3" />
-        <path d="M10 7h6a3 3 0 0 1 3 3v6M16 4l3 3-3 3" />
-      </svg>
+      <>
+        <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h13A2.5 2.5 0 0 1 22 6.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-5 4v-4h0.5A2.5 2.5 0 0 1 4 14.5z" />
+        <path d="M9 10.5h.01M13 10.5h.01M17 10.5h.01" />
+      </>
     ),
   },
   {
     accent: "pink" as const,
-    title: "Decisões guiadas por dados",
-    desc: "Do dado bruto à decisão com contexto.",
+    title: "Automações",
+    desc: "Pra tarefa repetida que ninguém quer fazer e todo mundo esquece.",
     icon: (
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#F64C6F" strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round">
-        <path d="M4 4v18h18" />
-        <path d="M8 16l4-5 3 3 5-7" />
-        <circle cx="20" cy="7" r="1.3" fill="#F64C6F" />
-      </svg>
+      <>
+        <path d="M20.5 10A8 8 0 0 0 6 7.5M5.5 16a8 8 0 0 0 14.5 2.5" />
+        <path d="M6 3.5v4h4M20 22.5v-4h-4" />
+      </>
     ),
   },
 ];
 
+/** Home · "O que a gente constrói". */
 export default function FeatureStrip() {
-  const [gridRef, shown] = useRevealOnce<HTMLDivElement>();
-
   return (
-    <section id="solucoes" className={styles.section}>
-      <div ref={gridRef} className={styles.grid}>
-        {FEATURES.map((f, i) => (
-          <div
-            key={f.title}
-            className={`${styles.card} ${shown ? styles.cardIn : ""} ${
-              f.accent === "green" ? styles.cardGreen : styles.cardPink
-            }`}
-            style={{ transitionDelay: `${i * 80}ms` }}
-          >
-            <div className={`${styles.iconTile} ${f.accent === "green" ? styles.iconTileGreen : styles.iconTilePink}`}>
-              {f.icon}
+    <section className={styles.section} aria-labelledby="o-que-construimos">
+      <h2 id="o-que-construimos" className={styles.eyebrow}>
+        O que a gente constrói
+      </h2>
+      <div className={styles.grid}>
+        {FEATURES.map((f) => (
+          <div key={f.title} className={`${styles.card} ${styles[f.accent]}`}>
+            <div className={styles.iconTile}>
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 26 26"
+                fill="none"
+                strokeWidth={1.5}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                {f.icon}
+              </svg>
             </div>
-            <div className={styles.title}>{f.title}</div>
+            <h3 className={styles.title}>{f.title}</h3>
             <p className={styles.desc}>{f.desc}</p>
           </div>
         ))}

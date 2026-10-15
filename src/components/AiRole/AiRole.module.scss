@@ -1,0 +1,72 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
+
+.section {
+  @include site.section(86px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: center;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 520px;
+
+  @media (max-width: $bp-md) {
+    padding: 56px 16px;
+  }
+}
+
+.copy {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.eyebrow {
+  @include site.eyebrow;
+}
+
+.h2 {
+  @include site.h2;
+}
+
+.intro {
+  @include site.intro;
+  margin: 14px 0 0;
+  max-width: 460px;
+}
+
+.points {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  color: $db-chat-text;
+
+  li {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+.check {
+  color: $db-green;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.frame {
+  flex: 1.1 1 380px;
+  min-width: 0;
+  height: 340px;
+  border: 1px solid $db-border;
+  border-radius: $r-xl;
+  overflow: hidden;
+  background: $db-bg;
+  position: relative;
+
+  @media (max-width: $bp-md) {
+    flex-basis: 100%;
+    height: 280px;
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "projectId": "3a4482cc-e574-45bc-a714-093a5140563c",
+  "shape": "package",
+  "pkg": "@devbutter/ui",
+  "globalName": "DevButter",
+  "buildCmd": "node design-system/build.mjs",
+  "cssEntry": "dist/style.css",
+  "docsDir": "docs",
+  "overrides": {
+    "Badge": {
+      "cardMode": "column"
+    },
+    "Card": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}

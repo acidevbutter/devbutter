@@ -26,6 +26,14 @@ export async function getClient(id: string): Promise<AdminClientDetail | null> {
   }
 }
 
+// Real: PATCH /admin/clients/{account_id}/document (CPF and/or CNPJ).
+export function updateClientDocument(id: string, payload: { cpf?: string; cnpj?: string }) {
+  return adminFetch<AdminClientDetail>(`/admin/clients/${id}/document`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
 /**
  * Real quotes/orders only carry an account_id — there's no bulk
  * id-to-name resolver, so this falls back to a short id label if the

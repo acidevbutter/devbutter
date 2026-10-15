@@ -1,0 +1,24 @@
+@use "../../styles/tokens" as *;
+
+.main {
+  display: block;
+  min-height: 60vh;
+  outline: none;
+}
+
+.skip {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: $z-toast;
+  padding: 10px 14px;
+  border-radius: $r-md;
+  background: $db-green;
+  color: $db-bg;
+  font: 600 13px var(--font-geist-sans), system-ui, sans-serif;
+
+  &:focus {
+    top: 12px;
+    color: $db-bg;
+  }
+}

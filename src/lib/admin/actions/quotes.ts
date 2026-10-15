@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import * as quotesService from "../services/quotes";
+import * as clientsService from "../services/clients";
 import { AdminApiError } from "../api";
 
 export type ActionState = { error: string } | null;
@@ -114,4 +115,26 @@ export async function createManualQuoteAction(
 
   revalidatePath("/admin/quotes");
   redirect(`/admin/quotes/${quote.id}`);
+}
+
+export async function updateClientDocumentAction(
+  accountId: string,
+  quoteId: string,
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const document = String(formData.get("document") ?? "").replace(/\D/g, "");
+  if (document.length !== 11 && document.length !== 14) {
+    return { error: "Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido." };
+  }
+  try {
+    await clientsService.updateClientDocument(
+      accountId,
+      document.length === 11 ? { cpf: document } : { cnpj: document }
+    );
+  } catch (err) {
+    return { error: err instanceof AdminApiError ? String(err.detail ?? err.message) : "Falha ao salvar o documento" };
+  }
+  revalidatePath(`/admin/quotes/${quoteId}`);
+  return null;
 }

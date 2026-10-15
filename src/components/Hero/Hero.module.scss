@@ -1,54 +1,41 @@
 @use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
+
+@include site.kf-fade-up;
 
 .hero {
   position: relative;
-  padding: 74px $db-section-pad-x 0;
+  padding: 56px $db-section-pad-x 48px;
   border-bottom: 1px solid $db-border;
   overflow: hidden;
-}
 
-.ambientDots {
-  position: absolute;
-  top: 120px;
-  right: 2vw;
-  opacity: 0.5;
-  display: none;
-
-  @media (min-width: 1100px) {
-    display: block;
+  @media (max-width: $bp-md) {
+    padding: 36px 16px 32px;
   }
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: 1.02fr 1fr;
-  gap: 36px;
-  align-items: center;
-  min-height: 70vh;
-  position: relative;
-  z-index: 2;
   max-width: $db-content-max;
   margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 36px;
+  align-items: center;
+}
 
-  @media (max-width: 940px) {
-    grid-template-columns: 1fr;
-    min-height: auto;
-    padding-top: 20px;
-    padding-bottom: 20px;
-  }
+.copy {
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 .eyebrow {
-  animation-delay: 0.05s;
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: $db-green;
+  @include site.eyebrow($db-green, 0.16em);
+  @include site.fade-up(0.05s);
   margin-bottom: 20px;
 }
 
 .h1 {
-  animation-delay: 0.12s;
+  @include site.fade-up(0.12s);
   margin: 0;
   font-weight: 800;
   line-height: 0.98;
@@ -57,28 +44,29 @@
 
 .h1Line1 {
   display: block;
-  font-size: clamp(30px, 3.4vw, 46px);
+  font-size: clamp(26px, 2.6vw, 36px);
   font-weight: 600;
   color: $db-text-primary;
 }
 
 .h1Line2 {
   display: block;
-  font-size: clamp(52px, 7vw, 92px);
+  font-size: clamp(42px, 4.8vw, 68px);
   color: $db-green;
 }
 
 .paragraph {
-  animation-delay: 0.22s;
-  max-width: 460px;
+  @include site.fade-up(0.22s);
+  max-width: 380px;
   font-size: 17px;
   line-height: 1.6;
   color: $db-text-secondary;
   margin: 24px 0 0;
+  text-wrap: pretty;
 }
 
 .ctas {
-  animation-delay: 0.32s;
+  @include site.fade-up(0.32s);
   display: flex;
   gap: 13px;
   margin-top: 32px;
@@ -86,189 +74,97 @@
 }
 
 .ctaPrimary {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-  padding: 14px 26px;
-  border-radius: 12px;
-  font: 600 15px var(--font-geist-sans);
-  cursor: pointer;
-  background: $db-green;
-  color: $db-bg;
-  border: none;
-  box-shadow: 0 0 32px rgba(0, 210, 106, 0.4);
-  transition: transform 0.15s, box-shadow 0.15s;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 40px rgba(0, 210, 106, 0.5);
-  }
+  @include site.btn-primary(lg);
 }
 
 .ctaSecondary {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-  padding: 14px 26px;
-  border-radius: 12px;
-  font: 600 15px var(--font-geist-sans);
-  cursor: pointer;
-  background: transparent;
-  color: $db-text-primary;
-  border: 1.5px solid rgba(255, 79, 163, 0.5);
-  box-shadow: 0 0 22px rgba(255, 79, 163, 0.12);
-  transition: border-color 0.15s, box-shadow 0.15s;
-
-  &:hover {
-    border-color: rgba(255, 79, 163, 0.8);
-    box-shadow: 0 0 28px rgba(255, 79, 163, 0.2);
-  }
+  @include site.btn-secondary;
 }
-
-// ---- illustration stage ----
 
 .stage {
+  flex: 2 1 480px;
+  min-width: 0;
   position: relative;
-  height: 500px;
+  height: 520px;
+  border: 1px solid $db-border;
+  border-radius: $r-xl;
+  overflow: hidden;
+  background: $db-surface-deep;
 
-  @media (max-width: 940px) {
+  @media (max-width: $bp-lg) {
+    height: 440px;
+  }
+
+  @media (max-width: $bp-md) {
+    flex-basis: 100%;
     height: 360px;
   }
-
-  @media (max-width: 560px) {
-    display: none;
-  }
 }
 
-.stageGlow {
-  position: absolute;
-  inset: -8%;
-  background: radial-gradient(circle at 56% 42%, rgba(246, 76, 111, 0.16), transparent 46%),
-    radial-gradient(circle at 42% 60%, rgba(121, 229, 155, 0.16), transparent 48%);
-  animation: db-glowb 5s ease-in-out infinite;
-}
-
-.circuitSvg,
-.ringSvg,
-.flaskSvg {
+.shade {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba($db-surface-deep, 0.6),
+    rgba($db-surface-deep, 0) 16%,
+    rgba($db-surface-deep, 0) 80%,
+    rgba($db-surface-deep, 0.78)
+  );
 }
 
-.circuitSvg {
-  overflow: visible;
-}
-
-.ringOuter {
-  transform-origin: 50% 50%;
-  animation: db-ringspin 34s linear infinite;
-}
-
-.ringInner {
-  transform-origin: 50% 50%;
-  animation: db-ringspin-r 26s linear infinite;
-}
-
-.flaskSvg {
-  width: 150px;
-  height: 180px;
-  left: calc(50% - 75px);
-  top: calc(50% - 96px);
-  z-index: 2;
-}
-
-.flaskLiquidTop {
-  animation: db-wave 6s ease-in-out infinite;
-}
-
-.flaskLiquidBottom {
-  animation: db-wave 6s ease-in-out infinite 0.5s;
-}
-
-.bubble {
-  animation: db-bubrise 2.4s ease-in infinite;
-}
-
-.keywordNode {
+.hint {
   position: absolute;
-  z-index: 2;
-  transform: translate(-50%, -50%);
+  left: 18px;
+  top: 16px;
   display: flex;
+  gap: 8px;
   align-items: center;
-  gap: 6px;
-  font: 600 10px var(--font-geist-mono), monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $db-text-muted;
+  pointer-events: none;
+}
+
+.hintDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $db-green-glow;
+  box-shadow: $glow-dot;
+}
+
+.legend {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: space-between;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
   pointer-events: none;
-  white-space: nowrap;
-}
 
-.keywordDot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-}
-
-.chip {
-  position: absolute;
-  z-index: 3;
-  animation: db-floaty 6s ease-in-out infinite;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 11px 16px;
-  border-radius: 12px;
-  border: 1.5px solid $db-green;
-  background: rgba(121, 229, 155, 0.05);
-  box-shadow: 0 0 20px rgba(0, 210, 106, 0.14);
-  font-weight: 600;
-  font-size: 13.5px;
-  color: $db-text-primary;
-
-  @media (max-width: 1180px) {
-    padding: 8px 12px;
-    font-size: 12px;
+  @media (max-width: $bp-sm) {
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+    font-size: 10.5px;
   }
 }
 
-.chipPink {
-  border-color: $db-pink;
-  background: rgba(246, 76, 111, 0.05);
-  box-shadow: 0 0 20px rgba(255, 79, 163, 0.14);
+.pink {
+  color: $db-pink;
 }
 
-// ---- wireframe data-terrain strip ----
-
-.terrainSection {
-  position: relative;
-  height: 230px;
-  margin-top: 10px;
-  overflow: hidden;
-
-  @media (max-width: 640px) {
-    height: 140px;
-  }
+.pinkGlow {
+  color: $db-pink-glow;
 }
 
-.terrainGrid {
-  position: absolute;
-  bottom: -30px;
-  left: -15%;
-  right: -15%;
-  height: 260px;
-  background-image: linear-gradient(rgba(121, 229, 155, 0.32) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 79, 163, 0.22) 1px, transparent 1px);
-  background-size: 46px 46px;
-  transform: perspective(300px) rotateX(66deg);
-  transform-origin: bottom;
-  -webkit-mask-image: linear-gradient(to top, #000 12%, transparent 88%);
-  mask-image: linear-gradient(to top, #000 12%, transparent 88%);
-  animation: db-gridmove 7s linear infinite;
-}
-
-.terrainParticles {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
+.green {
+  color: $db-green;
 }

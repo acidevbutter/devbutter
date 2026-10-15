@@ -1,65 +1,105 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logomark from "@/components/icons/Logomark";
-import NewQuoteModal from "@/components/portal/NewQuoteModal/NewQuoteModal";
-import {
-  CONCIERGE_GREETING,
-  CONCIERGE_INTENTS,
-} from "@/components/ConciergeCta/ConciergeCta";
+import ConciergeCta from "@/components/ConciergeCta/ConciergeCta";
 import styles from "./Nav.module.scss";
 
-const LINKS = [
-  { label: "Soluções", href: "#solucoes" },
-  { label: "Cases", href: "#cases" },
-  { label: "Sobre", href: "#sobre" },
-  { label: "Insights", href: "#insights" },
-];
+export const SITE_LINKS = [
+  { label: "Cases", href: "/cases" },
+  { label: "Como trabalhamos", href: "/metodo" },
+  { label: "Contato", href: "/contato" },
+] as const;
+
+function isActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export default function Nav() {
-  // Both "Falar com a IA" and "Solicitar diagnóstico" open the same right-anchored
-  // concierge panel (canvas 1b) -- there is no dedicated /cotacao route anymore.
-  const [showChat, setShowChat] = useState(false);
+  const pathname = usePathname() ?? "/";
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPath, setMenuPath] = useState(pathname);
+  const menuId = useId();
+
+  // Navigating closes the mobile menu (state derived during render, not in an effect).
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    setMenuOpen(false);
+  }
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
 
   return (
     <header className={styles.header}>
-      <Link href="/" className={styles.brand} aria-label="DevButter — voltar para a home">
-        <Logomark />
-        <span className={styles.wordmark}>
-          Dev<span className="gn">Butter</span>
-        </span>
-      </Link>
-
-      <nav className={styles.nav} aria-label="Navegação principal">
-        {LINKS.map(({ label, href }) => (
-          <a key={label} href={href}>
-            {label}
-          </a>
-        ))}
-      </nav>
-
-      <div className={styles.actions}>
-        <Link href="/portal/login" className={styles.loginBtn}>
-          Entrar
+      <div className={styles.bar}>
+        <Link href="/" className={styles.brand} aria-label="DevButter — início">
+          <Logomark width={24} height={27} />
+          <span className={styles.wordmark}>
+            Dev<span className={styles.wordmarkAccent}>Butter</span>
+          </span>
         </Link>
-        <button type="button" className={styles.ghostBtn} onClick={() => setShowChat(true)}>
-          Falar com a IA
-        </button>
-        <button type="button" className={styles.solidBtn} onClick={() => setShowChat(true)}>
-          Solicitar diagnóstico
-        </button>
+
+        <nav className={styles.nav} aria-label="Navegação principal">
+          {SITE_LINKS.map(({ label, href }) => (
+            <Link
+              key={href}
+              href={href}
+              className={styles.navLink}
+              aria-current={isActive(pathname, href) ? "page" : undefined}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className={styles.actions}>
+          <Link href="/entrar" className={styles.login}>
+            Entrar
+          </Link>
+          <ConciergeCta className={styles.cta}>Solicitar diagnóstico</ConciergeCta>
+          <button
+            type="button"
+            className={styles.menuButton}
+            aria-expanded={menuOpen}
+            aria-controls={menuId}
+            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <span className={styles.menuIcon} data-open={menuOpen || undefined} aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
-      {showChat && (
-        <NewQuoteModal
-          onClose={() => setShowChat(false)}
-          mode="public"
-          surface="panel"
-          initialMessage={CONCIERGE_GREETING}
-          openingIntents={CONCIERGE_INTENTS}
-        />
-      )}
+      <nav
+        id={menuId}
+        className={styles.mobileMenu}
+        data-open={menuOpen || undefined}
+        aria-label="Navegação principal (menu)"
+        hidden={!menuOpen}
+      >
+        {SITE_LINKS.map(({ label, href }) => (
+          <Link
+            key={href}
+            href={href}
+            className={styles.mobileLink}
+            aria-current={isActive(pathname, href) ? "page" : undefined}
+          >
+            {label}
+          </Link>
+        ))}
+        <Link href="/entrar" className={styles.mobileLink}>
+          Entrar
+        </Link>
+      </nav>
     </header>
   );
 }

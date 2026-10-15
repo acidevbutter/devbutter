@@ -1,0 +1,55 @@
+@use "../../styles/tokens" as *;
+@use "../../styles/site" as site;
+
+@include site.kf-slide;
+
+.region {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: $z-toast;
+
+  @media (max-width: $bp-sm) {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+.toast {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 280px;
+  max-width: 380px;
+  padding: 12px 14px;
+  background: $db-card;
+  border: 1px solid rgba($db-green, 0.35);
+  border-radius: $r-lg;
+  box-shadow: $shadow-card;
+  animation: slide 0.42s $ease-out both;
+
+  @media (max-width: $bp-sm) {
+    min-width: 0;
+    max-width: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.check {
+  color: $db-green;
+}
+
+.title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.meta {
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-text-muted;
+  margin-top: 2px;
+}

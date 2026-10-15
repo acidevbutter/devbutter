@@ -1,0 +1,16 @@
+{
+  "name": "@devbutter/ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DevButter admin primitives (Button, Badge, Card) compiled from src/components/admin/ui for design-sync. The app itself keeps importing the sources directly.",
+  "type": "module",
+  "main": "dist/index.es.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

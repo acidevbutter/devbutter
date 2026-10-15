@@ -79,3 +79,71 @@ $admin-border: rgba(255, 255, 255, 0.08);
 $admin-border-interactive: rgba(255, 255, 255, 0.14);
 $admin-amber: #e5b75a;
 $admin-text-2: #8b93a3;
+
+// ---------------------------------------------------------------------------
+// Site hi-fi ("Site DevButter.dc.html") — tokens that the public site, auth
+// screens and chat panel need beyond the palette above. Values mirror
+// docs/design/tokens/{colors,elevation,radius,motion}.css 1:1; alpha variants
+// are derived from the palette with rgba() instead of loose literals.
+// ---------------------------------------------------------------------------
+
+$db-white: #ffffff;
+$db-selection: rgba($db-pink-glow, 0.32);
+
+// Surfaces that only exist as translucent layers over the page.
+$db-nav-bg: rgba($db-bg, 0.94);
+$db-overlay: rgba($db-bg, 0.78);
+$db-panel: $admin-panel;
+$db-card: $admin-card;
+
+// Hairlines beyond the two base borders.
+$db-border-subtle: rgba($db-white, 0.05);
+$db-border-hover: rgba($db-white, 0.28);
+$db-border-dashed: rgba($db-white, 0.16);
+
+// Radius by role (docs/design/tokens/radius.css).
+$r-xs: 4px;
+$r-sm: 8px;
+$r-md: 10px;
+$r-lg: 12px;
+$r-tile: 14px;
+$r-xl: 16px;
+$r-2xl: 18px;
+$r-pill: 20px;
+
+// Elevation and glows (docs/design/tokens/elevation.css).
+$shadow-card: 0 14px 40px rgba(0, 0, 0, 0.45);
+$shadow-card-lg: 0 16px 44px rgba(0, 0, 0, 0.5);
+$shadow-dialog: 0 24px 60px rgba(0, 0, 0, 0.5);
+$glow-btn: 0 0 24px rgba($db-green-glow, 0.35);
+$glow-btn-hover: 0 0 30px rgba($db-green-glow, 0.48);
+$glow-cta: 0 0 32px rgba($db-green-glow, 0.4);
+$glow-cta-hover: 0 0 40px rgba($db-green-glow, 0.5);
+$glow-cta-xl: 0 0 34px rgba($db-green-glow, 0.42);
+$glow-cta-xl-hover: 0 0 42px rgba($db-green-glow, 0.55);
+$glow-pink: 0 0 22px rgba($db-pink-glow, 0.12);
+$glow-pink-hover: 0 0 28px rgba($db-pink-glow, 0.2);
+$glow-card-green: 0 0 26px rgba($db-green-glow, 0.12);
+$glow-card-pink: 0 0 26px rgba($db-pink-glow, 0.12);
+$glow-tile-green: 0 0 20px rgba($db-green-glow, 0.1);
+$glow-tile-pink: 0 0 20px rgba($db-pink-glow, 0.1);
+$glow-dot: 0 0 8px $db-green-glow;
+
+// Motion (docs/design/tokens/motion.css).
+$ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+$ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+// Stacking (docs/design/tokens/elevation.css).
+$z-nav: 40;
+$z-fab: 70;
+$z-overlay: 80;
+$z-dialog: 90;
+$z-toast: 100;
+
+// Touch targets never drop below this on any breakpoint.
+$touch-min: 44px;
+
+// Breakpoints the site layouts reflow at.
+$bp-sm: 560px;
+$bp-md: 760px;
+$bp-lg: 940px;

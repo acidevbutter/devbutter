@@ -1,0 +1,164 @@
+@use "../../../../styles/tokens" as *;
+@use "../../../../styles/site" as site;
+
+.section {
+  display: block;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 56px $db-section-pad-x 86px;
+
+  @media (max-width: $bp-md) {
+    padding: 32px 16px 64px;
+  }
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: $touch-min;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-text-muted;
+  @include site.focus-ring;
+
+  &:hover {
+    color: $db-text-primary;
+  }
+}
+
+.sector {
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $db-pink;
+  margin-top: 20px;
+}
+
+.title {
+  margin: 12px 0 0;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: pretty;
+}
+
+.meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+  flex-wrap: wrap;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
+  color: $db-text-secondary;
+}
+
+.client {
+  color: $db-text-primary;
+  font: 600 15px var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.tag {
+  @include site.tag;
+}
+
+.compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.before,
+.after {
+  border-radius: $r-xl;
+  padding: 22px;
+}
+
+.before {
+  border: 1px dashed rgba($db-pink, 0.5);
+  background: rgba($db-pink, 0.05);
+
+  .compareLabel {
+    color: $db-pink;
+  }
+}
+
+.after {
+  border: 1px solid rgba($db-green, 0.35);
+  background: rgba($db-green, 0.05);
+
+  .compareLabel {
+    color: $db-green;
+  }
+}
+
+.compareLabel {
+  @include site.mono-label;
+}
+
+.compareText {
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 10px 0 0;
+  color: $db-chat-text-strong;
+}
+
+.story {
+  margin: 44px 0 0;
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 14px 28px;
+
+  dt {
+    @include site.mono-label;
+    padding-top: 4px;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.7;
+    color: $db-text-secondary;
+  }
+
+  @media (max-width: $bp-md) {
+    grid-template-columns: 1fr;
+    gap: 6px;
+
+    dd {
+      margin-bottom: 18px;
+    }
+  }
+}
+
+.ctaBox {
+  margin-top: 52px;
+  padding: 28px;
+  border: 1px solid $db-border;
+  border-radius: $r-xl;
+  background: $db-surface;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+
+  @media (max-width: $bp-md) {
+    padding: 22px;
+  }
+}
+
+.ctaTitle {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ctaText {
+  font-size: 14px;
+  color: $db-text-secondary;
+  margin-top: 4px;
+}
+
+.cta {
+  @include site.btn-primary(md);
+}

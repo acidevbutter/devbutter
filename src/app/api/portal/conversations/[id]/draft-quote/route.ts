@@ -1,3 +1,4 @@
+import { redactPrices } from "@/lib/portal/redact";
 import { portalErrorResponse, portalFetchOptionalAuth } from "@/lib/portal/api";
 import { clearConversationCookie, setPortalSessionCookies } from "@/lib/portal/session";
 
@@ -26,7 +27,9 @@ export async function POST(
       await setPortalSessionCookies(quote.tokens);
     }
     await clearConversationCookie();
-    return Response.json(quote, { status: 201 });
+    // Tokens already became httpOnly cookies above; never hand them to the
+    // browser, and never a price before approval (#66).
+    return Response.json(redactPrices({ ...quote, tokens: quote.tokens ? true : null }), { status: 201 });
   } catch (error) {
     return portalErrorResponse(error);
   }
