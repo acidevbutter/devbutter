@@ -93,6 +93,7 @@ export default function InvoicesClient({ invoices }: { invoices: PortalInvoice[]
             <PixBoletoView
               pixCode={expanded.pixCode}
               boletoUrl={expanded.boletoUrl}
+              billingType={expanded.billingType}
               amount={expanded.amount}
               dueDate={expanded.dueDate}
               projectTitle={expanded.projectTitle}

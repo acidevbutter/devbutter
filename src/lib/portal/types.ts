@@ -127,6 +127,7 @@ export interface PortalInvoice {
   status: "PENDING" | "OVERDUE" | "RECEIVED" | "REFUNDED";
   pixCode: string | null;
   boletoUrl: string | null;
+  billingType: string | null;
 }
 
 export interface PortalCatalogEntry {
