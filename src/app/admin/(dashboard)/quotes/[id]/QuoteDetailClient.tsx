@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   approveQuoteAction,
+  updateClientDocumentAction,
   editQuoteAction,
   rejectQuoteAction,
   type ActionState,
@@ -19,6 +20,7 @@ export type LinkedClient = {
   name: string;
   email: string;
   cnpj: string | null;
+  cpf: string | null;
   asaas_customer_id: string | null;
 };
 
@@ -26,12 +28,14 @@ export default function QuoteDetailClient({
   quote,
   clientLabel,
   linkedClient,
+  accountId,
   conversationMessageCount,
   readOnly,
 }: {
   quote: QuoteRead;
   clientLabel: string;
   linkedClient: LinkedClient | null;
+  accountId: string;
   conversationMessageCount: number | null;
   readOnly: boolean;
 }) {
@@ -58,6 +62,13 @@ export default function QuoteDetailClient({
   const [approveAmount, setApproveAmount] = useState("");
   const [approveDueDate, setApproveDueDate] = useState("");
   const [approveBilling, setApproveBilling] = useState("UNDEFINED");
+
+  const [documentState, documentFormAction, documentPending] = useActionState<ActionState, FormData>(
+    updateClientDocumentAction.bind(null, accountId, quote.id),
+    null
+  );
+  const missingDocument =
+    !!linkedClient && !linkedClient.cpf && !linkedClient.cnpj && !linkedClient.asaas_customer_id;
 
   const [rejectError, setRejectError] = useState<string | null>(null);
   const [rejectPending, setRejectPending] = useState(false);
@@ -264,6 +275,21 @@ export default function QuoteDetailClient({
             </div>
             {canAct ? (
               <div className={styles.actions}>
+                {missingDocument && (
+                  <form action={documentFormAction} className={styles.approveForm}>
+                    <input
+                      className={styles.input}
+                      name="document"
+                      placeholder="CPF ou CNPJ do cliente (exigido pelo Asaas)"
+                      inputMode="numeric"
+                      required
+                    />
+                    <button type="submit" disabled={documentPending} className={styles.btnSolid}>
+                      {documentPending ? "Salvando…" : "Salvar documento"}
+                    </button>
+                    {documentState?.error && <div className={styles.error}>{documentState.error}</div>}
+                  </form>
+                )}
                 <form action={approveFormAction} className={styles.approveForm}>
                   <input
                     className={styles.input}
