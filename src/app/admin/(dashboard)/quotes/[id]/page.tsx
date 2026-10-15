@@ -32,6 +32,7 @@ export default async function AdminQuoteDetailPage({
         name: client.name,
         email: client.email,
         cnpj: client.cnpj,
+        cpf: client.cpf,
         asaas_customer_id: client.asaas_customer_id,
       }
     : null;
@@ -41,6 +42,7 @@ export default async function AdminQuoteDetailPage({
       quote={quote}
       clientLabel={clientLabel}
       linkedClient={linkedClient}
+      accountId={quote.account_id}
       conversationMessageCount={conversation?.message_count ?? null}
       readOnly={false}
     />
