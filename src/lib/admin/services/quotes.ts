@@ -20,9 +20,9 @@ export async function listAllQuotesForTable(): Promise<QuoteRead[]> {
   return page.items;
 }
 
-/** Real: GET /quotes/{id}. */
+/** Real: GET /admin/quotes/{id} -- unredacted (GET /quotes/{id} hides price_range from non-approved quotes). */
 export function getQuote(id: string): Promise<QuoteRead> {
-  return adminFetch<QuoteRead>(`/quotes/${id}`);
+  return adminFetch<QuoteRead>(`/admin/quotes/${id}`);
 }
 
 export function editQuote(id: string, payload: QuoteEdit) {

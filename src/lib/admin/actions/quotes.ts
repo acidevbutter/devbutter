@@ -56,6 +56,18 @@ export async function editQuoteAction(
   return null;
 }
 
+// 4xx details are already human (e.g. the 422 asking for CPF/CNPJ); 5xx means the
+// billing provider failed and its raw message is not useful to the admin.
+function approveErrorMessage(err: unknown): string {
+  if (err instanceof AdminApiError) {
+    if (err.status >= 500) {
+      return "Não foi possível criar a cobrança agora (falha no provedor de pagamento). Os valores foram mantidos; tente novamente.";
+    }
+    return String(err.detail ?? err.message);
+  }
+  return "Falha ao aprovar";
+}
+
 export async function approveQuoteAction(
   quoteId: string,
   _prevState: ActionState,
@@ -77,7 +89,7 @@ export async function approveQuoteAction(
       billing_type: billingType as "BOLETO" | "CREDIT_CARD" | "PIX" | "UNDEFINED",
     });
   } catch (err) {
-    return { error: err instanceof AdminApiError ? String(err.detail ?? err.message) : "Falha ao aprovar" };
+    return { error: approveErrorMessage(err) };
   }
 
   revalidatePath("/admin/quotes");
