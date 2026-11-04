@@ -8,8 +8,12 @@
 #                Dokploy injects the Traefik labels (HTTPS via Let's Encrypt).
 #                No `ports:` here on purpose: Traefik is the only way in.
 #   Network:     dokploy-network (external, created by Dokploy) is shared with
-#                Traefik and the APIs; API_BASE_URL=http://platform-api:8000
-#                resolves there (server-side calls never leave the network).
+#                Traefik, the Dokploy-managed Postgres/Redis and EVERY environment
+#                on this server (prod, preprod, staging). So the inter-service
+#                aliases carry the environment: DEPLOY_ENV=staging publishes
+#                `staging-frontend`, and that is the host the other services
+#                put in their *_BASE_URL vars. Never add an unprefixed alias here:
+#                it would resolve to all environments at once.
 #   Health:      the image ships its own HEALTHCHECK (any HTTP answer on :3000).
 
 x-logging: &default-logging
@@ -34,7 +38,7 @@ services:
     networks:
       dokploy-network:
         aliases:
-          - frontend
+          - ${DEPLOY_ENV:?set DEPLOY_ENV to prod, preprod or staging}-frontend
     restart: unless-stopped
     logging: *default-logging
 
