@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+- Deploy migrado da Coolify para o Dokploy: `docker/Dockerfile.hostinger` virou
+  `docker/Dockerfile.dokploy`, agora com `ARG NEXT_PUBLIC_SITE_URL` /
+  `NEXT_PUBLIC_SOCKET_URL` (o Dokploy só repassa build args declarados; sem
+  isso o bundle sairia com `http://localhost:8002`), `tini` como PID 1 e
+  `HEALTHCHECK` em `127.0.0.1:3000`. Novo `docker-compose.dokploy.yml`
+  (`frontend` na `dokploy-network`).
+
 - Corrigido o `MAINTENANCE_MODE`: o proxy agora reescreve páginas para
   `/manutencao`, preservando APIs e arquivos estáticos. O comportamento foi
   validado no servidor Next de produção local.
