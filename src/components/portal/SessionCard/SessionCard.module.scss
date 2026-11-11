@@ -48,7 +48,7 @@
 
 .body {
   margin: 0 0 22px;
-  font: 12.5px/1.6 "Geist Mono", monospace;
+  font: 12.5px/1.6 var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
 }
 
@@ -68,7 +68,7 @@
 .ctaGhost {
   display: inline-block;
   margin-top: 10px;
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
   text-decoration: none;
 

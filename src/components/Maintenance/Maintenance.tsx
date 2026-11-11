@@ -94,8 +94,8 @@ export default function Maintenance({
           <div className={`fu ${styles.contact}`}>
             <div>
               <div className={`mono ${styles.contactLabel}`}>solicitar diagnóstico</div>
-              <a className={styles.contactLink} href="mailto:contato@devbutter.com">
-                contato@devbutter.com
+              <a className={styles.contactLink} href="mailto:contato@devbutter.tech">
+                contato@devbutter.tech
               </a>
             </div>
             <div className={styles.contactDivider} />

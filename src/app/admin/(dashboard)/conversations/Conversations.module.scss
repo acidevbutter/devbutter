@@ -23,7 +23,7 @@
 }
 
 .filterChip {
-  font: 500 11px "Geist Mono", monospace;
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
   border: 1px solid $admin-border-interactive;
   border-radius: 20px;
   padding: 4px 10px;
@@ -57,7 +57,7 @@
 }
 
 .entryMeta {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
   margin-top: 4px;
 }
@@ -110,7 +110,7 @@
 }
 
 .metricsTitle {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -123,7 +123,7 @@
   gap: 8px;
   padding: 7px 0;
   border-top: 1px solid $admin-border;
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $admin-text-2;
 }
 

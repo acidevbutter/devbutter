@@ -25,7 +25,7 @@ function subaccountLabel(onboarding: string | null, approval: string | null) {
   if (!raw) return <span style={{ color: "var(--db-text-muted)" }}>sem subconta</span>;
   const ok = raw === "APPROVED" || raw === "ACTIVE";
   const failed = raw === "REJECTED" || raw === "DENIED";
-  const color = ok ? "var(--db-green)" : failed ? "var(--db-pink)" : "var(--admin-amber)";
+  const color = ok ? "var(--db-green)" : failed ? "var(--db-pink)" : "var(--status-wait)";
   const text = ok ? "aprovado" : failed ? "recusado" : "em análise";
   return (
     <>
@@ -125,7 +125,7 @@ export default async function AdminClientDetailPage({
               columns=".6fr 2fr .8fr .8fr .6fr"
               header={["id", "escopo", "faixa", "status", "data"]}
               rows={quotes.map((q) => [
-                <Link key="id" href={`/admin/quotes/${q.id}`} style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
+                <Link key="id" href={`/admin/quotes/${q.id}`} style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}>
                   {q.id.slice(0, 8).toUpperCase()}
                 </Link>,
                 q.scope_summary,
@@ -144,7 +144,7 @@ export default async function AdminClientDetailPage({
               columns=".6fr 1.4fr .8fr .8fr"
               header={["id", "valor", "status", "data"]}
               rows={orders.map((o) => [
-                <Link key="id" href={`/admin/orders/${o.id}`} style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
+                <Link key="id" href={`/admin/orders/${o.id}`} style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}>
                   #{o.id.slice(0, 8)}
                 </Link>,
                 formatCurrency(o.amount),
@@ -189,7 +189,7 @@ export default async function AdminClientDetailPage({
               columns="1.4fr .6fr .8fr .8fr"
               header={["início", "mensagens", "quote", "data"]}
               rows={conversations.map((c) => [
-                <Link key="id" href={`/admin/conversations?open=${c.id}`} style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
+                <Link key="id" href={`/admin/conversations?open=${c.id}`} style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}>
                   abrir transcript
                 </Link>,
                 String(c.message_count),
@@ -206,7 +206,7 @@ export default async function AdminClientDetailPage({
 }
 
 function Empty({ label }: { label: string }) {
-  return <div style={{ color: "var(--db-text-muted)", fontFamily: "'Geist Mono', monospace", fontSize: 13 }}>{label}</div>;
+  return <div style={{ color: "var(--db-text-muted)", fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 13 }}>{label}</div>;
 }
 
 function TableList({
@@ -226,7 +226,7 @@ function TableList({
           gridTemplateColumns: columns,
           gap: 12,
           padding: "10px 14px",
-          font: "500 10px 'Geist Mono', monospace",
+          font: "500 10px var(--font-geist-mono), ui-monospace, monospace",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           color: "var(--db-text-muted)",

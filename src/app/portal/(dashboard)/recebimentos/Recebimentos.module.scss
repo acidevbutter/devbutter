@@ -60,7 +60,7 @@
 }
 
 %bannerTag {
-  font: 500 9.5px "Geist Mono", monospace;
+  font: 500 9.5px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   border-radius: 5px;
@@ -83,15 +83,15 @@
 
 .amberBanner {
   @extend %banner;
-  border: 1px solid rgba(229, 183, 90, 0.42);
-  background: linear-gradient(90deg, rgba(229, 183, 90, 0.12), rgba(229, 183, 90, 0.02));
+  border: 1px solid rgba($status-wait, 0.42);
+  background: linear-gradient(90deg, rgba($status-wait, 0.12), rgba($status-wait, 0.02));
   color: #f0dfba;
 }
 
 .amberTag {
   @extend %bannerTag;
-  color: $admin-amber;
-  border: 1px solid rgba(229, 183, 90, 0.4);
+  color: $status-wait;
+  border: 1px solid rgba($status-wait, 0.4);
 }
 
 .redBanner {
@@ -117,7 +117,7 @@
 }
 
 .toolbarNote {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -145,7 +145,7 @@
     --step-color: #{$db-pink};
   }
   &[data-status="review"] {
-    --step-color: #{$admin-amber};
+    --step-color: #{$status-wait};
   }
   &[data-status="ok"] {
     --step-color: #{$db-green};
@@ -164,7 +164,7 @@
 }
 
 .stepTag {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   color: var(--step-color);
 }
 
@@ -239,7 +239,7 @@
 }
 
 .cardHeadNote {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -270,8 +270,8 @@
 }
 
 .cardAmber {
-  border-color: rgba(229, 183, 90, 0.32);
-  background: linear-gradient(180deg, rgba(229, 183, 90, 0.07), $admin-panel 60%);
+  border-color: rgba($status-wait, 0.32);
+  background: linear-gradient(180deg, rgba($status-wait, 0.07), $admin-panel 60%);
 }
 
 .cardPink {
@@ -291,7 +291,7 @@
 .reason {
   border-left: 2px solid $db-pink;
   padding: 2px 0 2px 12px;
-  font: 12.5px "Geist Mono", monospace;
+  font: 12.5px var(--font-geist-mono), ui-monospace, monospace;
   line-height: 1.6;
   color: #f4c9d4;
 }
@@ -359,7 +359,7 @@
 }
 
 .docMetaLine {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -398,7 +398,7 @@
 
 .uploaderHint {
   margin-top: 6px;
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -435,7 +435,7 @@
 
 .fileChipSub {
   margin-top: 3px;
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -462,7 +462,7 @@
 
 .summaryVal {
   margin-top: 6px;
-  font: 12.5px "Geist Mono", monospace;
+  font: 12.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
 }
 
@@ -480,7 +480,7 @@
 }
 
 .fieldLabel {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -493,13 +493,13 @@
   border: 1px solid $admin-border-interactive;
   border-radius: 10px;
   padding: 11px 13px;
-  font: 13px "Geist Mono", monospace;
+  font: 13px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-primary;
 }
 
 .fieldHint {
   margin-top: 6px;
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -518,7 +518,7 @@
   gap: 10px;
   flex-wrap: wrap;
   padding: 2px 4px;
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
 }
 
@@ -528,7 +528,7 @@
   padding: 7px 13px;
   background: transparent;
   color: $db-text-secondary;
-  font: 500 11.5px "Geist Mono", monospace;
+  font: 500 11.5px var(--font-geist-mono), ui-monospace, monospace;
   cursor: pointer;
 
   &:hover {
@@ -562,12 +562,12 @@
 }
 
 .readoutKey {
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
 .readoutVal {
-  font: 500 11px "Geist Mono", monospace;
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
   text-align: right;
   color: $db-text-primary;
 }
@@ -576,7 +576,7 @@
   color: $db-green;
 }
 .toneAmber {
-  color: $admin-amber;
+  color: $status-wait;
 }
 .tonePink {
   color: $db-pink;
@@ -589,12 +589,12 @@
 
 .errorText {
   margin-top: 10px;
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-pink;
 }
 
 .okText {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
 }
 

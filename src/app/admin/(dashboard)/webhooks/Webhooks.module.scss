@@ -42,13 +42,13 @@
 }
 
 .drawerTitle {
-  font: 500 13px "Geist Mono", monospace;
+  font: 500 13px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-primary;
 }
 
 .drawerMeta {
   margin-top: 4px;
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -82,7 +82,7 @@
   background: rgba(246, 76, 111, 0.08);
   border-radius: 10px;
   padding: 10px 12px;
-  font: 12px/1.5 "Geist Mono", monospace;
+  font: 12px/1.5 var(--font-geist-mono), ui-monospace, monospace;
   color: $db-pink;
 }
 
@@ -92,7 +92,7 @@
   background: $admin-card;
   border: 1px solid $admin-border-interactive;
   border-radius: 10px;
-  font: 11.5px/1.5 "Geist Mono", monospace;
+  font: 11.5px/1.5 var(--font-geist-mono), ui-monospace, monospace;
   color: $admin-text-2;
   white-space: pre-wrap;
   word-break: break-word;
@@ -106,7 +106,7 @@
   border: 1px solid $admin-border-interactive;
   border-radius: 7px;
   padding: 5px 10px;
-  font: 500 11px "Geist Mono", monospace;
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $admin-text-2;
   cursor: pointer;
 
@@ -123,7 +123,7 @@
   border: 1px solid rgba(121, 229, 155, 0.35);
   border-radius: 20px;
   padding: 4px 10px;
-  font: 500 11px "Geist Mono", monospace;
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
   text-decoration: none;
 
@@ -147,7 +147,7 @@
 }
 
 .attemptRow {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $admin-text-2;
 }
 
@@ -167,7 +167,7 @@
 }
 
 .confirmText {
-  font: 11.5px/1.5 "Geist Mono", monospace;
+  font: 11.5px/1.5 var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 

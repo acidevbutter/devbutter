@@ -25,8 +25,8 @@
   background: rgba(229, 183, 90, 0.08);
   border-radius: 11px;
   padding: 12px 14px;
-  font: 12.5px/1.55 "Geist Mono", monospace;
-  color: $admin-amber;
+  font: 12.5px/1.55 var(--font-geist-mono), ui-monospace, monospace;
+  color: $status-wait;
 }
 
 .grid {
@@ -74,7 +74,7 @@
 }
 
 .dotWarn {
-  background: $admin-amber;
+  background: $status-wait;
   animation: dbPulse 1.8s ease-in-out infinite;
 }
 
@@ -88,7 +88,7 @@
 }
 
 .statusText {
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .statusTextOk {
@@ -97,7 +97,7 @@
 
 .statusTextWarn,
 .statusTextError {
-  color: $admin-amber;
+  color: $status-wait;
 }
 
 .statusTextIdle {
@@ -105,7 +105,7 @@
 }
 
 .cardMeta {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
   margin-top: 8px;
 }

@@ -1,6 +1,26 @@
 @use "../styles/tokens" as *;
 @use "../styles/animations";
 
+// Semantic + motion custom properties, emitted once for the whole app
+// (raw values live in styles/_tokens.scss). Use these from TSX inline styles
+// and from any CSS that can't @use the tokens.
+:root {
+  --signal: #{$signal};
+  --problem: #{$problem};
+  --status-done: #{$status-done};
+  --status-wait: #{$status-wait};
+  --status-alert: #{$status-alert};
+  --status-neutral: #{$status-neutral};
+
+  --ease-out: #{$ease-out};
+  --ease-spring: #{$ease-spring};
+  --mo-instant: #{$mo-instant};
+  --mo-quick: #{$mo-quick};
+  --mo-base: #{$mo-base};
+  --mo-slow: #{$mo-slow};
+  --mo-deliberate: #{$mo-deliberate};
+}
+
 * {
   box-sizing: border-box;
 }
@@ -14,7 +34,7 @@ body {
   padding: 0;
   background: $db-bg;
   color: $db-text-primary;
-  font-family: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
+  font-family: $font-sans;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -42,11 +62,19 @@ button {
 }
 
 ::selection {
-  background: rgba(255, 79, 163, 0.32);
+  background: $db-selection;
+}
+
+// One keyboard focus ring for the whole product (site, portal, admin).
+// :where() keeps specificity at a single pseudo-class, so a component that
+// draws its own focus treatment still wins — but nothing is left without one.
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: $focus-ring-width solid $focus-ring-color;
+  outline-offset: $focus-ring-offset;
 }
 
 .mono {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: $font-mono;
 }
 
 .gn {

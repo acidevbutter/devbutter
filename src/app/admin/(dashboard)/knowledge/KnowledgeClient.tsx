@@ -63,14 +63,14 @@ function Editor({ entry }: { entry: KnowledgeEntry | null }) {
     <form className={styles.editor} action={formAction}>
       <input className={styles.input} name="name" defaultValue={entry?.name} placeholder="nome do serviço" style={{ marginBottom: 20, fontSize: 18, fontWeight: 600, fontFamily: "'Geist', sans-serif" }} />
 
-      <div style={{ font: "500 10px 'Geist Mono', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--db-text-muted)", marginBottom: 7 }}>
+      <div style={{ font: "500 10px var(--font-geist-mono), ui-monospace, monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--db-text-muted)", marginBottom: 7 }}>
         descrição / posicionamento
       </div>
       <textarea className={styles.textarea} name="description" defaultValue={entry?.description} />
 
       <div className={styles.row2}>
         <div>
-          <div style={{ font: "500 10px 'Geist Mono', monospace", color: "var(--admin-text-2)", marginBottom: 6 }}>
+          <div style={{ font: "500 10px var(--font-geist-mono), ui-monospace, monospace", color: "var(--admin-text-2)", marginBottom: 6 }}>
             faixa sugerida (R$)
           </div>
           <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
@@ -80,14 +80,14 @@ function Editor({ entry }: { entry: KnowledgeEntry | null }) {
           </div>
         </div>
         <div>
-          <div style={{ font: "500 10px 'Geist Mono', monospace", color: "var(--admin-text-2)", marginBottom: 6 }}>
+          <div style={{ font: "500 10px var(--font-geist-mono), ui-monospace, monospace", color: "var(--admin-text-2)", marginBottom: 6 }}>
             prazo típico
           </div>
           <input className={styles.input} name="typical_duration" defaultValue={entry?.typical_duration} />
         </div>
       </div>
 
-      <div style={{ font: "500 10px 'Geist Mono', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--db-text-muted)", margin: "18px 0 7px" }}>
+      <div style={{ font: "500 10px var(--font-geist-mono), ui-monospace, monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--db-text-muted)", margin: "18px 0 7px" }}>
         instruções para a IA
       </div>
       <textarea className={styles.textarea} name="ai_instructions" defaultValue={entry?.ai_instructions} />
@@ -110,11 +110,11 @@ function Editor({ entry }: { entry: KnowledgeEntry | null }) {
           </button>
         )}
         {entry && (
-          <span style={{ font: "11.5px 'Geist Mono', monospace", color: "var(--db-text-muted)" }}>
+          <span style={{ font: "11.5px var(--font-geist-mono), ui-monospace, monospace", color: "var(--db-text-muted)" }}>
             atualizado {formatDate(entry.updated_at)}
           </span>
         )}
-        {state?.error && <span style={{ font: "11.5px 'Geist Mono', monospace", color: "var(--db-pink)" }}>{state.error}</span>}
+        {state?.error && <span style={{ font: "11.5px var(--font-geist-mono), ui-monospace, monospace", color: "var(--db-pink)" }}>{state.error}</span>}
       </div>
     </form>
   );

@@ -95,16 +95,16 @@ export default async function AdminInvoicesPage({
             <span style={{ fontWeight: 600 }}>{inv.account_name}</span>
             <Link
               href={`/admin/orders/${inv.order_id}`}
-              style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12, color: "var(--admin-text-2)" }}
+              style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12, color: "var(--admin-text-2)" }}
             >
               #{inv.order_id.slice(0, 8)}
             </Link>
-            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12.5 }}>
+            <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12.5 }}>
               {formatCurrency(inv.amount)}
             </span>
             <span
               style={{
-                fontFamily: "'Geist Mono', monospace",
+                fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                 fontSize: 12,
                 color: inv.status === "OVERDUE" ? "var(--db-pink)" : "var(--admin-text-2)",
               }}
@@ -116,7 +116,7 @@ export default async function AdminInvoicesPage({
             </Badge>
             <span
               style={{
-                fontFamily: "'Geist Mono', monospace",
+                fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                 fontSize: 12,
                 color: inv.payment_link ? "var(--db-green)" : "var(--db-text-muted)",
               }}

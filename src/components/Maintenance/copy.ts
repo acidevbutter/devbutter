@@ -48,7 +48,7 @@ export const MAINTENANCE_COPY: Record<MaintenanceVariant, MaintenanceCopy> = {
     ],
     metaTitle: "DevButter — site em reconstrução",
     metaDescription:
-      "Estamos refazendo o site da DevButter. Os projetos seguem em andamento e o atendimento continua normal — fale com a gente por contato@devbutter.com.",
+      "Estamos refazendo o site da DevButter. Os projetos seguem em andamento e o atendimento continua normal — fale com a gente por contato@devbutter.tech.",
   },
   construcao: {
     status: "site em construção",
@@ -70,7 +70,7 @@ export const MAINTENANCE_COPY: Record<MaintenanceVariant, MaintenanceCopy> = {
     ],
     metaTitle: "DevButter — site em construção",
     metaDescription:
-      "O site da DevButter está sendo construído. O estúdio já está atendendo — fale com a gente por contato@devbutter.com.",
+      "O site da DevButter está sendo construído. O estúdio já está atendendo — fale com a gente por contato@devbutter.tech.",
   },
 };
 

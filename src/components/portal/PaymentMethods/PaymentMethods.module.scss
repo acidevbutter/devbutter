@@ -10,7 +10,7 @@
 
 .heading {
   color: $db-text-primary;
-  font: 600 12px "Geist Mono", monospace;
+  font: 600 12px var(--font-geist-mono), ui-monospace, monospace;
   text-transform: lowercase;
 }
 
@@ -38,14 +38,14 @@
 
 .method strong {
   color: $db-text-primary;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .method span,
 .feedback,
 .note {
   color: $db-text-muted;
-  font: 10.5px "Geist Mono", monospace;
+  font: 10.5px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .actions {
@@ -60,7 +60,7 @@
   border-radius: 6px;
   padding: 6px 8px;
   cursor: pointer;
-  font: 10px "Geist Mono", monospace;
+  font: 10px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .pay {
@@ -88,7 +88,7 @@
 .error {
   margin-top: 10px;
   color: $db-pink;
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .note {

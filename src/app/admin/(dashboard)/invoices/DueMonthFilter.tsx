@@ -23,7 +23,7 @@ export default function DueMonthFilter({
         }}
         style={{
           appearance: "none",
-          font: "11.5px 'Geist Mono', monospace",
+          font: "11.5px var(--font-geist-mono), ui-monospace, monospace",
           color: "var(--db-text-muted)",
           background: "transparent",
           border: "1px solid rgba(255,255,255,.12)",

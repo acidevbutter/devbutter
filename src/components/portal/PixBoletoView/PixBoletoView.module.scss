@@ -14,7 +14,7 @@
 }
 
 .method {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -24,9 +24,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font: 500 10px "Geist Mono", monospace;
-  color: $admin-amber;
-  border: 1px solid rgba(229, 183, 90, 0.4);
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
+  color: $status-wait;
+  border: 1px solid rgba($status-wait, 0.4);
   border-radius: 20px;
   padding: 2px 8px;
 }
@@ -47,7 +47,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
 }
 
@@ -57,7 +57,7 @@
   border: 1px solid $admin-border-interactive;
   border-radius: 7px;
   padding: 4px 9px;
-  font: 500 11px "Geist Mono", monospace;
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-primary;
   cursor: pointer;
 
@@ -71,7 +71,7 @@
   border: 1px solid $admin-border-interactive;
   border-radius: 8px;
   padding: 9px 11px;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
   text-decoration: none;
   background: $admin-card;
@@ -82,7 +82,7 @@
 }
 
 .meta {
-  font: 10.5px "Geist Mono", monospace;
+  font: 10.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -91,6 +91,6 @@
   border-radius: 10px;
   padding: 20px 12px;
   text-align: center;
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }

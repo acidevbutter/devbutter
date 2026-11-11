@@ -72,7 +72,7 @@ export default async function AdminConversationsPage({
             </div>
             {selected.draft && (
               <div className={styles.draft}>
-                <div style={{ font: "500 10px 'Geist Mono', monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--db-green)" }}>
+                <div style={{ font: "500 10px var(--font-geist-mono), ui-monospace, monospace", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--db-green)" }}>
                   draft gerado pela IA
                 </div>
                 <div style={{ marginTop: 8, fontSize: 13.5 }}>escopo: {selected.draft.scope_summary}</div>

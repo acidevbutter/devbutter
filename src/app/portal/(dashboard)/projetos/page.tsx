@@ -24,10 +24,10 @@ export default async function PortalProjectsPage() {
           >
             <span style={{ fontWeight: 600 }}>{p.title}</span>
             <Badge tone={orderStatusTone(p.status)}>{p.statusLabel}</Badge>
-            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
+            <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}>
               {p.progressPct}%
             </span>
-            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12, color: "var(--db-text-muted)" }}>
+            <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12, color: "var(--db-text-muted)" }}>
               entrega {formatDate(p.dueDate)}
             </span>
           </Link>

@@ -8,7 +8,7 @@
 }
 
 .breadcrumb {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 
   a {
@@ -38,7 +38,7 @@
 .statusBadge {
   display: inline-flex;
   align-items: center;
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   border-radius: 20px;
   padding: 3px 9px;
   color: $admin-text-2;
@@ -56,12 +56,12 @@
 }
 
 .blockedTitle {
-  font: 600 12.5px "Geist Mono", monospace;
-  color: $admin-amber;
+  font: 600 12.5px var(--font-geist-mono), ui-monospace, monospace;
+  color: $status-wait;
 }
 
 .blockedBody {
-  font: 11.5px/1.6 "Geist Mono", monospace;
+  font: 11.5px/1.6 var(--font-geist-mono), ui-monospace, monospace;
   color: $admin-text-2;
 }
 
@@ -178,7 +178,7 @@
   gap: 12px;
   padding: 9px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  font: 12.5px "Geist Mono", monospace;
+  font: 12.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $admin-text-2;
 
   &:last-child {

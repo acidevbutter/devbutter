@@ -1,5 +1,10 @@
-// DevButter design tokens — colors, type, spacing, shadows
+// DevButter design tokens — colors, type, spacing, shadows, motion
 // Source: design_handoff_homepage/README.md
+//
+// Every token here carries brand meaning, not just a value. Read
+// design-system/docs/Foundations.md before adding one, and
+// .claude/brand-voice-guidelines.md §9 (superproject) for why green and pink
+// mean what they mean.
 
 :root {
   // Backgrounds / surfaces
@@ -57,6 +62,36 @@ $db-border-interactive: rgba(255, 255, 255, 0.14);
 $db-content-max: 1280px;
 $db-section-pad-x: 4vw;
 
+// ---------------------------------------------------------------------------
+// Brand semantics — what the two accents MEAN (guidelines §9).
+//   "Verde é o sinal indo; rosa é a correção voltando."
+// Components reach for these names, not for the raw palette, whenever the
+// colour is saying something (action, problem, status). Raw $db-green /
+// $db-pink stay for illustration and editorial emphasis.
+// ---------------------------------------------------------------------------
+
+// Green — the signal, the action, the solution. Primary CTA, links, focus,
+// "done". Never an error.
+$signal: $db-green;
+$signal-glow: $db-green-glow;
+
+// Pink — the problem, the correction, attention. Errors, overdue, destructive
+// actions, the one problem-word in a headline. Never the primary CTA.
+$problem: $db-pink;
+$problem-glow: $db-pink-glow;
+
+// Status — functional colour, NOT brand colour. Amber means "waiting on
+// someone" (pendente, em revisão). It never appears on the marketing site and
+// is never decorative. A status is always written in words; colour only
+// reinforces it (green vs pink differ by just 2.2:1).
+$status-done: $signal;
+$status-wait: #e5b75a;
+$status-alert: $problem;
+$status-neutral: $db-text-secondary;
+// CSS custom properties for these (--signal, --status-wait, …) and for the
+// motion scale are emitted once, in app/globals.scss — not here, or every
+// CSS module that @uses this file would repeat them.
+
 // Admin dashboard — same DevButter language, tuned surfaces for dense UI.
 // Source: Claude Design "Admin Platform.dc.html".
 :root {
@@ -65,7 +100,8 @@ $db-section-pad-x: 4vw;
   --admin-card: #10151f;
   --admin-border: rgba(255, 255, 255, 0.08);
   --admin-border-interactive: rgba(255, 255, 255, 0.14);
-  --admin-amber: #e5b75a;
+  // Deprecated: use --status-wait. Kept so nothing breaks mid-migration.
+  --admin-amber: var(--status-wait);
   // The admin canvas ("Admin Platform.dc.html") uses a cooler secondary grey
   // (#8b93a3) than the marketing token (--db-text-secondary #9ca6b5). Admin
   // screens use this one; the rest of the app is untouched.
@@ -77,7 +113,9 @@ $admin-panel: #0a0e16;
 $admin-card: #10151f;
 $admin-border: rgba(255, 255, 255, 0.08);
 $admin-border-interactive: rgba(255, 255, 255, 0.14);
-$admin-amber: #e5b75a;
+// Deprecated alias — amber is a status colour, not an admin colour. Use
+// $status-wait (it was leaking into the client portal under the admin name).
+$admin-amber: $status-wait;
 $admin-text-2: #8b93a3;
 
 // ---------------------------------------------------------------------------
@@ -130,8 +168,51 @@ $glow-tile-pink: 0 0 20px rgba($db-pink-glow, 0.1);
 $glow-dot: 0 0 8px $db-green-glow;
 
 // Motion (docs/design/tokens/motion.css).
+// The product moves like a physical system relaxing to equilibrium along its
+// most economical path: it decelerates into place, never flashes for attention. Pick a duration by what moves, not by taste:
+//   instant     100ms  colour/opacity feedback (press, toggle tick)
+//   quick       160ms  hover, focus, border/glow, card lift
+//   base        260ms  small things entering/leaving (tooltip, chip, toast)
+//   slow        420ms  panels, drawers, dialogs, message reveal
+//   deliberate  700ms  editorial entrances (hero/page-title fade-up)
+// Loops (rings, floaty, pulses) are illustration, not UI, and keep their own
+// long periods. Everything respects prefers-reduced-motion.
 $ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
 $ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+$mo-instant: 100ms;
+$mo-quick: 160ms;
+$mo-base: 260ms;
+$mo-slow: 420ms;
+$mo-deliberate: 700ms;
+
+// Type. Two voices (guidelines §9): Sans is the human voice — headings, body,
+// conversation. Mono is the voice of the record — metadata, status, eyebrows,
+// numbers. Always reach the fonts through next/font's variables; a literal
+// "Geist Mono" resolves to whatever the visitor has installed.
+$font-sans: var(--font-geist-sans), -apple-system, system-ui, sans-serif;
+$font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+// Type scale — the sizes the hi-fi already uses most, named by role. New code
+// picks from here; half-pixel one-offs (11.5, 12.5, 10.5) migrate to the
+// nearest step when a file is touched.
+$fs-micro: 10px; // mono micro-label, badge
+$fs-label: 11px; // mono label, metadata
+$fs-eyebrow: 12px; // eyebrow, caption
+$fs-small: 13px; // secondary UI text, card body
+$fs-ui: 13.5px; // buttons, inputs, table cells
+$fs-body-sm: 14px; // dense body, nav links
+$fs-body: 16px; // reading text, intro
+$fs-card-title: 17px; // card titles
+$fs-title-sm: 20px; // panel/section titles in the app
+$fs-title: 22px; // page titles in the app
+// Editorial display sizes stay fluid and live in _site.scss mixins
+// (h2, page-title, hero).
+
+// Focus. One ring for the whole product: 2px signal green, 2px offset.
+$focus-ring-width: 2px;
+$focus-ring-offset: 2px;
+$focus-ring-color: $signal;
 
 // Stacking (docs/design/tokens/elevation.css).
 $z-nav: 40;

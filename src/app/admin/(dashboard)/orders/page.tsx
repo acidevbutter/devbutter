@@ -100,7 +100,7 @@ export default async function AdminOrdersPage({
               style={{ ["--cols" as string]: COLUMNS }}
             >
               <span
-                style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12, color: "var(--admin-text-2)" }}
+                style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12, color: "var(--admin-text-2)" }}
               >
                 {o.id.slice(0, 8)}
               </span>
@@ -109,7 +109,7 @@ export default async function AdminOrdersPage({
               <Badge tone={orderStatusTone(o.status)} style={{ justifySelf: "start" }}>
                 {o.status}
               </Badge>
-              <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12.5 }}>
+              <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12.5 }}>
                 {formatCurrency(o.amount)}
               </span>
               <span>
@@ -133,13 +133,13 @@ export default async function AdminOrdersPage({
                   />
                 </span>
                 <span
-                  style={{ font: "10.5px 'Geist Mono', monospace", color: "var(--db-text-muted)" }}
+                  style={{ font: "10.5px var(--font-geist-mono), ui-monospace, monospace", color: "var(--db-text-muted)" }}
                 >
                   {b.caption}
                 </span>
               </span>
               <span
-                style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12, color: "var(--db-text-muted)" }}
+                style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12, color: "var(--db-text-muted)" }}
               >
                 {formatDate(o.created_at)}
               </span>

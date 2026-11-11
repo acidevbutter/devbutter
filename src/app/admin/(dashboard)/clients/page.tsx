@@ -113,19 +113,19 @@ export default async function AdminClientsPage({
           >
             <span style={{ fontWeight: 600 }}>{c.name}</span>
             <span
-              style={{ color: "var(--admin-text-2)", fontFamily: "'Geist Mono', monospace", fontSize: 12 }}
+              style={{ color: "var(--admin-text-2)", fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}
             >
               {c.email}
             </span>
             <span
-              style={{ color: "var(--admin-text-2)", fontFamily: "'Geist Mono', monospace", fontSize: 12 }}
+              style={{ color: "var(--admin-text-2)", fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}
             >
               {c.cnpj ?? c.cpf ?? "—"}
             </span>
-            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
+            <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}>
               {c.quotes_count}
             </span>
-            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
+            <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}>
               {c.orders_count}
             </span>
             <Badge
@@ -135,7 +135,7 @@ export default async function AdminClientsPage({
               {c.asaas_customer_id ? "vinculado" : "não vinc."}
             </Badge>
             <span
-              style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12, color: "var(--db-text-muted)" }}
+              style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12, color: "var(--db-text-muted)" }}
             >
               {formatDate(c.created_at)}
             </span>

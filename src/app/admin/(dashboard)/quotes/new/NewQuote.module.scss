@@ -21,7 +21,7 @@
 }
 
 .headerHint {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -46,7 +46,7 @@
   border: 1px solid $admin-border-interactive;
   border-radius: 10px;
   padding: 11px 13px;
-  font: 13px "Geist Mono", monospace;
+  font: 13px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-primary;
 }
 
@@ -73,6 +73,6 @@
 }
 
 .error {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-pink;
 }

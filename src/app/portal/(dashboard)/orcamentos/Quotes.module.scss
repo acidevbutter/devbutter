@@ -22,7 +22,7 @@
 
 .subtitle {
   margin-top: 3px;
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -53,7 +53,7 @@
 }
 
 .date {
-  font: 10px "Geist Mono", monospace;
+  font: 10px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -78,17 +78,17 @@
 }
 
 .mono {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
 .cardLink {
-  font: 500 11.5px "Geist Mono", monospace;
+  font: 500 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
 }
 
 .cardMuted {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -96,6 +96,6 @@
   margin-top: 10px;
   padding-top: 9px;
   border-top: 1px dashed $admin-border;
-  font: 10.5px "Geist Mono", monospace;
+  font: 10.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }

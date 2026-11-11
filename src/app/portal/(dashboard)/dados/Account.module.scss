@@ -29,18 +29,18 @@
 }
 
 .warnCard {
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   line-height: 1.5;
-  color: $admin-amber;
-  background: rgba(229, 183, 90, 0.1);
-  border: 1px solid rgba(229, 183, 90, 0.35);
+  color: $status-wait;
+  background: rgba($status-wait, 0.1);
+  border: 1px solid rgba($status-wait, 0.35);
   border-radius: 8px;
   padding: 9px 11px;
   margin-bottom: 12px;
 }
 
 .label {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -57,7 +57,7 @@
   border: 1px solid $admin-border-interactive;
   border-radius: 10px;
   padding: 10px 12px;
-  font: 13px "Geist Mono", monospace;
+  font: 13px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-primary;
 
   &:disabled {
@@ -72,7 +72,7 @@
 
 .error {
   margin-top: 12px;
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-pink;
 }
 
@@ -100,7 +100,7 @@
 
 .linkRow p {
   margin: 0;
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
 }
 

@@ -54,7 +54,7 @@ export default async function AdminCompaniesPage({
             <span
               style={{
                 color: "var(--admin-text-2)",
-                fontFamily: "'Geist Mono', monospace",
+                fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                 fontSize: 12,
               }}
             >
@@ -63,10 +63,10 @@ export default async function AdminCompaniesPage({
             <Badge tone={c.has_payment_method ? "green" : "neutral"}>
               {c.has_payment_method ? "configurado" : "não configurado"}
             </Badge>
-            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
+            <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}>
               {c.split_quota_percent ? `${c.split_quota_percent}%` : "sem teto"}
             </span>
-            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
+            <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}>
               {c.used_percent ? `${c.used_percent}%` : "—"}
             </span>
           </Link>

@@ -136,7 +136,7 @@ export default async function AdminQuotesPage({
           >
             <span
               style={{
-                fontFamily: "'Geist Mono', monospace",
+                fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                 fontSize: 12,
                 color: "var(--admin-text-2)",
               }}
@@ -145,12 +145,12 @@ export default async function AdminQuotesPage({
             </span>
             <span style={{ fontWeight: 600 }}>{label}</span>
             <span style={{ color: "var(--admin-text-2)" }}>{quote.scope_summary}</span>
-            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12 }}>
+            <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12 }}>
               {quote.price_range ?? "—"}
             </span>
             <span
               style={{
-                fontFamily: "'Geist Mono', monospace",
+                fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                 fontSize: 12,
                 color: "var(--admin-text-2)",
               }}
@@ -159,7 +159,7 @@ export default async function AdminQuotesPage({
             </span>
             <span
               style={{
-                font: "500 10px 'Geist Mono', monospace",
+                font: "500 10px var(--font-geist-mono), ui-monospace, monospace",
                 color: quote.source === "ai" ? "var(--db-green)" : "var(--admin-text-2)",
               }}
             >
@@ -170,7 +170,7 @@ export default async function AdminQuotesPage({
             </Badge>
             <span
               style={{
-                fontFamily: "'Geist Mono', monospace",
+                fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                 fontSize: 12,
                 color: "var(--db-text-muted)",
               }}

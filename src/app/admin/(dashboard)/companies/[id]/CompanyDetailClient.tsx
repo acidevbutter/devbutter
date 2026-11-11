@@ -319,7 +319,7 @@ function TableList({
           gridTemplateColumns: columns,
           gap: 12,
           padding: "10px 14px",
-          font: "500 10px 'Geist Mono', monospace",
+          font: "500 10px var(--font-geist-mono), ui-monospace, monospace",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           color: "var(--db-text-muted)",

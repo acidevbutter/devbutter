@@ -133,13 +133,13 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
               className={`${listStyles.row} ${!e.processed_ok ? listStyles.rowAlert : ""}`}
               style={{ ["--cols" as string]: COLUMNS }}
             >
-              <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12.5 }}>
+              <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12.5 }}>
                 {e.event_type}
               </span>
               <span
                 style={{
                   color: "var(--admin-text-2)",
-                  fontFamily: "'Geist Mono', monospace",
+                  fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                   fontSize: 12,
                 }}
               >
@@ -147,7 +147,7 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
               </span>
               <span
                 style={{
-                  fontFamily: "'Geist Mono', monospace",
+                  fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                   fontSize: 12.5,
                   color: e.processed_ok ? "var(--db-green)" : "var(--db-pink)",
                 }}
@@ -156,7 +156,7 @@ export default function WebhooksClient({ events }: { events: AdminWebhookEvent[]
               </span>
               <span
                 style={{
-                  fontFamily: "'Geist Mono', monospace",
+                  fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                   fontSize: 12,
                   color: "var(--db-text-muted)",
                 }}

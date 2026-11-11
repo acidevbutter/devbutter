@@ -5,7 +5,7 @@ import styles from "./Maintenance.module.scss";
 
 type Status = "idle" | "sending" | "done" | "error";
 
-const CONTACT_EMAIL = "contato@devbutter.com";
+const CONTACT_EMAIL = "contato@devbutter.tech";
 
 export default function NotifyForm({ label }: { label: string }) {
   const [email, setEmail] = useState("");

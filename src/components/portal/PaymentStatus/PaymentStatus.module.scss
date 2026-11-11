@@ -28,14 +28,14 @@
 }
 
 .body {
-  font: 11px/1.5 "Geist Mono", monospace;
+  font: 11px/1.5 var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
 }
 
 .action {
   align-self: flex-start;
   margin-top: 2px;
-  font: 500 11px "Geist Mono", monospace;
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
   background: none;
   border: 1px solid $admin-border-interactive;
   border-radius: 7px;
@@ -50,12 +50,12 @@
 }
 
 .pending {
-  border-color: rgba(229, 183, 90, 0.4);
+  border-color: rgba($status-wait, 0.4);
   .dot {
-    background: $admin-amber;
+    background: $status-wait;
   }
   .label {
-    color: $admin-amber;
+    color: $status-wait;
   }
 }
 

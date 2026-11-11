@@ -56,7 +56,7 @@
 }
 
 .pendingMeta {
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
   margin-top: 4px;
 }
@@ -117,7 +117,7 @@
 }
 
 .projectMeta {
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
   margin-top: 8px;
 }
@@ -137,7 +137,7 @@
 }
 
 .ctaHint {
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
   margin-top: 4px;
 }

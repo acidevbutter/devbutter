@@ -10,7 +10,7 @@
   border: 1px solid $admin-border-interactive;
   border-radius: 8px;
   padding: 7px 11px;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
   cursor: pointer;
   text-align: left;
@@ -22,7 +22,7 @@
 
 .triggerKey {
   margin-left: auto;
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   border: 1px solid $admin-border-interactive;
   border-radius: 5px;
   padding: 1px 5px;
@@ -73,7 +73,7 @@
   border: none;
   outline: none;
   color: $db-text-primary;
-  font: 14px "Geist Mono", monospace;
+  font: 14px var(--font-geist-mono), ui-monospace, monospace;
 
   &::placeholder {
     color: $db-text-muted;
@@ -81,7 +81,7 @@
 }
 
 .escKey {
-  font: 500 10.5px "Geist Mono", monospace;
+  font: 500 10.5px var(--font-geist-mono), ui-monospace, monospace;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 5px;
   padding: 2px 6px;
@@ -95,7 +95,7 @@
 }
 
 .groupLabel {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: $db-text-secondary;
@@ -131,7 +131,7 @@
 }
 
 .itemSub {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
   white-space: nowrap;
 }
@@ -140,7 +140,7 @@
   padding: 28px 16px;
   text-align: center;
   color: $db-text-secondary;
-  font: 12.5px "Geist Mono", monospace;
+  font: 12.5px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .footer {
@@ -148,6 +148,6 @@
   gap: 14px;
   padding: 10px 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  font: 10.5px "Geist Mono", monospace;
+  font: 10.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
 }

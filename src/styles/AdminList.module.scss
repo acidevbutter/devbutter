@@ -35,7 +35,7 @@
   border: 1px solid $admin-border-interactive;
   border-radius: 8px;
   padding: 8px 11px;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-primary;
 
   &::placeholder {
@@ -52,7 +52,7 @@
 }
 
 .chip {
-  font: 500 11.5px "Geist Mono", monospace;
+  font: 500 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
   border: 1px solid $admin-border-interactive;
   border-radius: 20px;
@@ -73,9 +73,9 @@
 }
 
 .chipAmber {
-  background: rgba(229, 183, 90, 0.1);
-  color: $admin-amber;
-  border-color: rgba(229, 183, 90, 0.35);
+  background: rgba($status-wait, 0.1);
+  color: $status-wait;
+  border-color: rgba($status-wait, 0.35);
 }
 
 .chipSep {
@@ -117,7 +117,7 @@
   padding: 44px 16px;
   text-align: center;
   color: $db-text-muted;
-  font: 13px "Geist Mono", monospace;
+  font: 13px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .pagination {

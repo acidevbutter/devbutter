@@ -9,7 +9,7 @@
   padding: 12px 18px;
   border-bottom: 1px solid $admin-border;
   background: rgba(255, 255, 255, 0.02);
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -24,7 +24,7 @@
 }
 
 .meta {
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $admin-text-2;
   margin-top: 6px;
 }
@@ -54,18 +54,18 @@
 
 .fieldLabel {
   color: $db-text-muted;
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 .mono {
-  font: 12.5px "Geist Mono", monospace;
+  font: 12.5px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .emptyHint {
   color: $db-text-muted;
-  font: 13px "Geist Mono", monospace;
+  font: 13px var(--font-geist-mono), ui-monospace, monospace;
   margin: 0;
 }
 
@@ -74,7 +74,7 @@
   border: 1px solid $admin-border-interactive;
   border-radius: 8px;
   padding: 8px 11px;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-primary;
   max-width: 280px;
 
@@ -103,13 +103,13 @@
 }
 
 .quotaLabel {
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $admin-text-2;
 }
 
 .error {
   color: $db-pink;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   margin: 0;
 }
 
@@ -160,7 +160,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $admin-text-2;
 }
 
@@ -169,7 +169,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: $admin-amber;
+  background: $status-wait;
 }
 
 .dotInvalid {

@@ -3,7 +3,7 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   border-radius: 20px;
   border: 1px solid transparent;
   white-space: nowrap;
@@ -34,8 +34,8 @@
 }
 
 .amber {
-  color: $admin-amber;
-  border-color: rgba(229, 183, 90, 0.4);
+  color: $status-wait;
+  border-color: rgba($status-wait, 0.4);
 }
 
 .neutral {

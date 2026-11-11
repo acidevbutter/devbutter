@@ -37,7 +37,7 @@ export default async function AdminCatalogPage() {
             <span style={{ fontWeight: 600 }}>{entry.account_name}</span>
             <span style={{ color: "var(--admin-text-2)" }}>{entry.type}</span>
             <span style={{ color: "var(--admin-text-2)" }}>{entry.description}</span>
-            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 12, color: "var(--db-text-muted)" }}>
+            <span style={{ fontFamily: "var(--font-geist-mono), ui-monospace, monospace", fontSize: 12, color: "var(--db-text-muted)" }}>
               {formatDate(entry.created_at)}
             </span>
           </Link>

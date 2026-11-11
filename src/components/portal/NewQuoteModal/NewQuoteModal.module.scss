@@ -95,7 +95,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
   margin-top: 3px;
 }
@@ -121,7 +121,7 @@
   background: none;
   border: none;
   color: $db-text-muted;
-  font: 14px "Geist Mono", monospace;
+  font: 14px var(--font-geist-mono), ui-monospace, monospace;
   cursor: pointer;
 
   &:hover {
@@ -166,7 +166,7 @@
 }
 
 .launcherHint {
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
 }
 
@@ -340,7 +340,7 @@
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.06);
   color: $db-text-muted;
-  font: 16px "Geist Mono", monospace;
+  font: 16px var(--font-geist-mono), ui-monospace, monospace;
   cursor: pointer;
 
   &:not(:disabled) {
@@ -440,7 +440,7 @@
 }
 
 .previewTitle {
-  font: 600 10.5px "Geist Mono", monospace;
+  font: 600 10.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -456,13 +456,13 @@
   flex-wrap: wrap;
   gap: 8px;
   color: $db-text-secondary;
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .previewSource,
 .previewWarning,
 .previewMissing {
-  font: 11px/1.4 "Geist Mono", monospace;
+  font: 11px/1.4 var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .previewSource {
@@ -490,7 +490,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  font: 500 10.5px "Geist Mono", monospace;
+  font: 500 10.5px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -547,7 +547,7 @@
   display: grid;
   place-items: center;
   color: $db-green;
-  font: 19px "Geist Mono", monospace;
+  font: 19px var(--font-geist-mono), ui-monospace, monospace;
   box-shadow: 0 0 26px rgba(0, 210, 106, 0.25);
 }
 
@@ -580,12 +580,12 @@
 }
 
 .mono {
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
 .awaitingBadge {
-  font: 500 11px "Geist Mono", monospace;
+  font: 500 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-pink-glow;
   border: 1px solid rgba(246, 76, 111, 0.45);
   border-radius: 20px;
@@ -604,7 +604,7 @@
   flex-wrap: wrap;
   gap: 6px 16px;
   margin-top: 10px;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-secondary;
 }
 
@@ -701,7 +701,7 @@
   background: rgba(121, 229, 155, 0.14);
   display: grid;
   place-items: center;
-  font: 10px "Geist Mono", monospace;
+  font: 10px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
 }
 
@@ -743,7 +743,7 @@
 }
 
 .reviewGroupLabel {
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: $db-text-secondary;
@@ -785,7 +785,7 @@
 }
 
 .optionCardBadge {
-  font: 500 9.5px "Geist Mono", monospace;
+  font: 500 9.5px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: $db-green;
@@ -806,7 +806,7 @@
   flex-wrap: wrap;
   gap: 6px 16px;
   margin-top: 10px;
-  font: 12px "Geist Mono", monospace;
+  font: 12px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
 }
 
@@ -847,7 +847,7 @@
 }
 
 .collectingHint {
-  font: 500 10.5px "Geist Mono", monospace;
+  font: 500 10.5px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -1025,7 +1025,7 @@
 }
 
 .headProgress {
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
   white-space: nowrap;
   margin-right: 6px;
@@ -1044,14 +1044,14 @@
 }
 
 .previewCardKicker {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: $db-green;
 }
 
 .previewCardSource {
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -1087,7 +1087,7 @@
 }
 
 .previewStatLabel {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -1096,7 +1096,7 @@
 .previewStatGreen,
 .previewStatPlain {
   margin-top: 7px;
-  font: 600 19px "Geist Mono", monospace;
+  font: 600 19px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .previewStatGreen {
@@ -1112,7 +1112,7 @@
   gap: 8px;
   align-items: flex-start;
   margin-top: 14px;
-  font: 11.5px/1.5 "Geist Mono", monospace;
+  font: 11.5px/1.5 var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -1126,7 +1126,7 @@
   margin-top: 14px;
   padding-top: 13px;
   border-top: 1px solid $admin-border;
-  font: 12px/1.5 "Geist Mono", monospace;
+  font: 12px/1.5 var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -1184,7 +1184,7 @@
 }
 
 .dossierKicker {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: $db-green;
@@ -1199,7 +1199,7 @@
 
 .dossierSub {
   margin-top: 5px;
-  font: 11.5px "Geist Mono", monospace;
+  font: 11.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -1225,7 +1225,7 @@
 }
 
 .dossierRingPct {
-  font: 600 15px "Geist Mono", monospace;
+  font: 600 15px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-primary;
 
   span {
@@ -1234,7 +1234,7 @@
 }
 
 .dossierRingFrac {
-  font: 9px "Geist Mono", monospace;
+  font: 9px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -1270,7 +1270,7 @@
   border-radius: 4px;
   display: grid;
   place-items: center;
-  font: 9px "Geist Mono", monospace;
+  font: 9px var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .dossierTick {
@@ -1284,7 +1284,7 @@
 }
 
 .dossierBlockLabel {
-  font: 500 10px "Geist Mono", monospace;
+  font: 500 10px var(--font-geist-mono), ui-monospace, monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: $db-text-muted;
@@ -1298,7 +1298,7 @@
 
 .dossierStamp,
 .dossierCount {
-  font: 10px "Geist Mono", monospace;
+  font: 10px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
   white-space: nowrap;
 }
@@ -1351,7 +1351,7 @@
 
 .dossierStatValue {
   position: relative;
-  font: 600 19px "Geist Mono", monospace;
+  font: 600 19px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-primary;
 
   .dossierStatLive & {
@@ -1362,7 +1362,7 @@
 .dossierStatLabel {
   position: relative;
   margin-top: 4px;
-  font: 10px "Geist Mono", monospace;
+  font: 10px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 
   .dossierStatLive & {
@@ -1372,7 +1372,7 @@
 
 .dossierStatCaption {
   margin-top: 8px;
-  font: 10.5px "Geist Mono", monospace;
+  font: 10.5px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -1431,7 +1431,7 @@
 .dossierUnlockValue,
 .dossierUnlockValueGreen {
   margin-top: 9px;
-  font: 600 18px "Geist Mono", monospace;
+  font: 600 18px var(--font-geist-mono), ui-monospace, monospace;
   animation: db-tick 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
@@ -1445,7 +1445,7 @@
 
 .dossierLockHint {
   margin-top: 9px;
-  font: 11px/1.5 "Geist Mono", monospace;
+  font: 11px/1.5 var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -1457,7 +1457,7 @@
   padding: 13px 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(255, 255, 255, 0.02);
-  font: 11px "Geist Mono", monospace;
+  font: 11px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-text-muted;
 }
 
@@ -1504,7 +1504,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font: 10px "Geist Mono", monospace;
+  font: 10px var(--font-geist-mono), ui-monospace, monospace;
   color: $db-green;
   border: 1px solid rgba(121, 229, 155, 0.3);
   border-radius: 20px;
