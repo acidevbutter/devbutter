@@ -1,0 +1,62 @@
+// Field primitive — wraps the site's existing field/input mixins so the
+// portal, admin and site forms finally share one control.
+@use "../../../../styles/tokens" as *;
+@use "../../../../styles/site" as site;
+
+.field {
+  @include site.field;
+}
+
+.label {
+  @include site.mono-label;
+  font-size: $fs-label;
+  color: $db-text-secondary;
+}
+
+.optional {
+  color: $db-text-muted;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.input {
+  @include site.input;
+  font-size: $fs-ui;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.textarea {
+  min-height: 112px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: linear-gradient(45deg, transparent 50%, $db-text-muted 50%),
+    linear-gradient(135deg, $db-text-muted 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.hint {
+  margin: 0;
+  font: 400 $fs-label $font-mono;
+  line-height: 1.5;
+  color: $db-text-muted;
+}
+
+// Error is the problem colour (guidelines §9) and always a sentence that says
+// what to do; colour never carries it alone.
+.error {
+  margin: 0;
+  font: 400 $fs-label $font-mono;
+  line-height: 1.5;
+  color: $problem;
+}
