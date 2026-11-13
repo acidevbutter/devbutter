@@ -1,0 +1,47 @@
+# Dokploy "Compose" service -- Compose Path: ./docker-compose.dokploy.yml.
+#
+#   Environment: Dokploy "Environment" tab. Dokploy writes it to .env next to
+#                this file; the service loads it via env_file and compose
+#                interpolates ${VAR} from it (that is how the NEXT_PUBLIC_*
+#                build args below get their values). Nothing secret lives in git.
+#   Domains:     Dokploy "Domains" tab -> service `frontend`, port 3000;
+#                Dokploy injects the Traefik labels (HTTPS via Let's Encrypt).
+#                No `ports:` here on purpose: Traefik is the only way in.
+#   Network:     dokploy-network (external, created by Dokploy) is shared with
+#                Traefik, the Dokploy-managed Postgres/Redis and EVERY environment
+#                on this server (prod, preprod, staging). So the inter-service
+#                aliases carry the environment: DEPLOY_ENV=staging publishes
+#                `staging-frontend`, and that is the host the other services
+#                put in their *_BASE_URL vars. Never add an unprefixed alias here:
+#                it would resolve to all environments at once.
+#   Health:      the image ships its own HEALTHCHECK (any HTTP answer on :3000).
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dokploy
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://devbutter.tech}
+        NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:?NEXT_PUBLIC_SOCKET_URL is required (public platform-api URL)}
+    env_file:
+      - path: .env
+        required: false
+    expose:
+      - "3000"
+    networks:
+      dokploy-network:
+        aliases:
+          - ${DEPLOY_ENV:?set DEPLOY_ENV to prod, preprod or staging}-frontend
+    restart: unless-stopped
+    logging: *default-logging
+
+networks:
+  dokploy-network:
+    external: true
